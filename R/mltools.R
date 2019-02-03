@@ -49,6 +49,8 @@ clusterOn <- function() {
 ##
 ################################################################################
 get_model_metrics <- function(model_list,
+                              target_label = target.label,
+                              testing_set = testing.set,
                               palette = "Set1", direction = 1,
                               colors = NULL,
                               boxplot_color = "grey95") {
@@ -57,17 +59,20 @@ get_model_metrics <- function(model_list,
   require(ggplot2)
   require(RColorBrewer)
 
-  transpose_table <- function(metric_table, metric) {
+  transpose_table <- function(metric_table, metric, desc = FALSE) {
 
     suffix <- paste0("~", metric)
+    mean <- paste0(metric,".training")
 
     metric_table %>%
       dplyr::select(ends_with(suffix)) %>%
       rename_all(funs(gsub(suffix, "", .))) %>%
       t %>% as.data.frame %>%
-      rename(RMSE.training = V1, sd = V2) %>%
+      rename(mean = V1, sd = V2) %>%
       round(digits = 3) %>%
-      rownames_to_column(var = "model")
+      rownames_to_column(var = "model") %>%
+      arrange( {if (desc) desc(mean) else mean } )
+
   }
 
   ### get metrics from original resamples' folds
@@ -85,8 +90,8 @@ get_model_metrics <- function(model_list,
     }) %>% print
 
   RMSE.training <- metric_table %>% transpose_table("RMSE")
-  Rsquared.training <- metric_table %>% transpose_table("Rsquared")
 
+  Rsquared.training <- metric_table %>% transpose_table("Rsquared", desc = TRUE)
 
   ### visualize the resampling distribution from cross-validation
   resamples.boxplots <-
@@ -112,8 +117,17 @@ get_model_metrics <- function(model_list,
       scale_color_manual(values = colors)
   }
 
+  # RMSE for all models on testing set
+  RMSE.testing <- get_rmse_testing(target_label, model_list, testing_set)
+
+  benchmark.all <- merge(RMSE.training, RMSE.testing, by = "model") %>%
+    mutate(delta = mean - RMSE.testing) %>%
+    arrange(RMSE.testing)
+
   return(list(RMSE.training = RMSE.training,
               Rsquared.training = Rsquared.training,
+              RMSE.testing = RMSE.testing,
+              RMSE.all = benchmark.all,
               RMSE.boxplots = resamples.boxplots
   ))
 }
