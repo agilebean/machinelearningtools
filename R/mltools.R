@@ -49,13 +49,26 @@ clusterOn <- function() {
 ##
 ################################################################################
 get_model_metrics <- function(model_list,
-                              palette = "Set1",
+                              palette = "Set1", direction = 1,
                               colors = NULL,
                               boxplot_color = "grey95") {
   require(dplyr)
   require(purrr)
   require(ggplot2)
   require(RColorBrewer)
+
+  transpose_table <- function(metric_table, metric) {
+
+    suffix <- paste0("~", metric)
+
+    metric_table %>%
+      dplyr::select(ends_with(suffix)) %>%
+      rename_all(funs(gsub(suffix, "", .))) %>%
+      t %>% as.data.frame %>%
+      rename(RMSE.training = V1, sd = V2) %>%
+      round(digits = 3) %>%
+      rownames_to_column
+  }
 
   model_list <- models.list
 
@@ -71,10 +84,11 @@ get_model_metrics <- function(model_list,
     map_df(function(variable) {
       ## tricky: dplyr::mutate doesn't work here
       c(mean = mean(variable), sd = sd(variable))
-    }) %>%
-    t %>% as.data.frame %>%
-    rename(mean = V1, sd = V2) %>%
-    round(digits = 3)
+    }) %>% print
+
+  RMSE.training <- metric_table %>% transpose_table("RMSE")
+  Rsquared.training <- metric_table %>% transpose_table("Rsquared")
+
 
   ### visualize the resampling distribution from cross-validation
   resamples.boxplots <-
@@ -92,7 +106,7 @@ get_model_metrics <- function(model_list,
     theme(legend.position = "none", # removes all legends
           axis.title = element_text(size = 14),
           axis.text = element_text(size = 14)) +
-    scale_color_brewer(palette = palette)
+    scale_color_brewer(palette = palette, direction = direction)
 
   if (!is.null(colors)) {
     resamples.boxplots <-
@@ -100,10 +114,12 @@ get_model_metrics <- function(model_list,
       scale_color_manual(values = colors)
   }
 
-  return(list(RMSE.training = metric_table,
+  return(list(RMSE.training = RMSE.training,
+              Rsquared.training = Rsquared.training,
               RMSE.boxplots = resamples.boxplots
   ))
 }
+
 
 
 ################################################################################
