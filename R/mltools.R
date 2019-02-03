@@ -105,3 +105,34 @@ get_model_metrics <- function(model_list,
               RMSE.boxplots = resamples.boxplots
   ))
 }
+
+
+################################################################################
+# Get Testing Set Performance
+# calculate RMSE for all model objects in model_list
+################################################################################
+get_rmse_testing <- function(models_list, testing_set) {
+
+  models_list %>%
+    # caret::predict() can take a list of train objects as input
+    predict(testing.set) %>%
+    map_df(~sqrt(mean((testing.set[[target.label]]-.)^2)) ) %>%
+    round(digits = 3) %>%
+    t %>%
+    as.data.frame %>%
+    select(RMSE.testing = V1)
+}
+
+################################################################################
+# List variable importance
+# input caret::train object
+################################################################################
+list_variable_importance <- function(train_model) {
+
+  train_model$importance %>%
+    as.data.frame %>%
+    tibble::rownames_to_column() %>%
+    mutate(Importance = round(IncNodePurity * 100/max(IncNodePurity), digits =2)) %>%
+    arrange(-IncNodePurity)
+
+}
