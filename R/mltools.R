@@ -67,10 +67,8 @@ get_model_metrics <- function(model_list,
       t %>% as.data.frame %>%
       rename(RMSE.training = V1, sd = V2) %>%
       round(digits = 3) %>%
-      rownames_to_column
+      rownames_to_column(var = "model")
   }
-
-  model_list <- models.list
 
   ### get metrics from original resamples' folds
   resamples.values <- model_list %>% resamples %>% .$values %>%
