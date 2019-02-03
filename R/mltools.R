@@ -126,12 +126,12 @@ get_model_metrics <- function(model_list,
 # Get Testing Set Performance
 # calculate RMSE for all model objects in model_list
 ################################################################################
-get_rmse_testing <- function(models_list, testing_set) {
+get_rmse_testing <- function(target_label, models_list, testing_set) {
 
   models_list %>%
     # caret::predict() can take a list of train objects as input
     predict(testing.set) %>%
-    map_df(~sqrt(mean((testing.set[[target.label]]-.)^2)) ) %>%
+    map_df(~sqrt(mean((testing.set[[target_label]]-.)^2)) ) %>%
     round(digits = 3) %>%
     t %>%
     as.data.frame %>%
