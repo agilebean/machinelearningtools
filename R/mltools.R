@@ -35,11 +35,22 @@ clusterOn <- function() {
 # get_model_metrics:
 #   calculate training set performance:
 #   mean & sd for all model objects in model_list
+#
+# set color by
+##
+##  palette:
+##    models.list %>% get_model_metrics(palette = "Dark2")
+##
+##  color codes:
+##    models.list %>% get_model_metrics(
+##      colors = c("#4DAF4A", "#E41A1C", "#FF7F00", "#377EB8"))
+##
 ##  colors: "#4DAF4A" green "#377EB8" blue "#E41A1C" red "#FF7F00" orange
-##  order: 2, 4, 3, 1
+##
 ################################################################################
 get_model_metrics <- function(model_list,
-                              colors = c("#4DAF4A", "#E41A1C", "#FF7F00", "#377EB8"),
+                              palette = "Set1",
+                              colors = NULL,
                               boxplot_color = "grey95") {
   require(dplyr)
   require(purrr)
@@ -65,22 +76,6 @@ get_model_metrics <- function(model_list,
     rename(mean = V1, sd = V2) %>%
     round(digits = 3)
 
-  # # visualize model_metrics
-  # resamples.barcharts <- metric_table %>%
-  #   rownames_to_column() %>%
-  #   mutate(model = rowname) %>%
-  #   # remove "~RMSE" suffix from model names
-  #   mutate_at(.vars = "model", .funs = function(x) gsub("~RMSE", "", x) ) %>%
-  #   ggplot(data = .[1:4,], mapping = aes(x = reorder(model, mean), y = mean, color=model)) +
-  #   geom_bar(stat = "identity") +
-  #   geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), width=.2,
-  #                 position = position_dodge(.9)) +
-  #   coord_flip() +
-  #   theme(legend.position = "") +
-  #   theme(axis.text.x = element_text(size = 12)) +
-  #   theme(axis.text.y = element_text(size = 12 )) +
-  #   xlab("Model") + ylab("RMSE")
-
   ### visualize the resampling distribution from cross-validation
   resamples.boxplots <-
     resamples.values %>%
@@ -97,11 +92,15 @@ get_model_metrics <- function(model_list,
     theme(legend.position = "none", # removes all legends
           axis.title = element_text(size = 14),
           axis.text = element_text(size = 14)) +
-    # scale_color_brewer(values = RColorBrewer::brewer.pal(4,"Set1"))
-    scale_color_manual(values = colors)
+    scale_color_brewer(palette = palette)
+
+  if (!is.null(colors)) {
+    resamples.boxplots <-
+      resamples.boxplots +
+      scale_color_manual(values = colors)
+  }
 
   return(list(RMSE.training = metric_table,
-              # RMSE.barcharts = resamples.barcharts,
               RMSE.boxplots = resamples.boxplots
   ))
 }
