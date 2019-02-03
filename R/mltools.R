@@ -136,3 +136,26 @@ list_variable_importance <- function(train_model) {
     arrange(-IncNodePurity)
 
 }
+
+################################################################################
+# Visualize variable imporance for randomForests objects
+# input randomForests object
+################################################################################
+visualize_variable_importance_rf <- function(rf_object) {
+  rf_object$importance %>%
+    as.data.frame %>%
+    tibble::rownames_to_column() %>%
+    mutate(Importance = round(IncNodePurity * 100/max(IncNodePurity), digits =2)) %>%
+    arrange(-IncNodePurity) %>%
+    ggplot(data = ., aes(x = reorder(rowname, Importance), y = Importance)) +
+    theme_minimal() +
+    geom_bar(stat="identity", fill = "#114151") +
+    coord_flip() +
+    theme(axis.title = element_text(size = 12)
+          , axis.text = element_text(size = 12)
+          # , panel.grid.major.y = element_blank() # remove horizontal grid lines
+    ) +
+    scale_y_continuous(expand = c(0,0), limits = c(0,102)) +
+    xlab("item") + ylab("variable importance")
+}
+
