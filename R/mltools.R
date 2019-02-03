@@ -49,8 +49,8 @@ clusterOn <- function() {
 ##
 ################################################################################
 get_model_metrics <- function(model_list,
-                              target_label = target.label,
-                              testing_set = testing.set,
+                              target_label = NULL,
+                              testing_set = NULL,
                               palette = "Set1", direction = 1,
                               colors = NULL,
                               boxplot_color = "grey95") {
@@ -62,7 +62,9 @@ get_model_metrics <- function(model_list,
   transpose_table <- function(metric_table, metric, desc = FALSE) {
 
     suffix <- paste0("~", metric)
-    mean <- paste0(metric,".training")
+
+    # TODO: use dynamic name in dplyr - quosures don't workµ %>%
+    # mean <- paste0(metric,".training")
 
     metric_table %>%
       dplyr::select(ends_with(suffix)) %>%
@@ -87,7 +89,7 @@ get_model_metrics <- function(model_list,
     map_df(function(variable) {
       ## tricky: dplyr::mutate doesn't work here
       c(mean = mean(variable), sd = sd(variable))
-    }) %>% print
+    })
 
   RMSE.training <- metric_table %>% transpose_table("RMSE")
 
@@ -118,11 +120,18 @@ get_model_metrics <- function(model_list,
   }
 
   # RMSE for all models on testing set
-  RMSE.testing <- get_rmse_testing(target_label, model_list, testing_set)
+  if (!is.null(target_label) & !is.null(testing_set))
+  {
+    RMSE.testing <- get_rmse_testing(target_label, model_list, testing_set)
+    benchmark.all <- merge(RMSE.training, RMSE.testing, by = "model") %>%
+      mutate(delta = mean - RMSE.testing) %>%
+      arrange(RMSE.testing)
 
-  benchmark.all <- merge(RMSE.training, RMSE.testing, by = "model") %>%
-    mutate(delta = mean - RMSE.testing) %>%
-    arrange(RMSE.testing)
+  } else {
+    RMSE.testing <- "n/a due to missing target label & testing set"
+    benchmark.all <- "n/a due to missing target label & testing set"
+  }
+
 
   return(list(RMSE.training = RMSE.training,
               Rsquared.training = Rsquared.training,
