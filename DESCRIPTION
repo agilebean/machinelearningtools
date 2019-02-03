@@ -1,0 +1,9 @@
+Package: machinelearningtools
+Title: Convenience Functions for Machine Learning
+Version: 0.1
+Authors@R: person("Chaehan", "So", email = "chaehan.so@gmail.com", role = c("aut", "cre"))
+Description: Provide convenience functions for machine learning with caret
+Depends: R (>= 3.5.1)
+License: MIT
+Encoding: UTF-8
+LazyData: true
