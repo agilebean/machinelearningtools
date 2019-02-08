@@ -60,7 +60,7 @@ get_model_metrics <- function(models_list,
   require(RColorBrewer)
 
   # retrieve target.label & testing.set from models_list
-  target.label <- models_list$target.label
+  target.label <- if (!is.null(target_label)) target_label else models_list$target.label
   testing.set <- if (!is.null(testing_set)) testing_set else models_list$testing.set
 
   # remove target.label & testing.set from models_list to enable resamples()
@@ -148,8 +148,8 @@ get_models_list <- function(permutation_list, model_index,
 
   permutation <- permutation_list %>% map_df(model_index) %>% print
 
-  models.list.name <- paste0(c(prefix, permutation$target.label,
-                               permutation$features.set, "rds"),
+  models.list.name <- paste0(c(prefix, permutation$target_label,
+                               permutation$features_set, "rds"),
                              collapse = ".") %T>% print
 
   models.list  <- readRDS(models.list.name)
