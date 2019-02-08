@@ -48,7 +48,7 @@ clusterOn <- function() {
 ##  colors: "#4DAF4A" green "#377EB8" blue "#E41A1C" red "#FF7F00" orange
 ##
 ################################################################################
-get_model_metrics <- function(model_list,
+get_model_metrics <- function(models_list,
                               target_label = NULL,
                               testing_set = NULL,
                               palette = "Set1", direction = 1,
@@ -58,6 +58,13 @@ get_model_metrics <- function(model_list,
   require(purrr)
   require(ggplot2)
   require(RColorBrewer)
+
+  # retrieve target.label & testing.set from models_list
+  target.label <- models_list$target
+  testing.set <- if (!is.null(testing_set)) testing_set else models_list$testing.set
+
+  # remove target.label & testing.set from models_list to enable resamples()
+  models.list <- models_list %>% head(-2)
 
   transpose_table <- function(metric_table, metric, desc = FALSE) {
 
@@ -78,7 +85,7 @@ get_model_metrics <- function(model_list,
   }
 
   ### get metrics from original resamples' folds
-  resamples.values <- model_list %>% resamples %>% .$values %>%
+  resamples.values <- models.list %>% resamples %>% .$values %>%
     select_if(is.numeric) %>%
     # retrieve RMSE, Rsquared but not MAE
     ## tricky: select without dplyr:: prefix does NOT work
@@ -95,6 +102,10 @@ get_model_metrics <- function(model_list,
 
   Rsquared.training <- metric_table %>% transpose_table("Rsquared", desc = TRUE)
 
+  # create palette with 8+ colors
+  ## Source: http://novyden.blogspot.com/2013/09/how-to-expand-color-palette-with-ggplot.html
+  getPalette <- colorRampPalette(brewer.pal(8, palette))(length(models.list))
+
   ### visualize the resampling distribution from cross-validation
   resamples.boxplots <-
     resamples.values %>%
@@ -107,37 +118,24 @@ get_model_metrics <- function(model_list,
     geom_boxplot(width = 0.7, fill=boxplot_color) +
     geom_jitter() +
     coord_flip() +
+    # scale_color_brewer(palette = palette, direction = direction) +
+    scale_color_manual(values = if (!is.null(colors)) colors else getPalette) +
     labs(x = "model") +
     theme(legend.position = "none", # removes all legends
           axis.title = element_text(size = 14),
-          axis.text = element_text(size = 14)) +
-    scale_color_brewer(palette = palette, direction = direction)
+          axis.text = element_text(size = 14))
 
-  if (!is.null(colors)) {
-    resamples.boxplots <-
-      resamples.boxplots +
-      scale_color_manual(values = colors)
-  }
+  RMSE.testing <- get_rmse_testing(target.label, models.list, testing.set)
 
-  # RMSE for all models on testing set
-  if (!is.null(target_label) & !is.null(testing_set))
-  {
-    RMSE.testing <- get_rmse_testing(target_label, model_list, testing_set)
-    benchmark.all <- merge(RMSE.training, RMSE.testing, by = "model") %>%
-      mutate(delta = mean - RMSE.testing) %>%
-      arrange(RMSE.testing)
-
-  } else {
-    RMSE.testing <- "n/a due to missing target label & testing set"
-    benchmark.all <- "n/a due to missing target label & testing set"
-  }
-
+  benchmark.all <- merge(RMSE.training, RMSE.testing, by = "model") %>%
+    mutate(delta = mean - RMSE.testing) %>%
+    arrange(RMSE.testing)
 
   return(list(RMSE.training = RMSE.training,
               Rsquared.training = Rsquared.training,
+              RMSE.boxplots = resamples.boxplots,
               RMSE.testing = RMSE.testing,
-              RMSE.all = benchmark.all,
-              RMSE.boxplots = resamples.boxplots
+              RMSE.all = benchmark.all
   ))
 }
 
@@ -151,8 +149,8 @@ get_rmse_testing <- function(target_label, models_list, testing_set) {
 
   models_list %>%
     # caret::predict() can take a list of train objects as input
-    predict(testing.set) %>%
-    map_df(~sqrt(mean( (testing.set[[target_label]]-.)^2) ) ) %>%
+    predict(testing_set) %>%
+    map_df(~sqrt(mean( (testing_set[[target_label]]-.)^2) ) ) %>%
     # simpler than: mutate_if(is.numeric, funs(round(., digits = 3)))
     round(digits = 3) %>%
     t %>% as.data.frame %>%
