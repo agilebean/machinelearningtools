@@ -194,6 +194,7 @@ list_variable_importance <- function(train_model) {
 # input randomForests object
 ################################################################################
 visualize_variable_importance_rf <- function(rf_object) {
+
   rf_object$importance %>%
     as.data.frame %>%
     tibble::rownames_to_column() %>%
@@ -211,3 +212,85 @@ visualize_variable_importance_rf <- function(rf_object) {
     xlab("item") + ylab("variable importance")
 }
 
+################################################################################
+#
+# LESSONS LEARNED
+#
+################################################################################
+#
+################################################################################
+# 1. dplyr: never ever select() but dplyr::select()
+#
+################################################################################
+# 2. unified handling: use passed arguments or default values
+#
+# target.label <- if (!is.null(target_label)) target_label else models_list$target.label
+#
+################################################################################
+# 3. dplyr: extended dplyr verbs work with .f, FUN, funs()
+#
+# ... %>% rename_all(funs(gsub(suffix, "", .))) %>% ...
+#
+################################################################################
+# 4. dplyr: conditional sorting with dplyr
+#
+# arrange( {if (desc) desc(mean) else mean } )
+#
+################################################################################
+# 5. purrr: apply several functions on column values AND bind with c()
+#
+# metric_table <- resamples.values %>%
+#   map_df(function(variable) {
+#     ## tricky: dplyr::mutate doesn't work here
+#     c(mean = mean(variable), sd = sd(variable))
+#   })
+#
+################################################################################
+# 6. purrr: rename column names by set_names() or rename_all()
+#
+# resamples.values %>%
+#   dplyr::select(ends_with("~RMSE")) %>%
+#   set_names(~gsub("~RMSE","",.)) %>% ...
+# OR
+# metric_table %>%
+#   dplyr::select(ends_with(suffix)) %>%
+#   rename_all(funs(gsub(suffix, "", .))) %>% ...
+#
+################################################################################
+# 7. visualization:   # create palette with 8+ colors
+#
+# getPalette <- colorRampPalette(brewer.pal(8, palette))(length(models.list))
+# ...
+# scale_color_manual(values = if (!is.null(colors)) colors else getPalette)
+#
+################################################################################
+# 8. basic: match 2 dataframes by key column
+#
+# merge(RMSE.training, RMSE.testing, by = "model")
+#
+################################################################################
+# 9. basic: paste0() requires a vector for collapse,
+# but paste() can handle a strings separated by comma
+#
+# paste0(c("analysis", target.label, features.set, "pdf"), collapse = ".")
+# paste("analysis", target.label, features.set, "pdf", sep = ".")
+#
+################################################################################
+# 10. purrr: purrr style is shorter than base inline function style: function(x) {}
+#
+# models_list %>%
+#   predict(testing_set) %>%
+#   map_df(~sqrt(mean( (testing_set[[target_label]]-.)^2) ) )
+#
+################################################################################
+# 11. dplyr: rename column without mutate/rename by select()
+#
+# as.data.frame %>%
+#   select(RMSE.testing = V1)
+#
+################################################################################
+# 12. dplyr: make row names explicit and rename "rowname"
+#
+# rownames_to_column(var = "model")
+#
+################################################################################
