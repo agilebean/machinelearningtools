@@ -60,7 +60,7 @@ get_model_metrics <- function(models_list,
   require(RColorBrewer)
 
   # retrieve target.label & testing.set from models_list
-  target.label <- models_list$target
+  target.label <- models_list$target.label
   testing.set <- if (!is.null(testing_set)) testing_set else models_list$testing.set
 
   # remove target.label & testing.set from models_list to enable resamples()
@@ -139,7 +139,23 @@ get_model_metrics <- function(models_list,
   ))
 }
 
+################################################################################
+# Get Models List
+# read all model.list files from permutation_list's target & features set
+################################################################################
+get_models_list <- function(permutation_list, model_index,
+                            prefix = "data/models.list") {
 
+  permutation <- permutation_list %>% map_df(model_index) %>% print
+
+  models.list.name <- paste0(c(prefix, permutation$target.label,
+                               permutation$features.set, "rds"),
+                             collapse = ".") %T>% print
+
+  models.list  <- readRDS(models.list.name)
+
+  return(models.list)
+}
 
 ################################################################################
 # Get Testing Set Performance
