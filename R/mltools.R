@@ -53,7 +53,8 @@ get_model_metrics <- function(models_list,
                               testing_set = NULL,
                               palette = "Set1", direction = 1,
                               colors = NULL,
-                              boxplot_color = "grey95") {
+                              boxplot_fill = "grey95",
+                              boxplot_color = "grey25") {
   require(dplyr)
   require(purrr)
   require(ggplot2)
@@ -84,28 +85,14 @@ get_model_metrics <- function(models_list,
 
   Rsquared.training <- metric_table %>% transpose_table("Rsquared", desc = TRUE)
 
-  # create palette with 8+ colors
-  ## Source: http://novyden.blogspot.com/2013/09/how-to-expand-color-palette-with-ggplot.html
-  getPalette <- colorRampPalette(brewer.pal(8, palette))(length(models.list))
+  dot.size <- 1/logb(nrow(resamples.values), 5)
 
   ### visualize the resampling distribution from cross-validation
-  resamples.boxplots <-
-    resamples.values %>%
-    dplyr::select(ends_with("~RMSE")) %>%
-    set_names(~gsub("~RMSE","",.)) %>%
-    drop_na() %>%
-    gather(key = model, value = RMSE) %>%
-    ggplot(aes(x = reorder(model, RMSE, median), y = RMSE, color = model)) +
-    theme_minimal() +
-    geom_boxplot(width = 0.7, fill=boxplot_color) +
-    geom_jitter() +
-    coord_flip() +
-    # scale_color_brewer(palette = palette, direction = direction) +
-    scale_color_manual(values = if (!is.null(colors)) colors else getPalette) +
-    labs(x = "model") +
-    theme(legend.position = "none", # removes all legends
-          axis.title = element_text(size = 14),
-          axis.text = element_text(size = 14))
+  resamples.boxplots <- visualize_resamples_boxplots(
+    resamples.values,
+    palette, colour_count = length(models.list), dot_size = dot.size,
+    boxplot_fill, boxplot_color
+  )
 
   RMSE.testing <- get_rmse_testing(target.label, models.list, testing.set)
 
@@ -142,6 +129,48 @@ transpose_table <- function(metric_table, metric, desc = FALSE) {
     arrange( {if (desc) desc(mean) else mean } )
 
 }
+
+
+################################################################################
+# visualize_resamples_boxplots()
+# Helper function for get_model_metrics
+################################################################################
+visualize_resamples_boxplots <- function(resamples_values,
+                                         palette, colour_count, dot_size,
+                                         boxplot_fill = "grey95", boxplot_color = "grey25",
+                                         colors = NULL) {
+
+  require(dplyr)
+  require(ggplot2)
+
+  # print(paste("boxplot_fill: ", boxplot_fill))
+
+  # create palette with 8+ colors
+  ## Source: http://novyden.blogspot.com/2013/09/how-to-expand-color-palette-with-ggplot.html
+  getPalette <- colorRampPalette(brewer.pal(8, palette))(colour_count)
+
+  ### visualize the resampling distribution from cross-validation
+  resamples.boxplots <-
+    resamples_values %>%
+    dplyr::select(ends_with("~RMSE")) %>%
+    set_names(~gsub("~RMSE","",.)) %>%
+    drop_na() %>%
+    gather(key = model, value = RMSE) %>%
+    ggplot(aes(x = reorder(model, RMSE, median), y = RMSE, color = model)) +
+    theme_minimal() +
+    geom_jitter(size = dot_size) +
+    geom_boxplot(width = 0.7, fill=boxplot_fill, color=boxplot_color, alpha = 0.3) +
+    coord_flip() +
+    # scale_color_brewer(palette = palette, direction = direction) +
+    scale_color_manual(values = if (!is.null(colors)) colors else getPalette) +
+    labs(x = "model") +
+    theme(legend.position = "none", # removes all legends
+          axis.title = element_text(size = 14),
+          axis.text = element_text(size = 14))
+
+  return(resamples.boxplots)
+}
+
 
 ################################################################################
 # Get Models List
