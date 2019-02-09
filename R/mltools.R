@@ -128,7 +128,7 @@ get_model_metrics <- function(models_list,
   RMSE.testing <- get_rmse_testing(target.label, models.list, testing.set)
 
   benchmark.all <- merge(RMSE.training, RMSE.testing, by = "model") %>%
-    mutate(delta = mean - RMSE.testing) %>%
+    mutate(delta = RMSE.testing - mean) %>%
     arrange(RMSE.testing)
 
   return(list(RMSE.training = RMSE.training,
