@@ -66,24 +66,6 @@ get_model_metrics <- function(models_list,
   # remove target.label & testing.set from models_list to enable resamples()
   models.list <- models_list %>% head(-2)
 
-  transpose_table <- function(metric_table, metric, desc = FALSE) {
-
-    suffix <- paste0("~", metric)
-
-    # TODO: use dynamic name in dplyr - quosures don't workµ %>%
-    # mean <- paste0(metric,".training")
-
-    metric_table %>%
-      dplyr::select(ends_with(suffix)) %>%
-      rename_all(funs(gsub(suffix, "", .))) %>%
-      t %>% as.data.frame %>%
-      rename(mean = V1, sd = V2) %>%
-      round(digits = 3) %>%
-      rownames_to_column(var = "model") %>%
-      arrange( {if (desc) desc(mean) else mean } )
-
-  }
-
   ### get metrics from original resamples' folds
   resamples.values <- models.list %>% resamples %>% .$values %>%
     select_if(is.numeric) %>%
@@ -137,6 +119,28 @@ get_model_metrics <- function(models_list,
               RMSE.testing = RMSE.testing,
               RMSE.all = benchmark.all
   ))
+}
+
+################################################################################
+# transpose table
+# Helper function for get_model_metrics
+################################################################################
+transpose_table <- function(metric_table, metric, desc = FALSE) {
+
+  suffix <- paste0("~", metric)
+
+  # TODO: use dynamic name in dplyr - quosures don't work %>%
+  # mean <- paste0(metric,".training")
+
+  metric_table %>%
+    dplyr::select(ends_with(suffix)) %>%
+    rename_all(funs(gsub(suffix, "", .))) %>%
+    t %>% as.data.frame %>%
+    rename(mean = V1, sd = V2) %>%
+    round(digits = 3) %>%
+    rownames_to_column(var = "model") %>%
+    arrange( {if (desc) desc(mean) else mean } )
+
 }
 
 ################################################################################
