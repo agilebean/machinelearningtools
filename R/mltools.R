@@ -122,10 +122,9 @@ transpose_table <- function(metric_table, metric, desc = FALSE) {
   metric_table %>%
     dplyr::select(ends_with(suffix)) %>%
     rename_all(funs(gsub(suffix, "", .))) %>%
-    t %>% as.data.frame %>%
+    t %>%
+    as.tibble(rownames = "model") %>%
     rename(mean = V1, sd = V2) %>%
-    round(digits = 3) %>%
-    rownames_to_column(var = "model") %>%
     arrange( {if (desc) desc(mean) else mean } )
 
 }
@@ -201,10 +200,9 @@ get_rmse_testing <- function(target_label, models_list, testing_set) {
     predict(testing_set) %>%
     map_df(~sqrt(mean( (testing_set[[target_label]]-.)^2) ) ) %>%
     # simpler than: mutate_if(is.numeric, funs(round(., digits = 3)))
-    round(digits = 3) %>%
-    t %>% as.data.frame %>%
+    t %>%
+    as_tibble(rownames = "model") %>%
     select(RMSE.testing = V1) %>%
-    rownames_to_column(var = "model") %>%
     arrange(RMSE.testing)
 }
 
@@ -325,5 +323,14 @@ visualize_variable_importance_rf <- function(rf_object) {
 # 12. dplyr: make row names explicit and rename "rowname"
 #
 # rownames_to_column(var = "model")
+#
+################################################################################
+# 13. dplyr: transpose as.tibble instead of as.data.frame
+#
+# instead of:
+#   round(digits = 3) %>% t %>% as.data.frame %>%
+#     rownames_to_column(var = "model")
+# do:
+#   t %>% as.tibble(rownames = "model")
 #
 ################################################################################
