@@ -98,7 +98,8 @@ get_model_metrics <- function(models_list,
 
   benchmark.all <- merge(RMSE.training, RMSE.testing, by = "model") %>%
     mutate(delta = RMSE.testing - mean) %>%
-    arrange(RMSE.testing)
+    arrange(RMSE.testing) %>%
+    as_tibble
 
   return(list(RMSE.training = RMSE.training,
               Rsquared.training = Rsquared.training,
@@ -202,7 +203,7 @@ get_rmse_testing <- function(target_label, models_list, testing_set) {
     # simpler than: mutate_if(is.numeric, funs(round(., digits = 3)))
     t %>%
     as_tibble(rownames = "model") %>%
-    select(RMSE.testing = V1) %>%
+    rename(RMSE.testing = V1) %>%
     arrange(RMSE.testing)
 }
 
