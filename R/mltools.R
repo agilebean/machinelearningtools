@@ -177,13 +177,17 @@ visualize_resamples_boxplots <- function(resamples_values,
 # read all model.list files from permutation_list's target & features set
 ################################################################################
 get_models_list <- function(permutation_list, model_index,
+                            cv_repeats,
                             prefix = "data/models.list") {
 
   permutation <- permutation_list %>% map_df(model_index) %>% print
 
-  models.list.name <- paste0(c(prefix, permutation$target_label,
-                               permutation$features_set, "rds"),
-                             collapse = ".") %T>% print
+  models.list.name <- paste(prefix,
+                            permutation$target_label,
+                            permutation$features_set,
+                            paste0(cv_repeats, "repeats"),
+                            "rds",
+                            sep = ".") %T>% print
 
   models.list  <- readRDS(models.list.name)
 
