@@ -21,10 +21,13 @@ set_formula <- function(target_label, features) {
 ################################################################################
 # turn on cluster for parallel processing
 ################################################################################
-clusterOn <- function() {
+clusterOn <- function(no_cores = NULL) {
 
   require(doParallel) # loads parallel library for makeCluster
-  cluster.new <- makeCluster(spec = { detectCores() - 1 }, type = "FORK")
+  cluster.new <- makeCluster(spec = if (!is.null(no_cores)) no_cores else { detectCores() - 1 },
+                             type = "FORK",
+                             outfile = "" # verbose
+  )
   registerDoParallel(cluster.new)
 
   return(cluster.new)
@@ -177,8 +180,8 @@ visualize_resamples_boxplots <- function(resamples_values,
 # read all model.list files from permutation_list's target & features set
 ################################################################################
 get_models_list <- function(permutation_list, model_index,
-                            cv_repeats,
-                            prefix = "data/models.list") {
+                            prefix = "data/models.list",
+                            cv_repeats) {
 
   permutation <- permutation_list %>% map_df(model_index) %>% print
 
