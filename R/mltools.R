@@ -75,6 +75,11 @@ get_model_metrics <- function(models_list,
     metric2 = "Rsquared"
   }
 
+  # remove target.label + testing.set from models.list
+  if (!is.null(models_list$target.label) & !is.null(models_list$testing.set)) {
+    models_list %<>% head(-2)
+  }
+
   ### get metrics from original resamples' folds
   resamples.values <- models_list %>% resamples %>% .$values %>%
     # select_if(is.numeric) %>%
