@@ -185,9 +185,10 @@ visualize_resamples_boxplots <- function(resamples_values, METRIC,
 # Get Models List
 # read all model.list files from permutation_list's target & features set
 ################################################################################
-get_models_list <- function(permutation_list, model_index,
+get_models_list <- function(permutation_list, model_index = 1,
                             prefix = "data/models.list",
-                            cv_repeats) {
+                            impute_method = "medianImpute",
+                            cv_repeats = 100) {
 
   permutation <- permutation_list %>% map_df(model_index) %>% print
 
@@ -195,6 +196,7 @@ get_models_list <- function(permutation_list, model_index,
                             permutation$target_label,
                             permutation$features_set,
                             paste0(cv_repeats, "repeats"),
+                            impute_method,
                             "rds",
                             sep = ".") %T>% print
 
