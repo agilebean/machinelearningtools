@@ -88,17 +88,10 @@ get_model_metrics <- function(models_list,
   metric2.training <- get_metric_from_resamples(resamples.values, metric2)
 
   ### visualize the resampling distribution from cross-validation
-  dot.size <- 1/logb(nrow(resamples.values), 5)
   metric1.resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values, metric1,
-    palette, colour_count = length(models_list), dot_size = dot.size,
-    boxplot_fill, boxplot_color
-  )
+    resamples.values, metric1)
   metric2.resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values, metric2,
-    palette, colour_count = length(models_list), dot_size = dot.size,
-    boxplot_fill, boxplot_color
-  )
+    resamples.values, metric2)
 
   metric1.testing <- get_testingset_performance(
     target_label, models_list, testing_set)
