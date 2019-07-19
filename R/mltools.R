@@ -113,6 +113,29 @@ get_model_metrics <- function(models_list,
 }
 
 ################################################################################
+# get_metrics_from_resamples
+# Helper function for get_model_metrics
+################################################################################
+get_metric_from_resamples <- function(resamples_values, metric) {
+
+  suffix <- paste0("~", metric)
+  # tricky: for arrange, convert string column name to symbol, not quosure
+  # https://stackoverflow.com/a/26497839/7769076
+  metric.mean <- rlang::sym(paste0(metric,".mean"))
+  metric.sd <- paste0(metric,".sd")
+
+  metric_table <- resamples_values %>%
+    ## tricky: dplyr::mutate doesn't work here
+    map_df(~c(mean = mean(.), sd = sd(.) )) %>%
+    dplyr::select(ends_with(suffix)) %>%
+    rename_all(.funs = funs(gsub(suffix, "",.))) %>%
+    t %>% as_tibble(rownames = "model") %>%
+    setNames(c("model", metric.mean, metric.sd)) %>%
+    # tricky: unquote symbol, not quosure
+    arrange(desc(!!metric.mean))
+}
+
+################################################################################
 # transpose table
 # Helper function for get_model_metrics
 ################################################################################
@@ -200,17 +223,34 @@ get_models_list <- function(permutation_list, model_index,
 # Get Testing Set Performance
 # calculate RMSE for all model objects in model_list
 ################################################################################
-get_rmse_testing <- function(target_label, models_list, testing_set) {
+get_testingset_performance <- function(target_label, models_list, testing_set) {
 
-  models_list %>%
-    # caret::predict() can take a list of train objects as input
-    predict(testing_set) %>%
-    map_df(~sqrt(mean( (testing_set[[target_label]]-.)^2) ) ) %>%
-    # simpler than: mutate_if(is.numeric, funs(round(., digits = 3)))
-    t %>%
-    as_tibble(rownames = "model") %>%
-    rename(RMSE.testing = V1) %>%
-    arrange(RMSE.testing)
+  if (is.factor(testing_set[[target_label]])) {
+
+    models_list %>%
+      map(
+        # estimate target in the testing set
+        ~predict(., newdata = testing_set) %>%
+          confusionMatrix(., testing_set[[target_label]]) %>%
+          .$overall %>%
+          # tricky: convert first to dataframe > can select column names
+          map_df(1) %>% select(Accuracy, Kappa)
+      ) %>%
+      bind_rows(.id = "model") %>%
+      setNames(c("model", "Acc.testing", "Kappa.testing"))
+
+  } else if (is.numeric(testing_set[[target_label]])) {
+
+    models_list %>%
+      # caret::predict() can take a list of train objects as input
+      predict(testing_set) %>%
+      map_df(~sqrt(mean( (testing_set[[target_label]]-.)^2) ) ) %>%
+      # simpler than: mutate_if(is.numeric, funs(round(., digits = 3)))
+      t %>%
+      as_tibble(rownames = "model") %>%
+      rename(RMSE.testing = V1) %>%
+      arrange(RMSE.testing)
+  }
 }
 
 ################################################################################
