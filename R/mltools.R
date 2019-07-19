@@ -99,7 +99,8 @@ get_model_metrics <- function(models_list,
     resamples.values, metric2)
 
   metric1.testing <- get_testingset_performance(
-    target_label, models_list, testing_set)
+    # tricky: target.label & testing.set NOT target_label & testing_set
+    target.label, models_list, testing.set)
 
   if (is.factor(testing.set[[target.label]])) {
 
@@ -109,7 +110,8 @@ get_model_metrics <- function(models_list,
   } else if (is.numeric(testing.set[[target.label]])) {
 
     benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
-      mutate(delta = RMSE.testing - mean) %>%
+      merge(metric1.testing, by = "model") %>%
+      mutate(delta = RMSE.testing - RMSE.mean) %>%
       arrange(RMSE.testing) %>%
       as_tibble
   }
