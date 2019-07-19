@@ -67,48 +67,61 @@ get_model_metrics <- function(models_list,
   target.label <- if (!is.null(target_label)) target_label else models_list$target.label
   testing.set <- if (!is.null(testing_set)) testing_set else models_list$testing.set
 
-  # remove target.label & testing.set from models_list to enable resamples()
-  models.list <- models_list %>% head(-2)
+  if (is.factor(testing.set[[target.label]])) {
+    metric1 = "Accuracy"
+    metric2 = "Kappa"
+  } else if (is.numeric(testing.set[[target.label]])) {
+    metric1 = "RMSE"
+    metric2 = "Rsquared"
+  }
 
   ### get metrics from original resamples' folds
   resamples.values <- models.list %>% resamples %>% .$values %>%
-    select_if(is.numeric) %>%
+    # select_if(is.numeric) %>%
     # retrieve RMSE, Rsquared but not MAE
     ## tricky: select without dplyr:: prefix does NOT work
-    dplyr::select(ends_with("RMSE"), ends_with("Rsquared"))
+    # dplyr::select(ends_with("RMSE"), ends_with("Rsquared"))
+    dplyr::select(ends_with(metric1), ends_with(metric2))
 
   ### calculate mean and sd for each metric
-  metric_table <- resamples.values %>%
-    map_df(function(variable) {
-      ## tricky: dplyr::mutate doesn't work here
-      c(mean = mean(variable), sd = sd(variable))
-    })
-
-  RMSE.training <- metric_table %>% transpose_table("RMSE")
-
-  Rsquared.training <- metric_table %>% transpose_table("Rsquared", desc = TRUE)
-
-  dot.size <- 1/logb(nrow(resamples.values), 5)
+  metric1.training <- get_metric_from_resamples(resamples.values, metric1)
+  metric2.training <- get_metric_from_resamples(resamples.values, metric2)
 
   ### visualize the resampling distribution from cross-validation
-  resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values,
+  dot.size <- 1/logb(nrow(resamples.values), 5)
+  metric1.resamples.boxplots <- visualize_resamples_boxplots(
+    resamples.values, metric1,
+    palette, colour_count = length(models.list), dot_size = dot.size,
+    boxplot_fill, boxplot_color
+  )
+  metric2.resamples.boxplots <- visualize_resamples_boxplots(
+    resamples.values, metric2,
     palette, colour_count = length(models.list), dot_size = dot.size,
     boxplot_fill, boxplot_color
   )
 
-  RMSE.testing <- get_rmse_testing(target.label, models.list, testing.set)
+  metric1.testing <- get_testingset_performance(
+    target_label, models_list, testing_set)
 
-  benchmark.all <- merge(RMSE.training, RMSE.testing, by = "model") %>%
-    mutate(delta = RMSE.testing - mean) %>%
-    arrange(RMSE.testing) %>%
-    as_tibble
+  if (is.factor(testing.set[[target.label]])) {
 
-  return(list(RMSE.training = RMSE.training,
-              Rsquared.training = Rsquared.training,
-              RMSE.boxplots = resamples.boxplots,
-              RMSE.testing = RMSE.testing,
-              RMSE.all = benchmark.all
+    benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
+      merge(metric1.testing, by = "model")
+
+  } else if (is.numeric(testing.set[[target.label]])) {
+
+    benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
+      mutate(delta = RMSE.testing - mean) %>%
+      arrange(RMSE.testing) %>%
+      as_tibble
+  }
+
+  return(list(metric1.training = metric1.training,
+              metric2.training = metric2.training,
+              metric1.resamples.boxplots = metric1.resamples.boxplots,
+              metric2.resamples.boxplots = metric2.resamples.boxplots,
+              metric1.testing = metric1.testing,
+              benchmark.all = benchmark.all
   ))
 }
 
@@ -134,28 +147,6 @@ get_metric_from_resamples <- function(resamples_values, metric) {
     # tricky: unquote symbol, not quosure
     arrange(desc(!!metric.mean))
 }
-
-################################################################################
-# transpose table
-# Helper function for get_model_metrics
-################################################################################
-transpose_table <- function(metric_table, metric, desc = FALSE) {
-
-  suffix <- paste0("~", metric)
-
-  # TODO: use dynamic name in dplyr - quosures don't work %>%
-  # mean <- paste0(metric,".training")
-
-  metric_table %>%
-    dplyr::select(ends_with(suffix)) %>%
-    rename_all(funs(gsub(suffix, "", .))) %>%
-    t %>%
-    as.tibble(rownames = "model") %>%
-    rename(mean = V1, sd = V2) %>%
-    arrange( {if (desc) desc(mean) else mean } )
-
-}
-
 
 ################################################################################
 # visualize_resamples_boxplots()
@@ -290,6 +281,19 @@ visualize_variable_importance_rf <- function(rf_object) {
     xlab("item") + ylab("variable importance")
 }
 
+################################################################################
+# Send push message to RPushbullet app
+# input caret::train object
+################################################################################
+push_message <- function(time_in_seconds = 60) {
+
+  beepr::beep("facebook")
+  RPushbullet::pbPost(type = "note",
+                      title = paste("caret training finished after",
+                                    round(time_in_seconds/60, digits = 2), "min"),
+                      body = paste("The training for models finished"),
+                      devices = "ujyr8RSNXs4sjAsoeMFET6")
+}
 ################################################################################
 #
 # LESSONS LEARNED
