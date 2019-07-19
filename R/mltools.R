@@ -94,9 +94,9 @@ get_model_metrics <- function(models_list,
 
   ### visualize the resampling distribution from cross-validation
   metric1.resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values, metric1)
+    resamples.values, metric1, palette)
   metric2.resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values, metric2)
+    resamples.values, metric2, palette)
 
   metric1.testing <- get_testingset_performance(
     # tricky: target.label & testing.set NOT target_label & testing_set
