@@ -281,19 +281,7 @@ visualize_variable_importance_rf <- function(rf_object) {
     xlab("item") + ylab("variable importance")
 }
 
-################################################################################
-# Send push message to RPushbullet app
-# input caret::train object
-################################################################################
-push_message <- function(time_in_seconds = 60) {
 
-  beepr::beep("facebook")
-  RPushbullet::pbPost(type = "note",
-                      title = paste("caret training finished after",
-                                    round(time_in_seconds/60, digits = 2), "min"),
-                      body = paste("The training for models finished"),
-                      devices = "ujyr8RSNXs4sjAsoeMFET6")
-}
 ################################################################################
 #
 # LESSONS LEARNED
