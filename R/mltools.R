@@ -153,23 +153,23 @@ get_metric_from_resamples <- function(resamples_values, metric) {
 # Helper function for get_model_metrics
 ################################################################################
 visualize_resamples_boxplots <- function(resamples_values, METRIC,
-                                         palette, colour_count, dot_size,
+                                         palette = "Set1",
+                                         colour_count = ncol(resamples_values),
+                                         dot_size = 1/logb(nrow(resamples_values), 5),
                                          boxplot_fill = "grey95", boxplot_color = "grey25",
                                          colors = NULL) {
 
   require(dplyr)
   require(ggplot2)
 
-  # print(paste("boxplot_fill: ", boxplot_fill))
-
   # create palette with 8+ colors
   ## Source: http://novyden.blogspot.com/2013/09/how-to-expand-color-palette-with-ggplot.html
   getPalette <- colorRampPalette(brewer.pal(8, palette))(colour_count)
 
   ### visualize the resampling distribution from cross-validation
-  resamples.boxplots <- resamples.values %>%
+  resamples.boxplots <- resamples_values %>%
     dplyr::select(ends_with(METRIC)) %>%
-    set_names(~gsub(paste0("~", METRIC), "", .)) %>%
+    purrr::set_names(~gsub(paste0("~", METRIC), "", .)) %>%
     drop_na() %>%
     gather(key = model, value = METRIC) %>%
     ggplot(aes(x = reorder(model, METRIC, median),
