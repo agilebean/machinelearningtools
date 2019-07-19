@@ -138,7 +138,7 @@ transpose_table <- function(metric_table, metric, desc = FALSE) {
 # visualize_resamples_boxplots()
 # Helper function for get_model_metrics
 ################################################################################
-visualize_resamples_boxplots <- function(resamples_values,
+visualize_resamples_boxplots <- function(resamples_values, METRIC,
                                          palette, colour_count, dot_size,
                                          boxplot_fill = "grey95", boxplot_color = "grey25",
                                          colors = NULL) {
@@ -153,21 +153,20 @@ visualize_resamples_boxplots <- function(resamples_values,
   getPalette <- colorRampPalette(brewer.pal(8, palette))(colour_count)
 
   ### visualize the resampling distribution from cross-validation
-  resamples.boxplots <-
-    resamples_values %>%
-    dplyr::select(ends_with("~RMSE")) %>%
-    set_names(~gsub("~RMSE","",.)) %>%
+  resamples.boxplots <- resamples.values %>%
+    dplyr::select(ends_with(METRIC)) %>%
+    set_names(~gsub(paste0("~", METRIC), "", .)) %>%
     drop_na() %>%
-    gather(key = model, value = RMSE) %>%
-    ggplot(aes(x = reorder(model, RMSE, median), y = RMSE, color = model)) +
+    gather(key = model, value = METRIC) %>%
+    ggplot(aes(x = reorder(model, METRIC, median),
+               y = METRIC, color = model)) +
     theme_minimal() +
     geom_jitter(size = dot_size) +
-    geom_boxplot(width = 0.7, fill=boxplot_fill, color=boxplot_color, alpha = 0.3) +
+    geom_boxplot(width = 0.7, fill = boxplot_fill, color = boxplot_color, alpha = 0.3) +
     coord_flip() +
-    # scale_color_brewer(palette = palette, direction = direction) +
     scale_color_manual(values = if (!is.null(colors)) colors else getPalette) +
-    labs(x = "model") +
-    theme(legend.position = "none", # removes all legends
+    labs(x = "model", y = METRIC) +
+    theme(legend.position = "none",
           axis.title = element_text(size = 14),
           axis.text = element_text(size = 14))
 
