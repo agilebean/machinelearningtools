@@ -76,7 +76,7 @@ get_model_metrics <- function(models_list,
   }
 
   ### get metrics from original resamples' folds
-  resamples.values <- models.list %>% resamples %>% .$values %>%
+  resamples.values <- models_list %>% resamples %>% .$values %>%
     # select_if(is.numeric) %>%
     # retrieve RMSE, Rsquared but not MAE
     ## tricky: select without dplyr:: prefix does NOT work
@@ -91,12 +91,12 @@ get_model_metrics <- function(models_list,
   dot.size <- 1/logb(nrow(resamples.values), 5)
   metric1.resamples.boxplots <- visualize_resamples_boxplots(
     resamples.values, metric1,
-    palette, colour_count = length(models.list), dot_size = dot.size,
+    palette, colour_count = length(models_list), dot_size = dot.size,
     boxplot_fill, boxplot_color
   )
   metric2.resamples.boxplots <- visualize_resamples_boxplots(
     resamples.values, metric2,
-    palette, colour_count = length(models.list), dot_size = dot.size,
+    palette, colour_count = length(models_list), dot_size = dot.size,
     boxplot_fill, boxplot_color
   )
 
@@ -281,6 +281,19 @@ visualize_variable_importance_rf <- function(rf_object) {
     xlab("item") + ylab("variable importance")
 }
 
+################################################################################
+# Send push message to RPushbullet app
+# input caret::train object
+################################################################################
+push_message <- function(time_in_seconds = 60) {
+
+  beepr::beep("facebook")
+  RPushbullet::pbPost(type = "note",
+                      title = paste("caret training finished after",
+                                    round(time_in_seconds/60, digits = 2), "min"),
+                      body = paste("The training for models finished"),
+                      devices = "ujyr8RSNXs4sjAsoeMFET6")
+}
 
 ################################################################################
 #
