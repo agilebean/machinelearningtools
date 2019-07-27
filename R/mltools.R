@@ -98,19 +98,19 @@ get_model_metrics <- function(models_list,
   metric2.resamples.boxplots <- visualize_resamples_boxplots(
     resamples.values, metric2, palette)
 
-  metric1.testing <- get_testingset_performance(
+  metrics.testing <- get_testingset_performance(
     # tricky: target.label & testing.set NOT target_label & testing_set
     target.label, models_list, testing.set)
 
   if (is.factor(testing.set[[target.label]])) {
 
     benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
-      merge(metric1.testing, by = "model")
+      merge(metrics.testing, by = "model")
 
   } else if (is.numeric(testing.set[[target.label]])) {
 
     benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
-      merge(metric1.testing, by = "model") %>%
+      merge(metrics.testing, by = "model") %>%
       mutate(delta = RMSE.testing - RMSE.mean) %>%
       arrange(RMSE.testing) %>%
       as_tibble
@@ -120,7 +120,7 @@ get_model_metrics <- function(models_list,
               metric2.training = metric2.training,
               metric1.resamples.boxplots = metric1.resamples.boxplots,
               metric2.resamples.boxplots = metric2.resamples.boxplots,
-              metric1.testing = metric1.testing,
+              metrics.testing = metrics.testing,
               benchmark.all = benchmark.all
   ))
 }
@@ -234,14 +234,18 @@ get_testingset_performance <- function(target_label, models_list, testing_set) {
 
   } else if (is.numeric(testing_set[[target_label]])) {
 
-    models_list %>%
+    models.list %>%
+      head(-2) %>%  # remove
       # caret::predict() can take a list of train objects as input
-      predict(testing_set) %>%
-      map_df(~sqrt(mean( (testing_set[[target_label]]-.)^2) ) ) %>%
-      # simpler than: mutate_if(is.numeric, funs(round(., digits = 3)))
+      predict(testing.set) %>%
+      map_df(function(predicted) {
+        c(sqrt(mean( (testing.set[[params$target.label]]-predicted)^2)),
+          # R2 = regression SS / TSS > https://stackoverflow.com/a/40901487/7769076
+          sum((predicted - mean(predicted))^2) / sum((observed - mean(observed))^2))
+      }) %>%
       t %>%
       as_tibble(rownames = "model") %>%
-      rename(RMSE.testing = V1) %>%
+      rename(RMSE.testing = V1, Rsquared.testing = V2) %>%
       arrange(RMSE.testing)
   }
 }
