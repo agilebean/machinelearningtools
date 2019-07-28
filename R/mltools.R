@@ -67,17 +67,17 @@ get_model_metrics <- function(models_list,
   target.label <- if (!is.null(target_label)) target_label else models_list$target.label
   testing.set <- if (!is.null(testing_set)) testing_set else models_list$testing.set
 
+  # remove target.label + testing.set from models.list
+  if (!is.null(models_list$target.label) & !is.null(models_list$testing.set)) {
+    models_list %<>% purrr::list_modify("target.label" = NULL, "testing.set" = NULL)
+  }
+
   if (is.factor(testing.set[[target.label]])) {
     metric1 = "Accuracy"
     metric2 = "Kappa"
   } else if (is.numeric(testing.set[[target.label]])) {
     metric1 = "RMSE"
     metric2 = "Rsquared"
-  }
-
-  # remove target.label + testing.set from models.list
-  if (!is.null(models_list$target.label) & !is.null(models_list$testing.set)) {
-    models_list %<>% select(-target.label, -testing.set)
   }
 
   ### get metrics from original resamples' folds
@@ -111,7 +111,7 @@ get_model_metrics <- function(models_list,
 
     benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
       merge(metrics.testing, by = "model") %>%
-      mutate(delta = RMSE.testing - RMSE.mean) %>%
+      mutate(RMSE.delta = RMSE.testing - RMSE.mean) %>%
       arrange(RMSE.testing) %>%
       as_tibble
   }
@@ -237,7 +237,7 @@ get_testingset_performance <- function(target_label, models_list, testing_set) {
   } else if (is.numeric(observed)) {
 
     models_list %>%
-      select(-target.label, -testing.set) %>%
+      purrr::list_modify("target.label" = NULL, "testing.set" = NULL) %>%
       # caret::predict() can take a list of train objects as input
       predict(testing_set) %>%
       map_df(function(predicted) {
