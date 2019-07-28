@@ -77,7 +77,7 @@ get_model_metrics <- function(models_list,
 
   # remove target.label + testing.set from models.list
   if (!is.null(models_list$target.label) & !is.null(models_list$testing.set)) {
-    models_list %<>% head(-2)
+    models_list %<>% select(-target.label, -testing.set)
   }
 
   ### get metrics from original resamples' folds
@@ -236,10 +236,10 @@ get_testingset_performance <- function(target_label, models_list, testing_set) {
 
   } else if (is.numeric(observed)) {
 
-    models.list %>%
-      head(-2) %>%  # remove
+    models_list %>%
+      select(-target.label, -testing.set) %>%
       # caret::predict() can take a list of train objects as input
-      predict(testing.set) %>%
+      predict(testing_set) %>%
       map_df(function(predicted) {
         c(sqrt(mean( (observed - predicted)^2)),
           # R2 = regression SS / TSS > https://stackoverflow.com/a/40901487/7769076
