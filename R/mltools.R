@@ -218,13 +218,15 @@ get_models_list <- function(permutation_list, model_index = 1,
 ################################################################################
 get_testingset_performance <- function(target_label, models_list, testing_set) {
 
-  if (is.factor(testing_set[[target_label]])) {
+  observed <- testing_set[[target_label]]
+
+  if (is.factor(observed)) {
 
     models_list %>%
       map(
         # estimate target in the testing set
         ~predict(., newdata = testing_set) %>%
-          confusionMatrix(., testing_set[[target_label]]) %>%
+          confusionMatrix(., observed) %>%
           .$overall %>%
           # tricky: convert first to dataframe > can select column names
           map_df(1) %>% select(Accuracy, Kappa)
@@ -232,14 +234,14 @@ get_testingset_performance <- function(target_label, models_list, testing_set) {
       bind_rows(.id = "model") %>%
       setNames(c("model", "Acc.testing", "Kappa.testing"))
 
-  } else if (is.numeric(testing_set[[target_label]])) {
+  } else if (is.numeric(observed)) {
 
     models.list %>%
       head(-2) %>%  # remove
       # caret::predict() can take a list of train objects as input
       predict(testing.set) %>%
       map_df(function(predicted) {
-        c(sqrt(mean( (testing.set[[params$target.label]]-predicted)^2)),
+        c(sqrt(mean( (observed - predicted)^2)),
           # R2 = regression SS / TSS > https://stackoverflow.com/a/40901487/7769076
           sum((predicted - mean(predicted))^2) / sum((observed - mean(observed))^2))
       }) %>%
