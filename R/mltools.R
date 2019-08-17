@@ -293,13 +293,14 @@ visualize_variable_importance_rf <- function(rf_object) {
 # Send push message to RPushbullet app
 # input caret::train object
 ################################################################################
-push_message <- function(time_in_seconds = 60) {
+push_message <- function(time_in_seconds = 60, algorithm_list = "") {
 
   beepr::beep("facebook")
   RPushbullet::pbPost(type = "note",
                       title = paste("caret training finished after",
                                     round(time_in_seconds/60, digits = 2), "min"),
-                      body = paste("The training for models finished"),
+                      body = paste("The training finished for models:",
+                                   paste0(algorithm_list, collapse = ", ")),
                       devices = "ujyr8RSNXs4sjAsoeMFET6")
 }
 
