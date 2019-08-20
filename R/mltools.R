@@ -187,27 +187,182 @@ visualize_resamples_boxplots <- function(resamples_values, METRIC,
   return(resamples.boxplots)
 }
 
+#######################################################################
+# define output filename
+#######################################################################
+output_filename <- function(prefix, target_label, features_set_label,
+                            cv_repeats, impute_method) {
+  paste0(c(prefix,
+           target_label, features_set_label,
+           paste0(cv_repeats, "repeats"),
+           { if (!is.null(impute_method)) paste(impute_method) else "noimpute"},
+           "rds"),
+         collapse = ".") %T>% print
+}
 
-################################################################################
-# Get Models List
-# read all model.list files from permutation_list's target & features set
-################################################################################
-get_models_list <- function(permutation_list, model_index = 1,
-                            prefix = "data/models.list",
-                            impute_method = "medianImpute",
-                            cv_repeats = 100) {
+#######################################################################
+# benchmark algorithms with caret::train
+#######################################################################
+benchmark_algorithms <- function(
 
-  permutation <- permutation_list %>% map_df(model_index) %>% print
+  target_label = NULL, features_labels = NULL,
+  formula_input = NULL,
+  preprocess_configuration = c("center", "scale"),
+  impute_method = NULL,
+  data, algorithm_list, training_configuration,
+  seed = 17, split_ratio = 0.80,
+  cv_repeats, try_first = NULL,
+  models_list_name = NULL,
+  beep = TRUE,
+  push = TRUE) {
 
-  models.list.name <- paste(prefix,
-                            permutation$target_label,
-                            permutation$features_set,
-                            paste0(cv_repeats, "repeats"),
-                            impute_method,
-                            "rds",
-                            sep = ".") %T>% print
+  ########################################
+  ## 2.3 Select the target & features
+  ########################################
+  target_label %>% print
+  features_labels %>% print
 
-  models.list  <- readRDS(models.list.name)
+  ########################################
+  ## 2.4 Split the data
+  ########################################
+  # shuffle data - short version:
+  set.seed(seed)
+  dataset <- data %>% nrow %>% sample %>% data[.,]
+
+  # select variables
+  dataset %<>% select(target_label, features_labels) %>%
+    # for non-imputed data, #NA can differ for different targets
+    na.omit
+
+  # dataset subsetting for tibble: [[
+  set.seed(seed)
+  training.index <- createDataPartition(dataset[[target_label]], p = split_ratio, list = FALSE)
+  training.set <- dataset[training.index, ]
+  testing.set <- dataset[-training.index, ]
+
+  ########################################
+  # 3.2: Select the target & features
+  ########################################
+  target <- training.set[[target_label]]
+  features <- training.set %>% select(features_labels) %>% as.data.frame
+
+  ########################################
+  # 3.3: Train the models
+  ########################################
+  models.list <- list()
+
+  if (!is.null(formula_input)) {
+
+    print("FORMULA")
+
+    system.time(
+      models.list <- algorithm_list %>%
+
+        map(function(algorithm_label) {
+
+          if (algorithm_label == "rf") {
+
+            print("*** randomForest")
+
+            train(form = formula_input,
+                  method = "rf",
+                  data = if (is.null(try_first)) training.set else head(training.set, try_first),
+                  preProcess = preprocess_configuration,
+                  trControl = training_configuration,
+                  importance = TRUE
+            )
+
+            # logistic regression
+          } else if (algorithm_label == "glm" & class(target) == "factor") {
+
+            print("*** glm")
+
+            train(form = formula_input,
+                  method = "glm",
+                  data = if (is.null(try_first)) training.set else head(training.set, try_first),
+                  preProcess = preprocess_configuration,
+                  trControl = training_configuration
+            )
+
+          } else {
+
+            print(paste("***", algorithm_label))
+
+            train(form = formula_input,
+                  method = algorithm_label,
+                  data = if (is.null(try_first)) training.set else head(training.set, try_first),
+                  preProcess = preprocess_configuration,
+                  trControl = training_configuration
+            )
+          }
+        }) %>%
+        setNames(algorithm_list)
+    ) %T>% {
+      if (beep) beepr::beep()
+      if (push) push_message(.["elapsed"], algorithm.list)
+    }
+    # categorical variables -> x,y interface
+  } else {
+
+    print('******** X Y INTERFACE')
+
+    system.time(
+      models.list <- algorithm_list %>%
+
+        map(function(algorithm_label) {
+
+          if (algorithm_label == "rf") {
+
+            train(x = features,
+                  y = target,
+                  method = "rf",
+                  preProcess = preprocess_configuration,
+                  trControl = training_configuration,
+                  importance = TRUE
+            )
+
+            # logistic regression
+          } else if (algorithm_label == "glm" & class(target) == "factor") {
+
+            train(x = features,
+                  y = target,
+                  method = "glm",
+                  family = "binomial",
+                  preProcess = preprocess_configuration,
+                  trControl = training_configuration
+            )
+
+          } else {
+
+            train(x = features,
+                  y = target,
+                  method = algorithm_label,
+                  preProcess = preprocess_configuration,
+                  trControl = training_configuration
+            )
+          }
+        }) %>%
+        setNames(algorithm_list)
+    ) %T>% {
+      beepr::beep()
+      push_message(.["elapsed"], algorithm.list)
+    }
+  }
+
+  ########################################
+  # Postprocess the models
+  ########################################
+  # add target.label & testing.set to models.list
+  models.list$target.label <- target_label
+  models.list$testing.set <- testing.set
+  #
+  # save the models.list
+  if (is.null(try_first) & !is.null(models_list_name)) {
+
+    models.list %>% saveRDS(models_list_name)
+
+    print(paste("model training results saved in", models_list_name))
+  }
 
   return(models.list)
 }
