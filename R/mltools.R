@@ -205,11 +205,14 @@ output_filename <- function(prefix, target_label, features_set_label,
 #######################################################################
 benchmark_algorithms <- function(
 
-  target_label = NULL, features_labels = NULL,
+  target_label = NULL,
+  features_labels = NULL,
   formula_input = NULL,
   preprocess_configuration = c("center", "scale"),
+  training_configuration,
   impute_method = NULL,
-  data, algorithm_list, training_configuration,
+  data,
+  algorithm_list,
   seed = 17, split_ratio = 0.80,
   cv_repeats, try_first = NULL,
   models_list_name = NULL,
@@ -355,9 +358,9 @@ benchmark_algorithms <- function(
   # add target.label & testing.set to models.list
   models.list$target.label <- target_label
   models.list$testing.set <- testing.set
-  #
+
   # save the models.list
-  if (is.null(try_first) & !is.null(models_list_name)) {
+  if (!is.null(models_list_name)) {
 
     models.list %>% saveRDS(models_list_name)
 
