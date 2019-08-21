@@ -302,7 +302,7 @@ benchmark_algorithms <- function(
         setNames(algorithm_list)
     ) %T>% {
       if (beep) beepr::beep()
-      if (push) push_message(.["elapsed"], algorithm.list)
+      if (push) push_message(.["elapsed"], algorithm_list)
     }
     # categorical variables -> x,y interface
   } else {
@@ -348,7 +348,7 @@ benchmark_algorithms <- function(
         setNames(algorithm_list)
     ) %T>% {
       beepr::beep()
-      push_message(.["elapsed"], algorithm.list)
+      push_message(.["elapsed"], algorithm_list)
     }
   }
 
