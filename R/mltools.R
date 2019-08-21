@@ -24,6 +24,7 @@ set_formula <- function(target_label, features) {
 clusterOn <- function(no_cores = NULL) {
 
   require(doParallel) # loads parallel library for makeCluster
+
   cluster.new <- makeCluster(spec = if (!is.null(no_cores)) no_cores else { detectCores() - 1 },
                              type = "FORK",
                              outfile = "" # verbose
@@ -32,6 +33,19 @@ clusterOn <- function(no_cores = NULL) {
 
   return(cluster.new)
 
+}
+
+################################################################################
+# turn off cluster for parallel processing
+################################################################################
+clusterOff <- function(cluster_name) {
+
+  require(doParallel)
+
+  if (nrow(showConnections()) !=  0) {
+    registerDoSEQ()
+    stopCluster(cluster_name)
+  }
 }
 
 ################################################################################
