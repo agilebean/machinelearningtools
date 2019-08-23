@@ -304,7 +304,7 @@ benchmark_algorithms <- function(
 
             train(form = formula_input,
                   method = algorithm_label,
-                  nthreads = 1,
+                  nthread = 1,
                   preProcess = preprocess_configuration,
                   trControl = training_configuration
             )
@@ -360,7 +360,7 @@ benchmark_algorithms <- function(
             train(x = features,
                   y = target,
                   method = algorithm_label,
-                  nthreads = 1,
+                  nthread = 1,
                   preProcess = preprocess_configuration,
                   trControl = training_configuration
             )
