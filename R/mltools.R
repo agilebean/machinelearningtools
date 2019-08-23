@@ -227,6 +227,7 @@ benchmark_algorithms <- function(
   impute_method = NULL,
   data,
   algorithm_list,
+  glm_family = NULL,
   seed = 17, split_ratio = 0.80,
   cv_repeats, try_first = NULL,
   models_list_name = NULL,
@@ -277,9 +278,9 @@ benchmark_algorithms <- function(
 
         map(function(algorithm_label) {
 
-          if (algorithm_label == "rf") {
+          print(paste("***", algorithm_label))
 
-            print("*** randomForest")
+          if (algorithm_label == "rf") {
 
             train(form = formula_input,
                   method = "rf",
@@ -290,20 +291,24 @@ benchmark_algorithms <- function(
             )
 
             # logistic regression
-          } else if (algorithm_label == "glm" & class(target) == "factor") {
-
-            print("*** glm")
+          } else if (algorithm_label == "glm" | algorithm_label == "glmnet") {
 
             train(form = formula_input,
-                  method = "glm",
+                  method = algorithm_label,
+                  family = glm_family,
                   data = if (is.null(try_first)) training.set else head(training.set, try_first),
                   preProcess = preprocess_configuration,
                   trControl = training_configuration
             )
+          } else if (algorithm_label == "xgbTree" | algorithm_label == "xgbLinear") {
 
+            train(form = formula_input,
+                  method = algorithm_label,
+                  nthreads = 1,
+                  preProcess = preprocess_configuration,
+                  trControl = training_configuration
+            )
           } else {
-
-            print(paste("***", algorithm_label))
 
             train(form = formula_input,
                   method = algorithm_label,
@@ -328,6 +333,8 @@ benchmark_algorithms <- function(
 
         map(function(algorithm_label) {
 
+          print(paste("***", algorithm_label))
+
           if (algorithm_label == "rf") {
 
             train(x = features,
@@ -348,7 +355,15 @@ benchmark_algorithms <- function(
                   preProcess = preprocess_configuration,
                   trControl = training_configuration
             )
+          } else if (algorithm_label == "xgbTree" | algorithm_label == "xgbLinear") {
 
+            train(x = features,
+                  y = target,
+                  method = algorithm_label,
+                  nthreads = 1,
+                  preProcess = preprocess_configuration,
+                  trControl = training_configuration
+            )
           } else {
 
             train(x = features,
