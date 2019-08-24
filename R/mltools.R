@@ -355,6 +355,20 @@ benchmark_algorithms <- function(
                   preProcess = preprocess_configuration,
                   trControl = training_configuration
             )
+          } else if (algorithm_label == "glmnet" & class(target) == "factor") {
+
+            # with x,y interface, glmnet expects features as model.matrix that converts
+            # factors to one-hot-encodings (source: https://stackoverflow.com/a/48230658/7769076)
+            formula1 <- set_formula(target_label, features_labels)
+            features <- model.matrix(formula1, data = training.set)
+
+            train(x = features,
+                  y = target,
+                  method = algorithm_label,
+                  preProcess = preprocess_configuration,
+                  trControl = training_configuration
+            )
+
           } else if (algorithm_label == "xgbTree" | algorithm_label == "xgbLinear") {
 
             train(x = features,
