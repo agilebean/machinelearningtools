@@ -336,12 +336,8 @@ benchmark_algorithms <- function(
     if (contains_factors) {
 
       model.matrix.algorithms <- c("glmnet", "knn", "svmRadial", "svmLinear", "xgbTree", "xgbLinear")
-
-      if (algorithm_label %in% model.matrix.algorithms) {
-
-        formula1 <- set_formula(target_label, features_labels)
-        features <- model.matrix(formula1, data = training.set)
-      }
+      formula1 <- set_formula(target_label, features_labels)
+      features.onehotencoded <- model.matrix(formula1, data = training.set)
     }
 
     system.time(
@@ -350,6 +346,12 @@ benchmark_algorithms <- function(
         map(function(algorithm_label) {
 
           print(paste("***", algorithm_label))
+
+          if (contains_factors & (algorithm_label %in% model.matrix.algorithms)) {
+
+            features <- features.onehotencoded
+            print("*** factors one hot encoded")
+          }
 
           if (algorithm_label == "rf") {
 
