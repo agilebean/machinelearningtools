@@ -21,13 +21,13 @@ set_formula <- function(target_label, features) {
 ################################################################################
 # turn on cluster for parallel processing
 ################################################################################
-clusterOn <- function(no_cores = NULL) {
+clusterOn <- function(no_cores = NULL, outfile_name = "") {
 
   require(doParallel) # loads parallel library for makeCluster
 
   cluster.new <- makeCluster(spec = if (!is.null(no_cores)) no_cores else { detectCores() - 1 },
                              type = "FORK",
-                             outfile = "" # verbose
+                             outfile = outfile_name # verbose
   )
   registerDoParallel(cluster.new)
 
