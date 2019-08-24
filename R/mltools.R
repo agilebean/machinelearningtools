@@ -337,7 +337,9 @@ benchmark_algorithms <- function(
 
       model.matrix.algorithms <- c("glmnet", "knn", "svmRadial", "svmLinear", "xgbTree", "xgbLinear")
       formula1 <- set_formula(target_label, features_labels)
-      features.onehotencoded <- model.matrix(formula1, data = training.set)
+      features <- model.matrix(formula1, data = training.set)
+
+      print("*** Dataset contains factors - performed one-hot-encoding")
     }
 
     system.time(
@@ -346,12 +348,6 @@ benchmark_algorithms <- function(
         map(function(algorithm_label) {
 
           print(paste("***", algorithm_label))
-
-          if (contains_factors & (algorithm_label %in% model.matrix.algorithms)) {
-
-            features <- features.onehotencoded
-            print("*** factors one hot encoded")
-          }
 
           if (algorithm_label == "rf") {
 
@@ -417,6 +413,8 @@ benchmark_algorithms <- function(
 
   return(models.list)
 }
+
+
 
 ################################################################################
 # Get Testing Set Performance
