@@ -328,6 +328,22 @@ benchmark_algorithms <- function(
 
     print('******** X Y INTERFACE')
 
+    # check if dataset contains categorical features
+    contains_factors <- dataset %>% select_if(is.factor) %>% names %>% {length(.) > 0}
+
+    # transform categorical features by one-hot-encoding for models except rf, ranger, gbm
+    # e.g. glmnet expects features as model.matrix (source: https://stackoverflow.com/a/48230658/7769076)
+    if (contains_factors) {
+
+      model.matrix.algorithms <- c("glmnet", "knn", "svmRadial", "svmLinear", "xgbTree", "xgbLinear")
+
+      if (algorithm_label %in% model.matrix.algorithms) {
+
+        formula1 <- set_formula(target_label, features_labels)
+        features <- model.matrix(formula1, data = training.set)
+      }
+    }
+
     system.time(
       models.list <- algorithm_list %>%
 
@@ -351,20 +367,7 @@ benchmark_algorithms <- function(
             train(x = features,
                   y = target,
                   method = "glm",
-                  family = "binomial",
-                  preProcess = preprocess_configuration,
-                  trControl = training_configuration
-            )
-          } else if (algorithm_label == "glmnet" & class(target) == "factor") {
-
-            # with x,y interface, glmnet expects features as model.matrix that converts
-            # factors to one-hot-encodings (source: https://stackoverflow.com/a/48230658/7769076)
-            formula1 <- set_formula(target_label, features_labels)
-            features <- model.matrix(formula1, data = training.set)
-
-            train(x = features,
-                  y = target,
-                  method = algorithm_label,
+                  family = glm_family,
                   preProcess = preprocess_configuration,
                   trControl = training_configuration
             )
