@@ -414,8 +414,6 @@ benchmark_algorithms <- function(
   return(models.list)
 }
 
-
-
 ################################################################################
 # Get Testing Set Performance
 # calculate RMSE for all model objects in model_list
