@@ -336,8 +336,7 @@ benchmark_algorithms <- function(
             )
           }
           ############ END model training & STOP cluster
-          # stop cluster if training throws error (https://stackoverflow.com/a/41679580/7769076)
-          on.exit(stopCluster(cluster.new))
+          cluster.Off()
 
           return(model)
         }) %>%
@@ -420,8 +419,6 @@ benchmark_algorithms <- function(
           }
           ############ END model training & STOP cluster
           clusterOff(cluster.new)
-          # stop cluster if training throws error (https://stackoverflow.com/a/41679580/7769076)
-          on.exit(stopCluster(cluster.new))
 
           return(model)
         }) %>%
@@ -431,6 +428,9 @@ benchmark_algorithms <- function(
       push_message(.["elapsed"], algorithm_list)
     }
   }
+
+  # stop cluster if training throws error (https://stackoverflow.com/a/41679580/7769076)
+  on.exit(if (exists("cluster.new")) { stopCluster(cluster.new) } )
 
   ########################################
   # Postprocess the models
