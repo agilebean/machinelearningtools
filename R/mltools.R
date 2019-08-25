@@ -336,7 +336,8 @@ benchmark_algorithms <- function(
             )
           }
           ############ END model training & STOP cluster
-          clusterOff(cluster.new)
+          # stop cluster if training throws error (https://stackoverflow.com/a/41679580/7769076)
+          on.exit(stopCluster(cluster.new))
 
           return(model)
         }) %>%
@@ -419,6 +420,8 @@ benchmark_algorithms <- function(
           }
           ############ END model training & STOP cluster
           clusterOff(cluster.new)
+          # stop cluster if training throws error (https://stackoverflow.com/a/41679580/7769076)
+          on.exit(stopCluster(cluster.new))
 
           return(model)
         }) %>%
