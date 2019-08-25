@@ -311,6 +311,7 @@ benchmark_algorithms <- function(
               form = formula_input,
               method = algorithm_label,
               nthread = 1,
+              data = if (is.null(try_first)) training.set else head(training.set, try_first),
               preProcess = preprocess_configuration,
               trControl = training_configuration
             )
