@@ -280,50 +280,54 @@ benchmark_algorithms <- function(
 
           print(paste("***", algorithm_label))
 
-          ############ STOP cluster if exists
-          if (exists("cluster.new")) { clusterOff(cluster.new) }
-
           ############ START new cluster for model training
           cluster.new <- clusterOn()
 
           if (algorithm_label == "rf") {
 
-            train(form = formula_input,
-                  method = "rf",
-                  data = if (is.null(try_first)) training.set else head(training.set, try_first),
-                  preProcess = preprocess_configuration,
-                  trControl = training_configuration,
-                  importance = TRUE
+            model <- train(
+              form = formula_input,
+              method = "rf",
+              data = if (is.null(try_first)) training.set else head(training.set, try_first),
+              preProcess = preprocess_configuration,
+              trControl = training_configuration,
+              importance = TRUE
             )
 
             # logistic regression
           } else if (algorithm_label == "glm" | algorithm_label == "glmnet") {
 
-            train(form = formula_input,
-                  method = algorithm_label,
-                  family = glm_family,
-                  data = if (is.null(try_first)) training.set else head(training.set, try_first),
-                  preProcess = preprocess_configuration,
-                  trControl = training_configuration
+            model <- train(
+              form = formula_input,
+              method = algorithm_label,
+              family = glm_family,
+              data = if (is.null(try_first)) training.set else head(training.set, try_first),
+              preProcess = preprocess_configuration,
+              trControl = training_configuration
             )
           } else if (algorithm_label == "xgbTree" | algorithm_label == "xgbLinear") {
 
-            train(form = formula_input,
-                  method = algorithm_label,
-                  nthread = 1,
-                  preProcess = preprocess_configuration,
-                  trControl = training_configuration
+            model <- train(
+              form = formula_input,
+              method = algorithm_label,
+              nthread = 1,
+              preProcess = preprocess_configuration,
+              trControl = training_configuration
             )
           } else {
 
-            train(form = formula_input,
-                  method = algorithm_label,
-                  data = if (is.null(try_first)) training.set else head(training.set, try_first),
-                  preProcess = preprocess_configuration,
-                  trControl = training_configuration
+            model <- train(
+              form = formula_input,
+              method = algorithm_label,
+              data = if (is.null(try_first)) training.set else head(training.set, try_first),
+              preProcess = preprocess_configuration,
+              trControl = training_configuration
             )
           }
-          ############ END model training
+          ############ END model training & STOP cluster
+          clusterOff(cluster.new)
+
+          return(model)
         }) %>%
         setNames(algorithm_list)
     ) %T>% {
@@ -356,52 +360,56 @@ benchmark_algorithms <- function(
 
           print(paste("***", algorithm_label))
 
-          ############ STOP cluster if exists
-          if (exists("cluster.new")) { clusterOff(cluster.new) }
-
           ############ START new cluster for model training
           cluster.new <- clusterOn()
 
           if (algorithm_label == "rf") {
 
-            train(x = features,
-                  y = target,
-                  method = "rf",
-                  preProcess = preprocess_configuration,
-                  trControl = training_configuration,
-                  importance = TRUE
+            model <- train(
+              x = features,
+              y = target,
+              method = "rf",
+              preProcess = preprocess_configuration,
+              trControl = training_configuration,
+              importance = TRUE
             )
 
             # logistic regression
           } else if (algorithm_label == "glm" & class(target) == "factor") {
 
-            train(x = features,
-                  y = target,
-                  method = "glm",
-                  family = glm_family,
-                  preProcess = preprocess_configuration,
-                  trControl = training_configuration
+            model <- train(
+              x = features,
+              y = target,
+              method = "glm",
+              family = glm_family,
+              preProcess = preprocess_configuration,
+              trControl = training_configuration
             )
 
           } else if (algorithm_label == "xgbTree" | algorithm_label == "xgbLinear") {
 
-            train(x = features,
-                  y = target,
-                  method = algorithm_label,
-                  nthread = 1,
-                  preProcess = preprocess_configuration,
-                  trControl = training_configuration
+            model <- train(
+              x = features,
+              y = target,
+              method = algorithm_label,
+              nthread = 1,
+              preProcess = preprocess_configuration,
+              trControl = training_configuration
             )
           } else {
 
-            train(x = features,
-                  y = target,
-                  method = algorithm_label,
-                  preProcess = preprocess_configuration,
-                  trControl = training_configuration
+            model <- train(
+              x = features,
+              y = target,
+              method = algorithm_label,
+              preProcess = preprocess_configuration,
+              trControl = training_configuration
             )
           }
-          ############ END model training
+          ############ END model training & STOP cluster
+          clusterOff(cluster.new)
+
+          return(model)
         }) %>%
         setNames(algorithm_list)
     ) %T>% {
