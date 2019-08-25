@@ -280,6 +280,9 @@ benchmark_algorithms <- function(
 
           print(paste("***", algorithm_label))
 
+          ############ START
+          cluster.new <- clusterOn()
+
           if (algorithm_label == "rf") {
 
             train(form = formula_input,
@@ -317,6 +320,9 @@ benchmark_algorithms <- function(
                   trControl = training_configuration
             )
           }
+          ############ END
+          clusterOff(cluster.new)
+
         }) %>%
         setNames(algorithm_list)
     ) %T>% {
@@ -348,6 +354,9 @@ benchmark_algorithms <- function(
         map(function(algorithm_label) {
 
           print(paste("***", algorithm_label))
+
+          ############ START
+          cluster.new <- clusterOn()
 
           if (algorithm_label == "rf") {
 
@@ -388,6 +397,9 @@ benchmark_algorithms <- function(
                   trControl = training_configuration
             )
           }
+          ############ END
+          clusterOff(cluster.new)
+
         }) %>%
         setNames(algorithm_list)
     ) %T>% {
