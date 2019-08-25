@@ -49,6 +49,16 @@ clusterOff <- function(cluster_name) {
 }
 
 ################################################################################
+# turn off cluster without cluster name
+# Source: https://stackoverflow.com/a/25110203/7769076
+################################################################################
+unregister <- function() {
+  require(foreach)
+  env <- foreach:::.foreachGlobals
+  rm(list=ls(name=env), pos=env)
+}
+
+################################################################################
 # get_model_metrics:
 #   calculate training set performance:
 #   mean & sd for all model objects in model_list
