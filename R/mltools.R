@@ -271,7 +271,7 @@ benchmark_algorithms <- function(
 
   if (!is.null(formula_input)) {
 
-    print("FORMULA")
+    print("******** FORMULA interface")
 
     system.time(
       models.list <- algorithm_list %>%
@@ -280,7 +280,10 @@ benchmark_algorithms <- function(
 
           print(paste("***", algorithm_label))
 
-          ############ START
+          ############ STOP cluster if exists
+          if (exists("cluster.new")) { clusterOff(cluster.new) }
+
+          ############ START new cluster for model training
           cluster.new <- clusterOn()
 
           if (algorithm_label == "rf") {
@@ -320,9 +323,7 @@ benchmark_algorithms <- function(
                   trControl = training_configuration
             )
           }
-          ############ END
-          clusterOff(cluster.new)
-
+          ############ END model training
         }) %>%
         setNames(algorithm_list)
     ) %T>% {
@@ -332,7 +333,7 @@ benchmark_algorithms <- function(
     # categorical variables -> x,y interface
   } else {
 
-    print('******** X Y INTERFACE')
+    print("******** X Y INTERFACE")
 
     # check if dataset contains categorical features
     contains_factors <- dataset %>% select_if(is.factor) %>% names %>% {length(.) > 0}
@@ -355,7 +356,10 @@ benchmark_algorithms <- function(
 
           print(paste("***", algorithm_label))
 
-          ############ START
+          ############ STOP cluster if exists
+          if (exists("cluster.new")) { clusterOff(cluster.new) }
+
+          ############ START new cluster for model training
           cluster.new <- clusterOn()
 
           if (algorithm_label == "rf") {
@@ -397,9 +401,7 @@ benchmark_algorithms <- function(
                   trControl = training_configuration
             )
           }
-          ############ END
-          clusterOff(cluster.new)
-
+          ############ END model training
         }) %>%
         setNames(algorithm_list)
     ) %T>% {
