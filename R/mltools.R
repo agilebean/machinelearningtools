@@ -359,6 +359,7 @@ benchmark_algorithms <- function(
 
       formula1 <- set_formula(target_label, features_labels)
       features.onehotencoded <- model.matrix(formula1, data = training.set)
+      testing.set <- model.matrix(formula1, data = testing.set)
     }
 
     # models that can handle factors instead of one-hot-encoding
@@ -461,20 +462,44 @@ benchmark_algorithms <- function(
 # Get Testing Set Performance
 # calculate RMSE for all model objects in model_list
 ################################################################################
-get_testingset_performance <- function(target_label, models_list, testing_set) {
+get_testingset_performance <- function(
+  models_list, target_label = NULL, testing_set = NULL) {
 
-  observed <- testing_set[[target_label]]
+  # remove target.label + testing.set from models.list
+  if (!is.null(models_list$target.label) & !is.null(models_list$testing.set)) {
+
+    target.label <- models_list$target.label
+    testing.set <- models_list$testing.set
+    models_list %<>% purrr::list_modify("target.label" = NULL, "testing.set" = NULL)
+
+  } else if (!is.null(target_label) & !is.null(testing_set)) {
+
+    target.label <- target_label
+    testing.set <- testing_set
+  }
+
+  features.labels <- testing.set %>% select(-target.label) %>% names
+
+  observed <- testing.set[[target.label]]
 
   if (is.factor(observed)) {
 
     models_list %>%
       map(
-        # estimate target in the testing set
-        ~predict(., newdata = testing_set) %>%
-          confusionMatrix(., observed) %>%
-          .$overall %>%
-          # tricky: convert first to dataframe > can select column names
-          map_df(1) %>% select(Accuracy, Kappa)
+        function(model_object) {
+          # print(model_object$method)
+          if (contains_factors & !handles_factors(model_object$method)) {
+            formula1 <- set_formula(target.label, features.labels)
+            testing.set <- model.matrix(formula1, data = testing.set)
+          }
+          model_object %>%
+            # estimate target in the testing set
+            predict(., newdata = testing.set) %>%
+            confusionMatrix(., observed) %>%
+            .$overall %>%
+            # tricky: convert first to dataframe > can select column names
+            map_df(1) %>% select(Accuracy, Kappa)
+        }
       ) %>%
       bind_rows(.id = "model") %>%
       setNames(c("model", "Acc.testing", "Kappa.testing"))
@@ -482,9 +507,8 @@ get_testingset_performance <- function(target_label, models_list, testing_set) {
   } else if (is.numeric(observed)) {
 
     models_list %>%
-      purrr::list_modify("target.label" = NULL, "testing.set" = NULL) %>%
       # caret::predict() can take a list of train objects as input
-      predict(testing_set) %>%
+      predict(testing.set) %>%
       map_df(function(predicted) {
         c(sqrt(mean( (observed - predicted)^2)),
           # R2 = regression SS / TSS > https://stackoverflow.com/a/40901487/7769076
