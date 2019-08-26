@@ -357,12 +357,12 @@ benchmark_algorithms <- function(
     # e.g. glmnet expects features as model.matrix (source: https://stackoverflow.com/a/48230658/7769076)
     if (contains_factors) {
 
-      model.matrix.algorithms <- c("glmnet", "knn", "svmRadial", "svmLinear", "xgbTree", "xgbLinear")
       formula1 <- set_formula(target_label, features_labels)
-      features <- model.matrix(formula1, data = training.set)
-
-      print("*** Dataset contains factors - performed one-hot-encoding")
+      features.onehotencoded <- model.matrix(formula1, data = training.set)
     }
+
+    # models that can handle factors instead of one-hot-encoding
+    algorithms.handling.factors <- c("rf", "ranger", "gbm")
 
     system.time(
       models.list <- algorithm_list %>%
@@ -371,6 +371,13 @@ benchmark_algorithms <- function(
 
           print(paste("***", algorithm_label))
 
+          # transform factors by one-hot-encoding for all models except rf, ranger, gbm
+          if (contains_factors & (!algorithm_label %in% algorithms.handling.factors)) {
+
+            features <- features.onehotencoded
+            print(paste("*** performed one-hot-encoding for model", algorithm_label))
+
+          }
           ############ START new cluster for model training
           cluster.new <- clusterOn()
 
