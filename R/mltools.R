@@ -124,7 +124,7 @@ get_model_metrics <- function(models_list,
 
   metrics.testing <- get_testingset_performance(
     # tricky: target.label & testing.set NOT target_label & testing_set
-    target.label, models_list, testing.set)
+    models_list, target.label, testing.set)
 
   if (is.factor(testing.set[[target.label]])) {
 
