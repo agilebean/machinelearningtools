@@ -362,7 +362,7 @@ benchmark_algorithms <- function(
     }
 
     # models that can handle factors instead of one-hot-encoding
-    algorithms.handling.factors <- c("rf", "ranger", "gbm")
+    algorithms.handling.factors <- c("rf", "ranger", "gbm", "nnet")
 
     system.time(
       models.list <- algorithm_list %>%
