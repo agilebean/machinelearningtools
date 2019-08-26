@@ -459,6 +459,27 @@ benchmark_algorithms <- function(
 }
 
 ################################################################################
+# Dataset contains Factors
+# check if dataset contains categorical features
+################################################################################
+contains_factors <- function(data) {
+  data %>%
+    select_if(is.factor) %>%
+    names %>%
+    {length(.) > 0}
+}
+
+################################################################################
+# Algorithm handles Factors
+# Check if algorithm handles categorical features without one-hot-encoding
+################################################################################
+handles_factors <- function(algorithm_label) {
+
+  # models that can handle factors instead of one-hot-encoding
+  algorithms.handling.factors <- c("rf", "ranger", "gbm", "nnet")
+  algorithm_label %in% algorithms.handling.factors
+}
+################################################################################
 # Get Testing Set Performance
 # calculate RMSE for all model objects in model_list
 ################################################################################
@@ -488,7 +509,7 @@ get_testingset_performance <- function(
       map(
         function(model_object) {
           # print(model_object$method)
-          if (contains_factors & !handles_factors(model_object$method)) {
+          if (contains_factors(testing.set) & !handles_factors(model_object$method)) {
             formula1 <- set_formula(target.label, features.labels)
             testing.set <- model.matrix(formula1, data = testing.set)
           }
