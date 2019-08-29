@@ -432,8 +432,8 @@ benchmark_algorithms <- function(
         }) %>%
         setNames(algorithm_list)
     ) %T>% {
-      beepr::beep()
-      push_message(.["elapsed"], algorithm_list)
+      if (beep) beepr::beep()
+      if (push) push_message(.["elapsed"], algorithm_list)
     }
   }
 
