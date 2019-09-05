@@ -48,15 +48,6 @@ clusterOff <- function(cluster_name) {
   }
 }
 
-################################################################################
-# turn off cluster without cluster name
-# Source: https://stackoverflow.com/a/25110203/7769076
-################################################################################
-unregister <- function() {
-  require(foreach)
-  env <- foreach:::.foreachGlobals
-  rm(list=ls(name=env), pos=env)
-}
 
 ################################################################################
 # get_model_metrics:
@@ -315,16 +306,16 @@ benchmark_algorithms <- function(
               preProcess = preprocess_configuration,
               trControl = training_configuration
             )
-          } else if (algorithm_label == "xgbTree" | algorithm_label == "xgbLinear") {
-
-            model <- train(
-              form = formula_input,
-              method = algorithm_label,
-              nthread = 1,
-              data = if (is.null(try_first)) training.set else head(training.set, try_first),
-              preProcess = preprocess_configuration,
-              trControl = training_configuration
-            )
+          # } else if (algorithm_label == "xgbTree" | algorithm_label == "xgbLinear") {
+          #
+          #   model <- train(
+          #     form = formula_input,
+          #     method = algorithm_label,
+          #     nthread = 1,
+          #     data = if (is.null(try_first)) training.set else head(training.set, try_first),
+          #     preProcess = preprocess_configuration,
+          #     trControl = training_configuration
+          #   )
           } else {
 
             model <- train(
@@ -479,6 +470,19 @@ handles_factors <- function(algorithm_label) {
   algorithms.handling.factors <- c("rf", "ranger", "gbm", "nnet")
   algorithm_label %in% algorithms.handling.factors
 }
+
+################################################################################
+# Get feature set
+# From vector of feature labels, generate feature set
+################################################################################
+
+get_featureset <- function(data, featureset_labels) {
+
+  data %>%
+    select(!!!rlang::syms(featureset_labels))
+
+}
+
 ################################################################################
 # Get Testing Set Performance
 # calculate RMSE for all model objects in model_list
