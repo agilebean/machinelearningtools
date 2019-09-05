@@ -495,7 +495,7 @@ get_featureset <- function(data,
       if (!is.null(select_starts)) {
 
         cbind(.,
-              map_df(select_starts, function(start_keyword) {
+              map_dfc(select_starts, function(start_keyword) {
                 data %<>%
                   select(starts_with(start_keyword))
               })
