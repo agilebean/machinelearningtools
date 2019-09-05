@@ -475,12 +475,35 @@ handles_factors <- function(algorithm_label) {
 # Get feature set
 # From vector of feature labels, generate feature set
 ################################################################################
-
-get_featureset <- function(data, featureset_labels) {
+get_featureset <- function(data,
+                           target_label = NULL,
+                           featureset_labels = NULL,
+                           select_starts = NULL) {
 
   data %>%
-    select(!!!rlang::syms(featureset_labels))
+    dplyr::select(!!rlang::sym(target_label)) %>%
 
+    {
+      if (!is.null(featureset_labels)) {
+        cbind(.,
+              data %>%
+                dplyr::select(!!!rlang::syms(featureset_labels))
+        )
+      } else { . }
+    } %>%
+    {
+      if (!is.null(select_starts)) {
+
+        cbind(.,
+              map_df(select_starts, function(start_keyword) {
+                data %<>%
+                  select(starts_with(start_keyword))
+              })
+        )
+
+      } else { . }
+    } %>%
+    as_tibble()
 }
 
 ################################################################################
