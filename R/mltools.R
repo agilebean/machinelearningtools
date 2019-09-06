@@ -80,17 +80,29 @@ get_model_metrics <- function(models_list,
 
   # retrieve target.label & testing.set from models_list
   target.label <- if (!is.null(target_label)) target_label else models_list$target.label
-  testing.set <- if (!is.null(testing_set)) testing_set else models_list$testing.set
-
-  # remove target.label + testing.set from models.list
-  if (!is.null(models_list$target.label) & !is.null(models_list$testing.set)) {
-    models_list %<>% purrr::list_modify("target.label" = NULL, "testing.set" = NULL)
+  # set testing set to argument > from models_list > NULL if empty
+  if (!is.null(testing_set)) {
+    testing.set <- testing_set
+  } else if (nrow(models_list$testing.set) != 0) {
+    testings.set <- models_list$testing.set
+  } else {
+    testing.set <- NULL
   }
 
-  if (is.factor(testing.set[[target.label]])) {
+  # remove target.label + testing.set from models.list
+  if (!is.null(models_list$target.label)) {
+    models_list %<>% purrr::list_modify("target.label" = NULL)
+  }
+  if (!is.null(models_list$testing.set)) {
+    models_list %<>% purrr::list_modify("testing.set" = NULL)
+  }
+
+  target <- models_list[[1]]$trainingData$.outcome
+
+  if (is.factor(target)) {
     metric1 = "Accuracy"
     metric2 = "Kappa"
-  } else if (is.numeric(testing.set[[target.label]])) {
+  } else if (is.numeric(target)) {
     metric1 = "RMSE"
     metric2 = "Rsquared"
   }
@@ -113,22 +125,38 @@ get_model_metrics <- function(models_list,
   metric2.resamples.boxplots <- visualize_resamples_boxplots(
     resamples.values, metric2, palette)
 
-  metrics.testing <- get_testingset_performance(
-    # tricky: target.label & testing.set NOT target_label & testing_set
-    models_list, target.label, testing.set)
+  if (!is.null(testing.set)) {
+    metrics.testing <- get_testingset_performance(
+      models_list, target.label, testing.set
+    )
+  } else {
+    metrics.testing <- NULL
+  }
 
-  if (is.factor(testing.set[[target.label]])) {
+  if (is.factor(target)) {
 
     benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
-      merge(metrics.testing, by = "model")
-
-  } else if (is.numeric(testing.set[[target.label]])) {
+    {
+      if (!is.null(testing.set)) {
+        merge(., metrics.testing, by = "model")
+      } else {
+        as_tibble(.)
+      }
+      # ifelse(!is.null(testing.set), merge(., metrics.testing, by = "model"), as_tibble(.) )
+    }
+  } else if (is.numeric(target)) {
 
     benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
-      merge(metrics.testing, by = "model") %>%
-      mutate(RMSE.delta = RMSE.testing - RMSE.mean) %>%
-      arrange(RMSE.testing) %>%
-      as_tibble
+    {
+      if (!is.null(testing.set)) {
+        merge(metrics.testing, by = "model") %>%
+          mutate(RMSE.delta = RMSE.testing - RMSE.mean) %>%
+          arrange(RMSE.testing) %>%
+          as_tibble
+      } else {
+        as_tibble
+      }
+    }
   }
 
   return(list(metric1.training = metric1.training,
@@ -139,6 +167,7 @@ get_model_metrics <- function(models_list,
               benchmark.all = benchmark.all
   ))
 }
+
 
 ################################################################################
 # get_metrics_from_resamples
@@ -257,7 +286,8 @@ benchmark_algorithms <- function(
   set.seed(seed)
   training.index <- createDataPartition(dataset[[target_label]], p = split_ratio, list = FALSE)
   training.set <- dataset[training.index, ]
-  testing.set <- dataset[-training.index, ]
+  # if split_ratio == 100%, then create no testing.set
+  testing.set <- ifelse (split_ratio == 1.0, NULL, dataset[-training.index, ])
 
   ########################################
   # 3.2: Select the target & features
@@ -306,16 +336,6 @@ benchmark_algorithms <- function(
               preProcess = preprocess_configuration,
               trControl = training_configuration
             )
-          # } else if (algorithm_label == "xgbTree" | algorithm_label == "xgbLinear") {
-          #
-          #   model <- train(
-          #     form = formula_input,
-          #     method = algorithm_label,
-          #     nthread = 1,
-          #     data = if (is.null(try_first)) training.set else head(training.set, try_first),
-          #     preProcess = preprocess_configuration,
-          #     trControl = training_configuration
-          #   )
           } else {
 
             model <- train(
