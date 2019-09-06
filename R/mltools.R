@@ -193,6 +193,21 @@ get_metric_from_resamples <- function(resamples_values, metric) {
 }
 
 ################################################################################
+# get_metric_resamples
+# Helper function for tidyposterior
+################################################################################
+get_metric_resamples <- function(resamples_data, metric) {
+
+  resamples_data %>%
+    .$values %>%
+    as_tibble() %>%
+    select(Resample, contains(metric)) %>%
+    # tricky: tilde (~) NOT dash (-)
+    setNames(gsub(paste0("~", metric), "", names(.))) %>%
+    rename(id = Resample)
+}
+
+################################################################################
 # visualize_resamples_boxplots()
 # Helper function for get_model_metrics
 ################################################################################
