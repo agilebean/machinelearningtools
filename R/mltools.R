@@ -43,8 +43,12 @@ clusterOff <- function(cluster_name) {
   require(doParallel)
 
   if (nrow(showConnections()) !=  0) {
-    registerDoSEQ()
+
     stopCluster(cluster_name)
+    # tricky: insert serial backend after stopping cluster, not before
+    ## https://github.com/tobigithub/R-parallel/wiki/R-parallel-Errors
+    registerDoSEQ()
+
   }
 }
 
