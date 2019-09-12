@@ -145,23 +145,25 @@ get_model_metrics <- function(models_list,
         # tricky: within conditional {} block, must reference to LHS (.)
         merge(., metrics.testing, by = "model")
       } else {
-        as_tibble(.)
+        .
       }
-    }
-  } else if (is.numeric(metrics.testing)) {
+    } %>%
+      as_tibble(.)
+
+  } else if (is.numeric(target)) {
 
     benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
     {
-      if (!is.null(testing.set)) {
+      if (!is.null(metrics.testing)) {
         # tricky: within conditional {} block, must reference to LHS (.)
         merge(., metrics.testing, by = "model") %>%
           mutate(RMSE.delta = RMSE.testing - RMSE.mean) %>%
-          arrange(RMSE.testing) %>%
-          as_tibble
+          arrange(RMSE.testing)
       } else {
-        as_tibble
+        .
       }
-    }
+    } %>%
+      as_tibble(.)
   }
 
   return(list(metric1.training = metric1.training,
