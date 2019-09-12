@@ -302,7 +302,7 @@ benchmark_algorithms <- function(
   training.index <- createDataPartition(dataset[[target_label]], p = split_ratio, list = FALSE)
   training.set <- dataset[training.index, ]
   # if split_ratio == 100%, then create no testing.set
-  testing.set <- ifelse (split_ratio == 1.0, NULL, dataset[-training.index, ])
+  testing.set <- if (split_ratio != 1.0) dataset[-training.index, ] else NULL
 
   ########################################
   # 3.2: Select the target & features
@@ -458,8 +458,8 @@ benchmark_algorithms <- function(
         }) %>%
         setNames(algorithm_list)
     ) %T>% {
-      beepr::beep()
-      push_message(.["elapsed"], algorithm_list)
+      if (beep) beepr::beep()
+      if (push) push_message(.["elapsed"], algorithm_list)
     }
   }
 
