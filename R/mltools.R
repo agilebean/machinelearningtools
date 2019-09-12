@@ -84,7 +84,7 @@ get_model_metrics <- function(models_list,
   if (!is.null(testing_set)) {
     testing.set <- testing_set
   } else if (nrow(models_list$testing.set) != 0) {
-    testings.set <- models_list$testing.set
+    testing.set <- models_list$testing.set
   } else {
     testing.set <- NULL
   }
