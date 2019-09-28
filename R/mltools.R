@@ -295,9 +295,6 @@ benchmark_algorithms <- function(
   ########################################
   ## 2.4 Split the data
   ########################################
-  # shuffle data - short version:
-  set.seed(seed)
-  dataset <- data %>% nrow %>% sample %>% data[.,]
 
   # select variables
   dataset %<>% select(target_label, features_labels) %>%
