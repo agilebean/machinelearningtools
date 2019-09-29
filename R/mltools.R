@@ -326,7 +326,7 @@ benchmark_algorithms <- function(
             model <- train(
               form = formula1,
               method = "rf",
-              data = if (is.null(try_first)) training.set else head(training.set, try_first),
+              data = if (is.null(try_first)) training_set else head(training_set, try_first),
               preProcess = preprocess_configuration,
               trControl = training_configuration,
               importance = TRUE
@@ -339,7 +339,7 @@ benchmark_algorithms <- function(
               form = formula1,
               method = algorithm_label,
               family = glm_family,
-              data = if (is.null(try_first)) training.set else head(training.set, try_first),
+              data = if (is.null(try_first)) training_set else head(training_set, try_first),
               preProcess = preprocess_configuration,
               trControl = training_configuration
             )
@@ -348,7 +348,7 @@ benchmark_algorithms <- function(
             model <- train(
               form = formula1,
               method = algorithm_label,
-              data = if (is.null(try_first)) training.set else head(training.set, try_first),
+              data = if (is.null(try_first)) training_set else head(training_set, try_first),
               preProcess = preprocess_configuration,
               trControl = training_configuration
             )
@@ -369,7 +369,7 @@ benchmark_algorithms <- function(
     print("******** X Y INTERFACE")
 
     # check if dataset contains categorical features
-    contains_factors <- training.set %>%
+    contains_factors <- training_set %>%
       select_if(is.factor) %>% names %>% {length(.) > 0}
 
     # transform categorical features by one-hot-encoding for models except rf, ranger, gbm
@@ -377,7 +377,7 @@ benchmark_algorithms <- function(
     if (contains_factors) {
 
       formula1 <- set_formula(target_label, features_labels)
-      features.onehotencoded <- model.matrix(formula1, data = training.set)
+      features.onehotencoded <- model.matrix(formula1, data = training_set)
       testing.set <- model.matrix(formula1, data = testing.set)
     }
 
