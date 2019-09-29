@@ -271,13 +271,14 @@ output_filename <- function(prefix, target_label, features_set_label,
 #######################################################################
 benchmark_algorithms <- function(
 
-  target_label = NULL,
-  features_labels = NULL,
-  formula_input = NULL,
+  target_label,
+  features_labels,
+  training_set,
+  testing_set,
+  formula_input = FALSE,
   preprocess_configuration = c("center", "scale"),
   training_configuration,
   impute_method = NULL,
-  data,
   algorithm_list,
   glm_family = NULL,
   seed = 17, split_ratio = 0.80,
@@ -293,35 +294,22 @@ benchmark_algorithms <- function(
   features_labels %>% print
 
   ########################################
-  ## 2.4 Split the data
-  ########################################
-
-  # select variables
-  dataset %<>% select(target_label, features_labels) %>%
-    # for non-imputed data, #NA can differ for different targets
-    na.omit
-
-  # dataset subsetting for tibble: [[
-  set.seed(seed)
-  training.index <- createDataPartition(dataset[[target_label]], p = split_ratio, list = FALSE)
-  training.set <- dataset[training.index, ]
-  # if split_ratio == 100%, then create no testing.set
-  testing.set <- if (split_ratio != 1.0) dataset[-training.index, ] else NULL
-
-  ########################################
   # 3.2: Select the target & features
   ########################################
-  target <- training.set[[target_label]]
-  features <- training.set %>% select(features_labels) %>% as.data.frame
+  target <- training_set[[target_label]]
+  features <- training_set %>% select(features_labels) %>% as.data.frame
 
   ########################################
   # 3.3: Train the models
   ########################################
   models.list <- list()
 
-  if (!is.null(formula_input)) {
+  if (formula_input) {
 
     print("******** FORMULA interface")
+
+    # define formula
+    formula1 <- set_formula(target_label, features_labels)
 
     system.time(
       models.list <- algorithm_list %>%
@@ -336,7 +324,7 @@ benchmark_algorithms <- function(
           if (algorithm_label == "rf") {
 
             model <- train(
-              form = formula_input,
+              form = formula1,
               method = "rf",
               data = if (is.null(try_first)) training.set else head(training.set, try_first),
               preProcess = preprocess_configuration,
@@ -348,7 +336,7 @@ benchmark_algorithms <- function(
           } else if (algorithm_label == "glm" | algorithm_label == "glmnet") {
 
             model <- train(
-              form = formula_input,
+              form = formula1,
               method = algorithm_label,
               family = glm_family,
               data = if (is.null(try_first)) training.set else head(training.set, try_first),
@@ -358,7 +346,7 @@ benchmark_algorithms <- function(
           } else {
 
             model <- train(
-              form = formula_input,
+              form = formula1,
               method = algorithm_label,
               data = if (is.null(try_first)) training.set else head(training.set, try_first),
               preProcess = preprocess_configuration,
@@ -381,7 +369,8 @@ benchmark_algorithms <- function(
     print("******** X Y INTERFACE")
 
     # check if dataset contains categorical features
-    contains_factors <- dataset %>% select_if(is.factor) %>% names %>% {length(.) > 0}
+    contains_factors <- training.set %>%
+      select_if(is.factor) %>% names %>% {length(.) > 0}
 
     # transform categorical features by one-hot-encoding for models except rf, ranger, gbm
     # e.g. glmnet expects features as model.matrix (source: https://stackoverflow.com/a/48230658/7769076)
@@ -475,7 +464,7 @@ benchmark_algorithms <- function(
   ########################################
   # add target.label & testing.set to models.list
   models.list$target.label <- target_label
-  models.list$testing.set <- testing.set
+  models.list$testing.set <- testing_set
 
   # save the models.list
   if (!is.null(models_list_name)) {
@@ -487,6 +476,7 @@ benchmark_algorithms <- function(
 
   return(models.list)
 }
+
 
 ################################################################################
 # Dataset contains Factors
