@@ -434,6 +434,19 @@ benchmark_algorithms <- function(
               preProcess = preprocess_configuration,
               trControl = training_configuration
             )
+
+          } else if (algorithm_label == "svmRadial" | algorithm_label == "svmLinear") {
+
+            formula.svm <- set_formula(target_label, features_labels)
+
+            model <- train(
+              form = formula.svm,
+              method = algorithm_label,
+              data = if (is.null(try_first)) training_set else head(training_set, try_first),
+              preProcess = preprocess_configuration,
+              trControl = training_configuration
+            )
+
           } else {
 
             model <- train(
@@ -476,7 +489,6 @@ benchmark_algorithms <- function(
 
   return(models.list)
 }
-
 
 ################################################################################
 # Dataset contains Factors
