@@ -564,7 +564,7 @@ get_testingset_performance <- function(
     models_list %>%
       map(
         function(model_object) {
-          # print(model_object$method)
+
           if (contains_factors(testing.set) & !handles_factors(model_object$method)) {
             formula1 <- set_formula(target.label, features.labels)
             testing.set <- model.matrix(formula1, data = testing.set)
@@ -586,15 +586,30 @@ get_testingset_performance <- function(
     models_list %>%
       # caret::predict() can take a list of train objects as input
       predict(testing.set) %>%
+
       map_df(function(predicted) {
-        c(sqrt(mean( (observed - predicted)^2)),
-          # R2 = regression SS / TSS > https://stackoverflow.com/a/40901487/7769076
-          sum((predicted - mean(predicted))^2) / sum((observed - mean(observed))^2))
+
+        mean.training.set <- models_list[[1]]$trainingData$.outcome %>% mean %T>% print
+
+        # predicted <- predict(model_object, testing.set) %T>% print
+        c(
+          # postResample(predicted, observed) %>% .["RMSE"],
+          sqrt(mean((observed - predicted)^2)),
+          # https://stackoverflow.com/a/36727900/7769076
+          sum((predicted - mean.training.set)^2) / sum((observed - mean.training.set)^2),
+          # R2 = regression SS / TSS
+          ## sum((predicted - mean(predicted))^2) / sum((observed - mean(observed))^2),
+          ## the same reference (observed) seems to be better
+          sum((predicted - mean(observed))^2) / sum((observed - mean(observed))^2),
+          # postResample(predicted, observed) %>% .[("Rsquared")],
+          cor(predicted, observed)^2
+        )
       }) %>%
       t %>%
       as_tibble(rownames = "model") %>%
-      rename(RMSE.testing = V1, Rsquared.testing = V2) %>%
-      arrange(RMSE.testing)
+      rename(RMSE.testing = V1, R2.testing = V2,
+             R2.testing2 = V3,  R2.postResample= V4) %>%
+      arrange(RMSE.testing) %>% as.data.frame
   }
 }
 
