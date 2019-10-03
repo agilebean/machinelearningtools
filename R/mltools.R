@@ -84,6 +84,7 @@ get_model_metrics <- function(models_list,
 
   # retrieve target.label & testing.set from models_list
   target.label <- if (!is.null(target_label)) target_label else models_list$target.label
+
   # set testing set to argument > from models_list > NULL if empty
   if (!is.null(testing_set)) {
     testing.set <- testing_set
@@ -276,7 +277,7 @@ benchmark_algorithms <- function(
   training_set,
   testing_set,
   formula_input = FALSE,
-  preprocess_configuration = c("center", "scale"),
+  preprocess_configuration = c("center", "scale", "nzv"),
   training_configuration,
   impute_method = NULL,
   algorithm_list,
@@ -297,6 +298,7 @@ benchmark_algorithms <- function(
   # 3.2: Select the target & features
   ########################################
   target <- training_set[[target_label]]
+  # avoid tibble e.g. for svmRadial: "setting rownames on tibble is deprecated"
   features <- training_set %>% select(features_labels) %>% as.data.frame
 
   ########################################
@@ -437,6 +439,8 @@ benchmark_algorithms <- function(
 
           } else if (algorithm_label == "svmRadial" | algorithm_label == "svmLinear") {
 
+            # predict() requires kernlab::ksvm object created by formula:
+            # https://stackoverflow.com/q/52743663/7769076
             formula.svm <- set_formula(target_label, features_labels)
 
             model <- train(
@@ -601,7 +605,7 @@ get_testingset_performance <- function(
 
       map_df(function(predicted) {
 
-        mean.training.set <- models_list[[1]]$trainingData$.outcome %>% mean %T>% print
+        mean.training.set <- models_list[[1]]$trainingData$.outcome %>% mean
 
         # predicted <- predict(model_object, testing.set) %T>% print
         c(
