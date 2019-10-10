@@ -186,7 +186,6 @@ get_model_metrics <- function(models_list,
 get_metric_from_resamples <- function(resamples_values, metric) {
 
   require(dplyr)
-  resamples_values <- resamples.values
   metric <- "RMSE"
 
   suffix <- paste0("~", metric)
