@@ -185,21 +185,31 @@ get_model_metrics <- function(models_list,
 ################################################################################
 get_metric_from_resamples <- function(resamples_values, metric) {
 
+  resamples_values <- resamples.values
+  metric <- "RMSE"
+
   suffix <- paste0("~", metric)
   # tricky: for arrange, convert string column name to symbol, not quosure
   # https://stackoverflow.com/a/26497839/7769076
   metric.mean <- rlang::sym(paste0(metric,".mean"))
   metric.sd <- paste0(metric,".sd")
 
-  metric_table <- resamples_values %>%
+  # metric_table <-
+  resamples_values %>%
     ## tricky: dplyr::mutate doesn't work here
     map_df(~c(mean = mean(.), sd = sd(.) )) %>%
     dplyr::select(ends_with(suffix)) %>%
     rename_all(.funs = funs(gsub(suffix, "",.))) %>%
     t %>% as_tibble(rownames = "model") %>%
     setNames(c("model", metric.mean, metric.sd)) %>%
-    # tricky: unquote symbol, not quosure
-    arrange(desc(!!metric.mean))
+    {
+      if (metric == "Accuracy" | metric == "Kappa") {
+        # tricky: unquote symbol, not quosure
+        arrange(., desc(!!metric.mean))
+      } else {
+        arrange(., !!metric.mean)
+      }
+    }
 }
 
 ################################################################################
