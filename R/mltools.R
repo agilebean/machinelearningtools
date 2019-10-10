@@ -186,7 +186,6 @@ get_model_metrics <- function(models_list,
 get_metric_from_resamples <- function(resamples_values, metric) {
 
   require(dplyr)
-  metric <- "RMSE"
 
   suffix <- paste0("~", metric)
   # tricky: for arrange, convert string column name to symbol, not quosure
