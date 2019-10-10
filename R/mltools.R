@@ -88,9 +88,11 @@ get_model_metrics <- function(models_list,
   # set testing set to argument > from models_list > NULL if empty
   if (!is.null(testing_set)) {
     testing.set <- testing_set
+  } else if (is.null(models_list$testing.set)) {
+    testing.set <- NULL
   } else if (nrow(models_list$testing.set) != 0) {
     testing.set <- models_list$testing.set
-  } else {
+  } else { # e.g. if testingset exits but 0 rows
     testing.set <- NULL
   }
 
