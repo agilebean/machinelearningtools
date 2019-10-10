@@ -185,6 +185,7 @@ get_model_metrics <- function(models_list,
 ################################################################################
 get_metric_from_resamples <- function(resamples_values, metric) {
 
+  require(dplyr)
   resamples_values <- resamples.values
   metric <- "RMSE"
 
@@ -203,11 +204,13 @@ get_metric_from_resamples <- function(resamples_values, metric) {
     t %>% as_tibble(rownames = "model") %>%
     setNames(c("model", metric.mean, metric.sd)) %>%
     {
-      if (metric == "Accuracy" | metric == "Kappa") {
+      if (metric == "RMSE") {
         # tricky: unquote symbol, not quosure
-        arrange(., desc(!!metric.mean))
-      } else {
+        # tricky: must use . inside inline dplyr code {}
         arrange(., !!metric.mean)
+      } else {
+        # for Accuracy, Kappa AND Rsquared
+        arrange(., desc(!!metric.mean))
       }
     }
 }
