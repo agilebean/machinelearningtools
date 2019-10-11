@@ -554,7 +554,7 @@ get_featureset <- function(data,
 
         cbind(.,
               map_dfc(select_starts, function(start_keyword) {
-                data %<>%
+                data %>%
                   select(starts_with(start_keyword))
               })
         )
