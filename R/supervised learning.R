@@ -393,7 +393,10 @@ benchmark_algorithms <- function(
 
       formula1 <- set_formula(target_label, features_labels)
       features.onehotencoded <- model.matrix(formula1, data = training_set)
-      testing.set <- model.matrix(formula1, data = testing.set)
+
+      if (!is.null(testing.set)) {
+        testing.set <- model.matrix(formula1, data = testing.set)
+      }
     }
 
     # models that can handle factors instead of one-hot-encoding
