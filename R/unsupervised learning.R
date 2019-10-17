@@ -24,7 +24,7 @@ iterate_factor_analysis <- function (items, max_factors = 5) {
       set_names(c("pca.cor", "pca.cov", "pfa.cor", "pfa.cov")) %>%
       map_df(function(EFA) {
 
-        cor.label <- EFA$Call %>% as.character() %>% .[length(.) ] %>% print
+        cor.label <- EFA$Call %>% as.character() %>% .[length(.) ]
         if(cor.label != "cor" & cor.label != "cov") {
           cor.label <- ifelse(cor.label == FALSE, "cor", "cov")
         }
@@ -39,7 +39,7 @@ iterate_factor_analysis <- function (items, max_factors = 5) {
                   "model", "loadings", "scores")) %>%
       mutate_if(is.numeric, round, 2)
 
-  }) %T>% print
+  })
 
   return(result)
 }
