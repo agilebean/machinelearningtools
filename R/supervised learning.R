@@ -272,14 +272,15 @@ visualize_resamples_boxplots <- function(resamples_values, METRIC,
 #######################################################################
 output_filename <- function(prefix,
                             ...,
-                            cv_repeats, impute_method) {
+                            cv_repeats, impute_method,
+                            suffix = "rds") {
   dots <- as.character(...)
 
   paste0(c(prefix,
            dots,
            paste0(cv_repeats, "repeats"),
            { if (!is.null(impute_method)) paste(impute_method) else "noimpute"},
-           "rds"),
+           suffix),
          collapse = ".") %T>% print
 }
 
