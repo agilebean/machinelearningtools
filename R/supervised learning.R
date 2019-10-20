@@ -169,10 +169,13 @@ get_model_metrics <- function(models_list,
       as_tibble(.)
   }
 
-  return(list(metric1.training = metric1.training,
+  return(list(metric1 = metric1,
+              metric2 = metric2,
+              resamples.values = resamples.values,
+              metric1.training = metric1.training,
               metric2.training = metric2.training,
-              metric1.resamples.boxplots = metric1.resamples.boxplots,
               metric2.resamples.boxplots = metric2.resamples.boxplots,
+              metric1.resamples.boxplots = metric1.resamples.boxplots,
               metrics.testing = metrics.testing,
               benchmark.all = benchmark.all
   ))
