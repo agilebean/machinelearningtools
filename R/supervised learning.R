@@ -384,7 +384,10 @@ benchmark_algorithms <- function(
         setNames(algorithm_list)
     ) %T>% {
       if (beep) beepr::beep()
-      if (push) push_message(.["elapsed"], algorithm_list)
+      if (push) push_message(
+        .["elapsed"],
+        if (!is.null(models_list_name)) models_list_name else algorithm_list
+        )
     }
     # categorical variables -> x,y interface
   } else {
@@ -488,13 +491,17 @@ benchmark_algorithms <- function(
           }
           ############ END model training & STOP cluster
           clusterOff(cluster.new)
+          stopImplicitCluster()
 
           return(model)
         }) %>%
         setNames(algorithm_list)
     ) %T>% {
       if (beep) beepr::beep()
-      if (push) push_message(.["elapsed"], algorithm_list)
+      if (push) push_message(
+        .["elapsed"],
+        if (!is.null(models_list_name)) models_list_name else algorithm_list
+      )
     }
   }
 
