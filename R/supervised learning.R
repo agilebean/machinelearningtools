@@ -302,9 +302,10 @@ benchmark_algorithms <- function(
   impute_method = NULL,
   algorithm_list,
   glm_family = NULL,
-  seed = 17, split_ratio = 0.80,
+  seed = 17,
   cv_repeats, try_first = NULL,
   models_list_name = NULL,
+  cluster_log = "",
   beep = TRUE,
   push = TRUE) {
 
@@ -341,7 +342,7 @@ benchmark_algorithms <- function(
           print(paste("***", algorithm_label))
 
           ############ START new cluster for model training
-          cluster.new <- clusterOn()
+          cluster.new <- clusterOn(outfile_name = cluster_log)
 
           if (algorithm_label == "rf") {
 
@@ -425,7 +426,7 @@ benchmark_algorithms <- function(
 
           }
           ############ START new cluster for model training
-          cluster.new <- clusterOn()
+          cluster.new <- clusterOn(outfile_name = cluster_log)
 
           if (algorithm_label == "rf") {
 
@@ -498,7 +499,7 @@ benchmark_algorithms <- function(
   }
 
   # stop cluster if training throws error (https://stackoverflow.com/a/41679580/7769076)
-  on.exit(if (exists("cluster.new")) { stopCluster(cluster.new) } )
+  on.exit(if (exists("cluster.new")) { clusterOff(cluster.new) } )
 
   ########################################
   # Postprocess the models
