@@ -402,7 +402,7 @@ benchmark_algorithms <- function(
       features.onehotencoded <- model.matrix(formula1, data = training_set)
 
       if (!is.null(testing.set)) {
-        testing.set <- model.matrix(formula1, data = testing.set)
+        testing.set.onehotencoded <- model.matrix(formula1, data = testing_set)
       }
     }
 
@@ -420,6 +420,7 @@ benchmark_algorithms <- function(
           if (contains_factors & (!algorithm_label %in% algorithms.handling.factors)) {
 
             features <- features.onehotencoded
+            testing.set <- testing.set.onehotencoded
             print(paste("*** performed one-hot-encoding for model", algorithm_label))
 
           }
@@ -703,6 +704,7 @@ push_message <- function(time_in_seconds = 60, algorithm_list = "") {
                                    paste0(algorithm_list, collapse = ", ")),
                       devices = "ujyr8RSNXs4sjAsoeMFET6")
 }
+
 
 ################################################################################
 #
