@@ -414,7 +414,7 @@ benchmark_algorithms <- function(
           print(paste("***", algorithm_label))
 
           # transform factors by one-hot-encoding for all models except rf, ranger, gbm
-          if (contains_factors(training_set) & !handles.factors(algorithm_label)) {
+          if (contains_factors(training_set) & !handles_factors(algorithm_label)) {
 
             features <- features.onehotencoded
             testing.set <- testing.set.onehotencoded
@@ -611,17 +611,26 @@ get_testingset_performance <- function(
       map(
         function(model_object) {
 
+          # set flag for onehot encoding
+          onehot <- FALSE
+          # do onehot encoding for algorithms that cannot handle factors
           if (contains_factors(testing.set) & !handles_factors(model_object$method)) {
+
+            onehot <- TRUE
             formula1 <- set_formula(target.label, features.labels)
-            testing.set <- model.matrix(formula1, data = testing.set)
+            testing.set.onehot <- model.matrix(formula1, data = testing.set) %>%
+              as_tibble() %>%
+              select(-`(Intercept)`)
           }
+
           model_object %>%
             # estimate target in the testing set
-            predict(., newdata = testing.set) %>%
+            predict(newdata = if (switch) testing.set.onehot else testing.set) %>%
             confusionMatrix(., observed) %>%
             .$overall %>%
             # tricky: convert first to dataframe > can select column names
-            map_df(1) %>% select(Accuracy, Kappa)
+            map_df(1) %>%
+            select(Accuracy, Kappa)
         }
       ) %>%
       bind_rows(.id = "model") %>%
