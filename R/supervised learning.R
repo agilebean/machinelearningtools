@@ -625,7 +625,7 @@ get_testingset_performance <- function(
 
           model_object %>%
             # estimate target in the testing set
-            predict(newdata = if (switch) testing.set.onehot else testing.set) %>%
+            predict(newdata = if (onehot) testing.set.onehot else testing.set) %>%
             confusionMatrix(., observed) %>%
             .$overall %>%
             # tricky: convert first to dataframe > can select column names
