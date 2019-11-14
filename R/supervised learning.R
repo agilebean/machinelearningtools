@@ -394,13 +394,9 @@ benchmark_algorithms <- function(
 
     print("******** X Y INTERFACE")
 
-    # check if dataset contains categorical features
-    contains_factors <- training_set %>%
-      select_if(is.factor) %>% names %>% {length(.) > 0}
-
     # transform categorical features by one-hot-encoding for models except rf, ranger, gbm
     # e.g. glmnet expects features as model.matrix (source: https://stackoverflow.com/a/48230658/7769076)
-    if (contains_factors) {
+    if (contains_factors(training_set)) {
 
       formula1 <- set_formula(target_label, features_labels)
       features.onehotencoded <- model.matrix(formula1, data = training_set)
@@ -410,9 +406,6 @@ benchmark_algorithms <- function(
       }
     }
 
-    # models that can handle factors instead of one-hot-encoding
-    algorithms.handling.factors <- c("rf", "ranger", "gbm", "nnet")
-
     system.time(
       models.list <- algorithm_list %>%
 
@@ -421,7 +414,7 @@ benchmark_algorithms <- function(
           print(paste("***", algorithm_label))
 
           # transform factors by one-hot-encoding for all models except rf, ranger, gbm
-          if (contains_factors & (!algorithm_label %in% algorithms.handling.factors)) {
+          if (contains_factors(training_set) & !handles.factors(algorithm_label)) {
 
             features <- features.onehotencoded
             testing.set <- testing.set.onehotencoded
@@ -544,7 +537,12 @@ contains_factors <- function(data) {
 handles_factors <- function(algorithm_label) {
 
   # models that can handle factors instead of one-hot-encoding
-  algorithms.handling.factors <- c("rf", "ranger", "gbm", "nnet")
+  algorithms.handling.factors <- c(
+    "rf", "ranger", "gbm", "nnet",
+    "svmRadial", "svmLinear"
+  )
+
+  # check whether imput algorithm handles factors
   algorithm_label %in% algorithms.handling.factors
 }
 
