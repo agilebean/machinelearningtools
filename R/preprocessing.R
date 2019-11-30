@@ -1,4 +1,5 @@
-perform_max_SMOTE <- function(features, target, algorithm = "SMOTE") {
+perform_max_SMOTE <- function(
+  features, target, max_k = 30, algorithm = "SMOTE") {
 
   require(smotefamily)
   for (k in max_k:1) {
