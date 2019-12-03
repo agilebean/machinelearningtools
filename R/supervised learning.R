@@ -25,7 +25,7 @@ clusterOn <- function(no_cores = NULL, outfile_name = "") {
 
   require(doParallel) # loads parallel library for makeCluster
 
-  cluster.new <- makeCluster(spec = if (!is.null(no_cores)) no_cores else { detectCores() - 1 },
+  cluster.new <- makeCluster(spec = if (!is.null(no_cores)) no_cores else { detectCores() },
                              type = "FORK",
                              outfile = outfile_name # verbose
   )
@@ -377,7 +377,8 @@ benchmark_algorithms <- function(
             )
           }
           ############ END model training & STOP cluster
-          cluster.Off()
+          clusterOff(cluster.new)
+          stopImplicitCluster()
 
           return(model)
         }) %>%
