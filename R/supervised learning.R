@@ -710,15 +710,37 @@ visualize_variable_importance_rf <- function(rf_object) {
 # Send push message to RPushbullet app
 # input caret::train object
 ################################################################################
-push_message <- function(time_in_seconds = 60, algorithm_list = "") {
+push_message <- function(
+  time_in_seconds = 60, algorithm_list = NULL, models_list_name = NULL
+  ) {
 
-  beepr::beep("facebook")
-  RPushbullet::pbPost(type = "note",
-                      title = paste("caret training finished after",
-                                    round(time_in_seconds/60, digits = 2), "min"),
-                      body = paste("The training finished for models:",
-                                   paste0(algorithm_list, collapse = ", ")),
-                      devices = "ujyr8RSNXs4sjAsoeMFET6")
+  # beepr::beep("facebook")
+
+  algorithm_list_string <- if (!is.null(algorithm_list)) {
+    paste("for machine learning algorithms:", paste0(algorithm_list, collapse = ", "))
+  } else {
+    ""
+  }
+
+  models_list_string <- if (!is.null(models_list_name)) {
+    paste(", and is saved under the filename", models_list_name)
+  } else {
+    ""
+  }
+
+  RPushbullet::pbPost(
+    type = "note",
+    title = paste(
+      "caret training finished after",
+      round(time_in_seconds/60, digits = 2), "min"
+    ),
+    body = paste(
+      "The training finished",
+      algorithm_list_string,
+      models_list_string
+    ),
+    devices = "ujyr8RSNXs4sjAsoeMFET6"
+  )
 }
 
 
