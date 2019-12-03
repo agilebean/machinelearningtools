@@ -343,6 +343,8 @@ benchmark_algorithms <- function(
 
           ############ START new cluster for model training
           cluster.new <- clusterOn(outfile_name = cluster_log)
+          # stop cluster if training throws error (https://stackoverflow.com/a/41679580/7769076)
+          on.exit(if (exists("cluster.new")) { clusterOff(cluster.new) } )
 
           if (algorithm_label == "rf") {
 
@@ -386,9 +388,10 @@ benchmark_algorithms <- function(
     ) %T>% {
       if (beep) beepr::beep()
       if (push) push_message(
-        .["elapsed"],
-        if (!is.null(models_list_name)) models_list_name else algorithm_list
-        )
+        time_in_seconds = .["elapsed"],
+        algorithm_list = algorithm_list,
+        models_list_name = if (!is.null(models_list_name)) models_list_name else NULL
+      )
     }
     # categorical variables -> x,y interface
   } else {
@@ -424,6 +427,8 @@ benchmark_algorithms <- function(
           }
           ############ START new cluster for model training
           cluster.new <- clusterOn(outfile_name = cluster_log)
+          # stop cluster if training throws error (https://stackoverflow.com/a/41679580/7769076)
+          on.exit(if (exists("cluster.new")) { clusterOff(cluster.new) } )
 
           if (algorithm_label == "rf") {
 
@@ -493,14 +498,12 @@ benchmark_algorithms <- function(
     ) %T>% {
       if (beep) beepr::beep()
       if (push) push_message(
-        .["elapsed"],
-        if (!is.null(models_list_name)) models_list_name else algorithm_list
+        time_in_seconds = .["elapsed"],
+        algorithm_list = algorithm_list,
+        models_list_name = if (!is.null(models_list_name)) models_list_name else NULL
       )
     }
   }
-
-  # stop cluster if training throws error (https://stackoverflow.com/a/41679580/7769076)
-  on.exit(if (exists("cluster.new")) { clusterOff(cluster.new) } )
 
   ########################################
   # Postprocess the models
