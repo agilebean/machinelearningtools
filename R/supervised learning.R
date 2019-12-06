@@ -422,7 +422,9 @@ benchmark_algorithms <- function(
           if (contains_factors(training_set) & !handles_factors(algorithm_label)) {
 
             features <- features.onehotencoded
-            testing.set <- testing.set.onehotencoded
+            if (!is.null(testing_set)) {
+              testing.set <- testing.set.onehotencoded
+            }
             print(paste("*** performed one-hot-encoding for model", algorithm_label))
 
           }
