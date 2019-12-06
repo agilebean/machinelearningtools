@@ -200,7 +200,7 @@ get_metric_from_resamples <- function(resamples_values, metric) {
   # metric_table <-
   resamples_values %>%
     ## tricky: dplyr::mutate doesn't work here
-    map_df(~c(mean = mean(.), sd = sd(.) )) %>%
+    map_df(~c(mean = mean(., na.rm = TRUE), sd = sd(., na.rm = TRUE) )) %>%
     dplyr::select(ends_with(suffix)) %>%
     rename_all(.funs = funs(gsub(suffix, "",.))) %>%
     t %>% as_tibble(rownames = "model") %>%
