@@ -104,7 +104,7 @@ get_model_metrics <- function(models_list,
     models_list %<>% purrr::list_modify("testing.set" = NULL)
   }
 
-  target <- models_list[[1]]$trainingData$.outcome
+  target <- testing_set[[target_label]]
 
   if (is.factor(target)) {
     metric1 = "Accuracy"
