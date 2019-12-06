@@ -82,6 +82,7 @@ get_model_metrics <- function(models_list,
   require(ggplot2)
   require(RColorBrewer)
 
+  models_list <- models.list
   # retrieve target.label & testing.set from models_list
   target.label <- if (!is.null(target_label)) target_label else models_list$target.label
 
@@ -104,7 +105,7 @@ get_model_metrics <- function(models_list,
     models_list %<>% purrr::list_modify("testing.set" = NULL)
   }
 
-  target <- testing.set[[target_label]]
+  target <- testing.set[[target.label]]
 
   if (is.factor(target)) {
     metric1 = "Accuracy"
