@@ -82,6 +82,7 @@ get_model_metrics <- function(models_list,
   require(ggplot2)
   require(RColorBrewer)
 
+  models_list <- models.list
   # retrieve target.label & testing.set from models_list
   target.label <- if (!is.null(target_label)) target_label else models_list$target.label
 
@@ -199,8 +200,12 @@ get_metric_from_resamples <- function(resamples_values, metric) {
   # metric_table <-
   resamples_values %>%
     ## tricky: dplyr::mutate doesn't work here
+<<<<<<< HEAD
     map_df(~c(mean = mean(.), sd = sd(.) )) %>%
     # suffix is ~Accuracy or ~Kappa
+=======
+    map_df(~c(mean = mean(., na.rm = TRUE), sd = sd(., na.rm = TRUE) )) %>%
+>>>>>>> 308c83d2544c0eddfd66be774dd9fe29d0335a18
     dplyr::select(ends_with(suffix)) %>%
     # remove the suffix leaves model names
     rename_all(.funs = funs(gsub(suffix, "",.))) %>%
@@ -424,7 +429,9 @@ benchmark_algorithms <- function(
           if (contains_factors(training_set) & !handles_factors(algorithm_label)) {
 
             features <- features.onehotencoded
-            testing.set <- testing.set.onehotencoded
+            if (!is.null(testing_set)) {
+              testing.set <- testing.set.onehotencoded
+            }
             print(paste("*** performed one-hot-encoding for model", algorithm_label))
 
           }
