@@ -200,8 +200,11 @@ get_metric_from_resamples <- function(resamples_values, metric) {
   resamples_values %>%
     ## tricky: dplyr::mutate doesn't work here
     map_df(~c(mean = mean(.), sd = sd(.) )) %>%
+    # suffix is ~Accuracy or ~Kappa
     dplyr::select(ends_with(suffix)) %>%
+    # remove the suffix leaves model names
     rename_all(.funs = funs(gsub(suffix, "",.))) %>%
+    # create tibble with model names in rows, mean/sd in columns
     t %>% as_tibble(rownames = "model") %>%
     setNames(c("model", metric.mean, metric.sd)) %>%
     {
@@ -542,8 +545,7 @@ handles_factors <- function(algorithm_label) {
 
   # models that can handle factors instead of one-hot-encoding
   algorithms.handling.factors <- c(
-    "rf", "ranger", "gbm", "nnet",
-    "svmRadial", "svmLinear"
+    "rf", "ranger", "gbm", "nnet"
   )
 
   # check whether imput algorithm handles factors
