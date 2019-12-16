@@ -423,7 +423,9 @@ benchmark_algorithms <- function(
           print(paste("***", algorithm_label))
 
           # transform factors by one-hot-encoding for all models except rf, ranger, gbm
-          if (contains_factors(training_set) & !handles_factors(algorithm_label)) {
+          if (contains_factors(training_set) &
+              !handles_factors(algorithm_label) &
+              !model_object$method %in% c("svmRadial", "svmLinear")) {
 
             features <- features.onehotencoded
             if (!is.null(testing_set)) {
@@ -624,7 +626,9 @@ get_testingset_performance <- function(
           # set flag for onehot encoding
           onehot <- FALSE
           # do onehot encoding for algorithms that cannot handle factors
-          if (contains_factors(testing.set) & !handles_factors(model_object$method)) {
+          if (contains_factors(testing.set) &
+              !handles_factors(model_object$method) &
+              !model_object$method %in% c("svmRadial", "svmLinear")) {
 
             onehot <- TRUE
             formula1 <- set_formula(target.label, features.labels)
