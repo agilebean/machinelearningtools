@@ -200,12 +200,9 @@ get_metric_from_resamples <- function(resamples_values, metric) {
   # metric_table <-
   resamples_values %>%
     ## tricky: dplyr::mutate doesn't work here
-<<<<<<< HEAD
-    map_df(~c(mean = mean(.), sd = sd(.) )) %>%
-    # suffix is ~Accuracy or ~Kappa
-=======
+    ## tricky: must remove occasional NAs in resamples
     map_df(~c(mean = mean(., na.rm = TRUE), sd = sd(., na.rm = TRUE) )) %>%
->>>>>>> 308c83d2544c0eddfd66be774dd9fe29d0335a18
+    # suffix is ~Accuracy or ~Kappa
     dplyr::select(ends_with(suffix)) %>%
     # remove the suffix leaves model names
     rename_all(.funs = funs(gsub(suffix, "",.))) %>%
