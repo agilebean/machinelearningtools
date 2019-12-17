@@ -328,7 +328,7 @@ benchmark_algorithms <- function(
   # avoid tibble e.g. for svmRadial: "setting rownames on tibble is deprecated"
   features <- training_set %>% select(features_labels) %>% as.data.frame
 
-  if(!is.null(try_first) & is.integer(try_first)) {
+  if(!is.null(try_first) & is.numeric(try_first)) {
 
     target %<>% head(try_first)
     features %<>% head(try_first)
