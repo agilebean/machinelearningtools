@@ -308,7 +308,8 @@ benchmark_algorithms <- function(
   algorithm_list,
   glm_family = NULL,
   seed = 17,
-  cv_repeats, try_first = NULL,
+  cv_repeats,
+  try_first = NULL,
   models_list_name = NULL,
   cluster_log = "",
   beep = TRUE,
@@ -326,6 +327,13 @@ benchmark_algorithms <- function(
   target <- training_set[[target_label]]
   # avoid tibble e.g. for svmRadial: "setting rownames on tibble is deprecated"
   features <- training_set %>% select(features_labels) %>% as.data.frame
+
+  if(!is.null(try_first) & is.integer(try_first)) {
+
+    target %<>% head(try_first)
+    features %<>% head(try_first)
+
+  }
 
   ########################################
   # 3.3: Train the models
@@ -451,7 +459,9 @@ benchmark_algorithms <- function(
             )
 
             # logistic regression
-          } else if (algorithm_label == "glm" & class(target) == "factor") {
+          } else if (class(target) == "factor" &
+            (algorithm_label == "glm" | algorithm_label == "glmnet")
+            ) {
 
             model <- train(
               x = features,
@@ -528,7 +538,7 @@ benchmark_algorithms <- function(
 
     print(paste("model training results saved in", models_list_name))
   }
-
+  print(models.list)
   return(models.list)
 }
 
