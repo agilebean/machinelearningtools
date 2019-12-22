@@ -416,13 +416,15 @@ benchmark_algorithms <- function(
     if (contains_factors(training_set)) {
 
       formula1 <- set_formula(target_label, features_labels)
-      features.onehotencoded <- model.matrix(formula1, data = training_set) %>%
+      features.onehot <- model.matrix(formula1, data = training_set) %>%
         as.data.frame() %>%
         select(-`(Intercept)`)
+      training.set.onehot <- cbind(target, features.onehot)
       }
     }
     # backup original features before loop to avoid overriding
     features.original <- features
+    training.set.original <- training_set
 
     system.time(
       models.list <- algorithm_list %>%
@@ -437,12 +439,14 @@ benchmark_algorithms <- function(
               # & !algorithm_label %in% c("svmRadial", "svmLinear")
           ) {
 
-            features <- features.onehotencoded
+            features <- features.onehot
+            training.set <- training.set.onehot
             print(paste("*** performed one-hot-encoding for model", algorithm_label))
 
           } else { # no onehot-encoding
 
             features <- features.original
+            training.set <- training.set.original
 
           }
 
@@ -496,7 +500,7 @@ benchmark_algorithms <- function(
             model <- train(
               form = formula.svm,
               method = algorithm_label,
-              data = if (is.null(try_first)) training_set else head(training_set, try_first),
+              data = training.set,
               preProcess = preprocess_configuration,
               trControl = training_configuration
             )
