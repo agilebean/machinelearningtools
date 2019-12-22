@@ -302,7 +302,7 @@ benchmark_algorithms <- function(
   training_set,
   testing_set,
   formula_input = FALSE,
-  preprocess_configuration = c("center", "scale", "nzv"),
+  preprocess_configuration = c("center", "scale", "zv"),
   training_configuration,
   impute_method = NULL,
   algorithm_list,
@@ -328,10 +328,11 @@ benchmark_algorithms <- function(
   # avoid tibble e.g. for svmRadial: "setting rownames on tibble is deprecated"
   features <- training_set %>% select(features_labels) %>% as.data.frame
 
-  if(!is.null(try_first) & is.numeric(try_first)) {
+  if (!is.null(try_first) & is.numeric(try_first)) {
 
     target %<>% head(try_first)
     features %<>% head(try_first)
+    training_set %<>% head(try_first)
 
   }
 
@@ -364,7 +365,7 @@ benchmark_algorithms <- function(
             model <- train(
               form = formula1,
               method = "rf",
-              data = if (is.null(try_first)) training_set else head(training_set, try_first),
+              data = training_set,
               preProcess = preprocess_configuration,
               trControl = training_configuration,
               importance = TRUE
@@ -377,7 +378,7 @@ benchmark_algorithms <- function(
               form = formula1,
               method = algorithm_label,
               family = glm_family,
-              data = if (is.null(try_first)) training_set else head(training_set, try_first),
+              data = training_set,
               preProcess = preprocess_configuration,
               trControl = training_configuration
             )
@@ -386,7 +387,7 @@ benchmark_algorithms <- function(
             model <- train(
               form = formula1,
               method = algorithm_label,
-              data = if (is.null(try_first)) training_set else head(training_set, try_first),
+              data = training_set,
               preProcess = preprocess_configuration,
               trControl = training_configuration
             )
@@ -403,7 +404,7 @@ benchmark_algorithms <- function(
       if (push) push_message(
         time_in_seconds = .["elapsed"],
         algorithm_list = algorithm_list,
-        models_list_name = if (!is.null(models_list_name)) models_list_name else NULL
+        models_list_name = models_list_name
       )
     }
     # categorical variables -> x,y interface
@@ -432,8 +433,9 @@ benchmark_algorithms <- function(
 
           # transform factors by one-hot-encoding for all models except rf, ranger, gbm
           if (contains_factors(training_set) &
-              !handles_factors(algorithm_label) &
-              !algorithm_label %in% c("svmRadial", "svmLinear")) {
+              !handles_factors(algorithm_label)
+              # & !algorithm_label %in% c("svmRadial", "svmLinear")
+              ) {
 
             features <- features.onehotencoded
             if (!is.null(testing_set)) {
