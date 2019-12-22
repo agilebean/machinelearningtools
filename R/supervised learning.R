@@ -445,7 +445,7 @@ benchmark_algorithms <- function(
           } else { # no onehot-encoding
 
             features <- features.original
-            training.set <- training.set.original
+            # training.set <- training.set.original
 
           }
 
