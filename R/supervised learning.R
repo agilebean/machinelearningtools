@@ -82,7 +82,6 @@ get_model_metrics <- function(models_list,
   require(ggplot2)
   require(RColorBrewer)
 
-  models_list <- models.list
   # retrieve target.label & testing.set from models_list
   target.label <- if (!is.null(target_label)) target_label else models_list$target.label
 
@@ -629,6 +628,15 @@ get_testingset_performance <- function(
 
   observed <- testing.set[[target.label]]
 
+  # do onehot encoding for algorithms that cannot handle factors
+  if (contains_factors(testing.set)) {
+
+    formula1 <- set_formula(target.label, features.labels)
+    testing.set.onehot <- model.matrix(formula1, data = testing.set) %>%
+      as_tibble() %>%
+      select(-`(Intercept)`)
+  }
+
   if (is.factor(observed)) {
 
     models_list %>%
@@ -643,10 +651,6 @@ get_testingset_performance <- function(
               !model_object$method %in% c("svmRadial", "svmLinear")) {
 
             onehot <- TRUE
-            formula1 <- set_formula(target.label, features.labels)
-            testing.set.onehot <- model.matrix(formula1, data = testing.set) %>%
-              as_tibble() %>%
-              select(-`(Intercept)`)
           }
 
           model_object %>%
@@ -665,32 +669,44 @@ get_testingset_performance <- function(
   } else if (is.numeric(observed)) {
 
     models_list %>%
-      # caret::predict() can take a list of train objects as input
-      predict(testing.set) %>%
+      map_df(
+        function(model_object) {
 
-      map_df(function(predicted) {
+          # set flag for onehot encoding
+          onehot <- FALSE
+          # do onehot encoding for algorithms that cannot handle factors
+          if (contains_factors(testing.set) &
+              !handles_factors(model_object$method) &
+              !model_object$method %in% c("svmRadial", "svmLinear")) {
 
-        mean.training.set <- models_list[[1]]$trainingData$.outcome %>% mean
+            onehot <- TRUE
+          }
 
-        # predicted <- predict(model_object, testing.set) %T>% print
-        c(
-          # postResample(predicted, observed) %>% .["RMSE"],
-          sqrt(mean((observed - predicted)^2)),
-          # https://stackoverflow.com/a/36727900/7769076
-          sum((predicted - mean.training.set)^2) / sum((observed - mean.training.set)^2),
-          # R2 = regression SS / TSS
-          ## sum((predicted - mean(predicted))^2) / sum((observed - mean(observed))^2),
-          ## the same reference (observed) seems to be better
-          sum((predicted - mean(observed))^2) / sum((observed - mean(observed))^2),
-          # postResample(predicted, observed) %>% .[("Rsquared")],
-          cor(predicted, observed)^2
-        )
-      }) %>%
+          mean.training.set <- models_list[[1]]$trainingData$.outcome %>% mean
+
+          predicted <- model_object %>%
+            # estimate target in the testing set
+            predict(newdata = if (onehot) testing.set.onehot else testing.set)
+
+          c(
+            # postResample(predicted, observed) %>% .["RMSE"],
+            sqrt(mean((observed - predicted)^2)),
+            # https://stackoverflow.com/a/36727900/7769076
+            sum((predicted - mean.training.set)^2) / sum((observed - mean.training.set)^2),
+            # R2 = regression SS / TSS
+            ## sum((predicted - mean(predicted))^2) / sum((observed - mean(observed))^2),
+            ## ?for centering, the same reference (observed) seems to be better?
+            sum((predicted - mean(observed))^2) / sum((observed - mean(observed))^2),
+            # postResample(predicted, observed) %>% .[("Rsquared")]
+            cor(predicted, observed)^2
+          )
+        }) %>%
       t %>%
       as_tibble(rownames = "model") %>%
       rename(RMSE.testing = V1, R2.testing = V2,
              R2.testing2 = V3,  R2.postResample= V4) %>%
-      arrange(RMSE.testing) %>% as.data.frame
+      arrange(RMSE.testing) %>%
+      as.data.frame
   }
 }
 
