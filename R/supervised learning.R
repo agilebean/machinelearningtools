@@ -419,11 +419,11 @@ benchmark_algorithms <- function(
       features.onehot <- model.matrix(formula1, data = training_set) %>%
         as.data.frame() %>%
         select(-`(Intercept)`)
-      training.set.onehot <- cbind(target, features.onehot)
+      # training.set.onehot <- cbind(target, features.onehot)
     }
     # backup original features before loop to avoid overriding
     features.original <- features
-    training.set.original <- training_set
+    # training.set.original <- training_set
 
     system.time(
       models.list <- algorithm_list %>%
@@ -439,7 +439,7 @@ benchmark_algorithms <- function(
           ) {
 
             features <- features.onehot
-            training.set <- training.set.onehot
+            # training.set <- training.set.onehot
             print(paste("*** performed one-hot-encoding for model", algorithm_label))
 
           } else { # no onehot-encoding
@@ -499,7 +499,7 @@ benchmark_algorithms <- function(
             model <- train(
               form = formula.svm,
               method = algorithm_label,
-              data = training.set,
+              data = training_set,
               preProcess = preprocess_configuration,
               trControl = training_configuration
             )
