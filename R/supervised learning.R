@@ -435,7 +435,7 @@ benchmark_algorithms <- function(
           # transform factors by one-hot-encoding for all models except rf, ranger, gbm
           if (contains_factors(training_set) &
               !handles_factors(algorithm_label)
-              # & !algorithm_label %in% c("svmRadial", "svmLinear")
+              & !algorithm_label %in% c("svmRadial", "svmLinear")
           ) {
 
             features <- features.onehot
