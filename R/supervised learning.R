@@ -143,29 +143,29 @@ get_model_metrics <- function(models_list,
   if (is.factor(target)) {
 
     benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
-    {
-      if (!is.null(metrics.testing)) {
-        # tricky: within conditional {} block, must reference to LHS (.)
-        merge(., metrics.testing, by = "model")
-      } else {
-        .
-      }
-    } %>%
+      {
+        if (!is.null(metrics.testing)) {
+          # tricky: within conditional {} block, must reference to LHS (.)
+          merge(., metrics.testing, by = "model")
+        } else {
+          .
+        }
+      } %>%
       as_tibble(.)
 
   } else if (is.numeric(target)) {
 
     benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
-    {
-      if (!is.null(metrics.testing)) {
-        # tricky: within conditional {} block, must reference to LHS (.)
-        merge(., metrics.testing, by = "model") %>%
-          mutate(RMSE.delta = RMSE.testing - RMSE.mean) %>%
-          arrange(RMSE.testing)
-      } else {
-        .
-      }
-    } %>%
+      {
+        if (!is.null(metrics.testing)) {
+          # tricky: within conditional {} block, must reference to LHS (.)
+          merge(., metrics.testing, by = "model") %>%
+            mutate(RMSE.delta = RMSE.testing - RMSE.mean) %>%
+            arrange(RMSE.testing)
+        } else {
+          .
+        }
+      } %>%
       as_tibble(.)
   }
 
@@ -416,10 +416,9 @@ benchmark_algorithms <- function(
     if (contains_factors(training_set)) {
 
       formula1 <- set_formula(target_label, features_labels)
-      features.onehotencoded <- model.matrix(formula1, data = training_set)
-
-      if (!is.null(testing_set)) {
-        testing.set.onehotencoded <- model.matrix(formula1, data = testing_set)
+      features.onehotencoded <- model.matrix(formula1, data = training_set) %>%
+        as.data.frame() %>%
+        select(-`(Intercept)`)
       }
     }
     # backup original features before loop to avoid overriding
@@ -436,7 +435,7 @@ benchmark_algorithms <- function(
           if (contains_factors(training_set) &
               !handles_factors(algorithm_label)
               # & !algorithm_label %in% c("svmRadial", "svmLinear")
-              ) {
+          ) {
 
             features <- features.onehotencoded
             print(paste("*** performed one-hot-encoding for model", algorithm_label))
@@ -465,8 +464,8 @@ benchmark_algorithms <- function(
 
             # logistic regression
           } else if (class(target) == "factor" &
-            (algorithm_label == "glm" | algorithm_label == "glmnet")
-            ) {
+                     (algorithm_label == "glm" | algorithm_label == "glmnet")
+          ) {
 
             model <- train(
               x = features,
@@ -757,7 +756,7 @@ visualize_variable_importance_rf <- function(rf_object) {
 ################################################################################
 push_message <- function(
   time_in_seconds = 60, algorithm_list = NULL, models_list_name = NULL
-  ) {
+) {
 
   # beepr::beep("facebook")
 
