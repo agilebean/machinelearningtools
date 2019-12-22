@@ -420,7 +420,6 @@ benchmark_algorithms <- function(
         as.data.frame() %>%
         select(-`(Intercept)`)
       training.set.onehot <- cbind(target, features.onehot)
-      }
     }
     # backup original features before loop to avoid overriding
     features.original <- features
