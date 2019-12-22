@@ -422,6 +422,8 @@ benchmark_algorithms <- function(
         testing.set.onehotencoded <- model.matrix(formula1, data = testing_set)
       }
     }
+    # backup original features before loop to avoid overriding
+    features.original <- features
 
     system.time(
       models.list <- algorithm_list %>%
@@ -437,12 +439,14 @@ benchmark_algorithms <- function(
               ) {
 
             features <- features.onehotencoded
-            if (!is.null(testing_set)) {
-              testing.set <- testing.set.onehotencoded
-            }
             print(paste("*** performed one-hot-encoding for model", algorithm_label))
 
+          } else { # no onehot-encoding
+
+            features <- features.original
+
           }
+
           ############ START new cluster for model training
           cluster.new <- clusterOn(outfile_name = cluster_log)
           # stop cluster if training throws error (https://stackoverflow.com/a/41679580/7769076)
