@@ -239,15 +239,19 @@ get_metric_resamples <- function(resamples_data, metric) {
 # visualize_resamples_boxplots()
 # Helper function for get_model_metrics
 ################################################################################
-visualize_resamples_boxplots <- function(resamples_values, METRIC,
-                                         palette = "Set1",
-                                         colour_count = ncol(resamples_values),
-                                         dot_size = 1/logb(nrow(resamples_values), 5),
-                                         boxplot_fill = "grey95", boxplot_color = "grey25",
-                                         colors = NULL) {
+visualize_resamples_boxplots <- function(
+  resamples_values,
+  METRIC,
+  palette = "Set1",
+  colour_count = ncol(resamples_values),
+  dot_size = 1 / logb(nrow(resamples_values), 5),
+  boxplot_fill = "grey95",
+  boxplot_color = "grey25",
+  colors = NULL) {
 
   require(dplyr)
   require(ggplot2)
+  require(RColorBrewer)
 
   # create palette with 8+ colors
   ## Source: http://novyden.blogspot.com/2013/09/how-to-expand-color-palette-with-ggplot.html
