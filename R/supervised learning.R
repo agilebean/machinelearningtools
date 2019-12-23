@@ -146,7 +146,8 @@ get_model_metrics <- function(models_list,
       {
         if (!is.null(metrics.testing)) {
           # tricky: within conditional {} block, must reference to LHS (.)
-          merge(., metrics.testing, by = "model")
+          merge(., metrics.testing, by = "model") %>%
+            arrange(desc(Acc.testing))
         } else {
           .
         }
