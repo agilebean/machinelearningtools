@@ -794,7 +794,8 @@ push_message <- function(
 ################################################################################
 # Visualize importance for gbm or randomForest varImp() objects
 ################################################################################
-visualize_importance <- function (importance_object, cut_off = 10) {
+visualize_importance <- function (
+  importance_object, cut_off = 10, fill_color = "#114151") {
 
   # for importance objects from caret
   if (class(importance_object) == "varImp.train") {
@@ -811,7 +812,7 @@ visualize_importance <- function (importance_object, cut_off = 10) {
     filter(Importance > cut_off) %>%
     ggplot(data = ., aes(x = reorder(variable, Importance), y = Importance)) +
     theme_minimal() +
-    geom_bar(stat = "identity", fill = "#114151") +
+    geom_bar(stat = "identity", fill = fill_color) +
     coord_flip() +
     theme(axis.title = element_text(size = 12),
           axis.text = element_text(size = 12)) +
