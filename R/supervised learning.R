@@ -247,7 +247,9 @@ visualize_resamples_boxplots <- function(
   dot_size = 1 / logb(nrow(resamples_values), 5),
   boxplot_fill = "grey95",
   boxplot_color = "grey25",
-  colors = NULL) {
+  colors = NULL,
+  exclude_light_hues = NULL
+  ) {
 
   require(dplyr)
   require(ggplot2)
@@ -255,7 +257,13 @@ visualize_resamples_boxplots <- function(
 
   # create palette with 8+ colors
   ## Source: http://novyden.blogspot.com/2013/09/how-to-expand-color-palette-with-ggplot.html
-  getPalette <- colorRampPalette(brewer.pal(8, palette))(colour_count)
+  color.codes <- brewer.pal(8, palette)
+
+  # remove the first color codes that usually have light hues
+  if (!is.null(exclude_light_hues)) {
+    color.codes %<>% .[-c(1:exclude_light_hues)]
+  }
+  getPalette <- colorRampPalette(color.codes)(colour_count)
 
   ### visualize the resampling distribution from cross-validation
   resamples.boxplots <- resamples_values %>%
