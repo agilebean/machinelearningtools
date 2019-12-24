@@ -21,11 +21,17 @@ unnest_freetext <- function(data, predictor, limit = NULL) {
 
 # get sentiment weights of a free-text field for one predictor label
 sentiment_freetext <- function(
-  data, text_column, limit = NULL, lexicon, normalize = FALSE
+  data, text_column,
+  lexicon = NULL, lexicon_label = "nrc",
+  normalize = FALSE, no_rows = NULL
 ) {
   require(dplyr)
   require(tidyr)
   require(tidytext) # for stopwords, get_sentiments
+
+  if (is.null(lexicon)) {
+    lexicon <- get_sentiments(lexicon_label)
+  }
 
   unnested <- data %>%
     select(!!text_column) %>%
@@ -36,8 +42,8 @@ sentiment_freetext <- function(
     arrange(desc(count))
 
   # print only the first <limit> rows
-  if (!is.null(limit)) {
-    unnested <- unnested[1:limit, ]
+  if (!is.null(no_rows)) {
+    unnested <- unnested[1:no_rows, ]
   }
 
   # tricky: right_join (not inner_join) to keep all dict. sentiments
