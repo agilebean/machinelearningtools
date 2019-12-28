@@ -301,7 +301,7 @@ output_filename <- function(prefix,
            paste0(cv_repeats, "repeats"),
            { if (!is.null(impute_method)) paste(impute_method) else "noimpute"},
            suffix),
-         collapse = ".") %T>% print
+         collapse = ".")
 }
 
 #######################################################################
