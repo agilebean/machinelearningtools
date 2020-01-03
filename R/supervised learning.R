@@ -306,6 +306,15 @@ output_filename <- function(prefix, ..., suffix = "rds") {
 }
 
 #######################################################################
+# define string in filename
+#######################################################################
+filename_string <- function(logical_flag, true_string) {
+
+  if (logical_flag) true_string else NULL
+
+}
+
+#######################################################################
 # benchmark algorithms with caret::train
 #######################################################################
 benchmark_algorithms <- function(
