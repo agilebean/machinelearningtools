@@ -290,18 +290,19 @@ visualize_resamples_boxplots <- function(
 #######################################################################
 # define output filename
 #######################################################################
-output_filename <- function(prefix,
-                            ...,
-                            cv_repeats, impute_method,
-                            suffix = "rds") {
-  dots <- as.character(...)
+output_filename <- function(prefix, ..., suffix = "rds") {
 
-  paste0(c(prefix,
-           dots,
-           paste0(cv_repeats, "repeats"),
-           { if (!is.null(impute_method)) paste(impute_method) else "noimpute"},
-           suffix),
-         collapse = ".")
+  require(dplyr)
+  require(purrr)
+  dots <- list(...) %>%
+    # tricky: enable variable names that are not defined (NULL)
+    discard(is.null) %>%
+    as.character()
+
+  paste0(
+    c(prefix, dots, suffix),
+    collapse = "."
+  )
 }
 
 #######################################################################
