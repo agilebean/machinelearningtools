@@ -244,46 +244,65 @@ visualize_resamples_boxplots <- function(
   resamples_values,
   METRIC,
   palette = "Set1",
-  colour_count = ncol(resamples_values),
-  dot_size = 1 / logb(nrow(resamples_values), 5),
+  color_count = NULL,
+  dot_size = NULL,
   boxplot_fill = "grey95",
   boxplot_color = "grey25",
   colors = NULL,
   exclude_light_hues = NULL
   ) {
-
   require(dplyr)
   require(ggplot2)
   require(RColorBrewer)
 
-  # create palette with 8+ colors
+  # dot size of resamples distribution is indirectly proportional to their #
+  if (is.null(dot_size)) dot_size <- 1/logb(nrow(resamples_values), 5)
+
+  # extract the resamples values for selected METRIC (e.g. "Accuracy" or "RMSE")
+  resamples_by_metric <- resamples_values %>% dplyr::select(ends_with(METRIC))
+
+  # create HEX color codes from palette with 8+ colors
   ## Source: http://novyden.blogspot.com/2013/09/how-to-expand-color-palette-with-ggplot.html
   color.codes <- brewer.pal(8, palette)
 
-  # remove the first color codes that usually have light hues
+  # remove the first color codes of palette as they have very light hues
   if (!is.null(exclude_light_hues)) {
     color.codes %<>% .[-c(1:exclude_light_hues)]
   }
-  getPalette <- colorRampPalette(color.codes)(colour_count)
 
-  ### visualize the resampling distribution from cross-validation
-  resamples.boxplots <- resamples_values %>%
-    dplyr::select(ends_with(METRIC)) %>%
-    purrr::set_names(~gsub(paste0("~", METRIC), "", .)) %>%
+  # the # colors needed depends on # extracted resamples for selected METRIC
+  if (is.null(color_count)) color_count <- ncol(resamples_by_metric)
+
+  # generate the color palette by extrapolation from color.codes to color_count
+  color.palette.generated <- colorRampPalette(color.codes)(color_count)
+
+  resamples.boxplots <- resamples_by_metric %>%
+    purrr::set_names(~ gsub(paste0("~", METRIC), "", .)) %>%
     drop_na() %>%
     gather(key = model, value = METRIC) %>%
-    ggplot(aes(x = reorder(model, METRIC, median),
-               y = METRIC, color = model)) +
+    ggplot(aes(
+      x = reorder(model, METRIC, median),
+      y = METRIC,
+      color = model
+    )) +
     theme_minimal() +
     geom_jitter(size = dot_size) +
-    geom_boxplot(width = 0.7, fill = boxplot_fill, color = boxplot_color, alpha = 0.3) +
+    geom_boxplot(
+      width = 0.7,
+      fill = boxplot_fill,
+      color = boxplot_color,
+      alpha = 0.3
+    ) +
     coord_flip() +
-    scale_color_manual(values = if (!is.null(colors)) colors else getPalette) +
+    scale_color_manual(
+      values = if (!is.null(colors)) colors else color.palette.generated
+    ) +
     labs(x = "model", y = METRIC) +
-    theme(legend.position = "none",
-          axis.title = element_text(size = 14),
-          axis.text = element_text(size = 14))
-
+    theme(
+      legend.position = "none",
+      axis.title = element_text(size = 14),
+      axis.text = element_text(size = 14)
+    )
   return(resamples.boxplots)
 }
 
