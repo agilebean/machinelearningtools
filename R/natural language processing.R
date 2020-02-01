@@ -63,7 +63,7 @@ sentiment_freetext <- function(
       }
     } %>%
     # tricky: spread all sentiment levels into columns
-    spread(sentiment, weight) %>% print
+    spread(sentiment, weight)
 
   return(result)
 }
