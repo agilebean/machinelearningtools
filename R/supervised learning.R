@@ -800,8 +800,9 @@ visualize_variable_importance_rf <- function(rf_object) {
 # input caret::train object
 ################################################################################
 push_message <- function(
-  time_in_seconds = 60, algorithm_list = NULL, models_list_name = NULL
-) {
+  time_in_seconds = 60, algorithm_list = NULL, models_list_name = NULL) {
+
+  require(RPushbullet)
 
   # beepr::beep("facebook")
 
