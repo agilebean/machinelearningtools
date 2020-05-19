@@ -237,10 +237,10 @@ get_google_survey_data <- function(survey_key, input_dir, survey_name,
 
   # preprocess survey data
   survey.raw %<>%
-    # remove Timestamp
-    .[,-1] %>%
+    # Remove timestamp
+    select(-Timestamp) %>%
     # remove duplicates
-    .[!duplicated(.),]
+    distinct()
 
   return(survey.raw)
 }
