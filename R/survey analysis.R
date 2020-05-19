@@ -235,8 +235,12 @@ get_google_survey_data <- function(survey_key, input_dir, survey_name,
   ## Prerequisites: 1. File | Publish to the web + 2. Share | Get link
   survey.raw <- survey_key %>% gs_key(lookup = FALSE) %>% gs_read()
 
-  # remove duplicates
-  survey.raw %<>% .[!duplicated(.),]
+  # preprocess survey data
+  survey.raw %<>%
+    # remove Timestamp
+    .[,-1] %>%
+    # remove duplicates
+    .[!duplicated(.),]
 
   return(survey.raw)
 }
