@@ -226,26 +226,18 @@ filename.n <- function(filename, sample_size) {
 #       survey_name (char)
 # OUT:  survey.raw (dataframe)
 ######################################################################
-create_survey_data <- function(survey_key, input_dir, survey_name,
+get_google_survey_data <- function(survey_key, input_dir, survey_name,
                                start_date = NULL, end_date = NULL,
                                descriptive_columns = NULL)
 {
-  survey.raw <- survey_key %>%  gs_key(lookup = FALSE) %>% gs_read()
+  require(googlesheets)
+  # retrieve google spreadsheet data
+  ## Prerequisites: 1. File | Publish to the web + 2. Share | Get link
+  survey.raw <- survey_key %>% gs_key(lookup = FALSE) %>% gs_read()
 
-  # survey_raw$Timestamp <- as.POSIXct(survey_raw$Timestamp,
-  #                                    format = "%m/%d/%Y %H:%M:%S",
-  #                                    tz = "Asia/Seoul")
+  # remove duplicates
+  survey.raw %<>% .[!duplicated(.),]
 
-  # clean data (rows)
-  survey.raw %<>%
-    # remove Timestamp
-    .[,-1] %>%
-    # remove duplicates
-    .[!duplicated(.),]
-
-  # remove Timestamp and save
-  setwd(input_dir)
-  saveRDS(survey.raw, survey_name)
   return(survey.raw)
 }
 
