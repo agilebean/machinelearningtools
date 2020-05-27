@@ -197,18 +197,18 @@ get_metric_from_resamples <- function(resamples_values, metric) {
   metric.mean <- rlang::sym(paste0(metric,".mean"))
   metric.sd <- paste0(metric,".sd")
 
-  # metric_table <-
   resamples_values %>%
-    ## tricky: dplyr::mutate doesn't work here
-    ## tricky: must remove occasional NAs in resamples
-    map_df(~c(mean = mean(., na.rm = TRUE), sd = sd(., na.rm = TRUE) )) %>%
-    # suffix is ~Accuracy or ~Kappa
     dplyr::select(ends_with(suffix)) %>%
-    # remove the suffix leaves model names
-    rename_all(.funs = funs(gsub(suffix, "",.))) %>%
-    # create tibble with model names in rows, mean/sd in columns
-    t %>% as_tibble(rownames = "model") %>%
-    setNames(c("model", metric.mean, metric.sd)) %>%
+    rename_with(~gsub(suffix, "", .)) %>%
+    summarize(across(everything(),
+                     list(mean = mean, sd = sd))) %>%
+    # genius tip (.value!): https://stackoverflow.com/a/58880309/7769076
+    pivot_longer(
+      cols = everything(),
+      names_to = c("model", ".value"),
+      names_pattern =  "(.+)_(.+$)"
+    ) %>%
+    set_names(c("model", as.character(metric.mean), metric.sd)) %>%
     {
       if (metric == "RMSE") {
         # tricky: unquote symbol, not quosure
