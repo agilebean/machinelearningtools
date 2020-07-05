@@ -73,6 +73,7 @@ clusterOff <- function(cluster_name) {
 get_model_metrics <- function(models_list,
                               target_label = NULL,
                               testing_set = NULL,
+                              median_sort = FALSE,
                               palette = "Set1", direction = 1,
                               colors = NULL,
                               boxplot_fill = "grey95",
@@ -123,8 +124,10 @@ get_model_metrics <- function(models_list,
     dplyr::select(ends_with(metric1), ends_with(metric2))
 
   ### calculate mean and sd for each metric
-  metric1.training <- get_metric_from_resamples(resamples.values, metric1)
-  metric2.training <- get_metric_from_resamples(resamples.values, metric2)
+  metric1.training <- get_metric_from_resamples(
+    resamples.values, metric1, median_sort = FALSE)
+  metric2.training <- get_metric_from_resamples(
+    resamples.values, metric2, median_sort = FALSE)
 
   ### visualize the resampling distribution from cross-validation
   metric1.resamples.boxplots <- visualize_resamples_boxplots(
