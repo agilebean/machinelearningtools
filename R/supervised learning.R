@@ -220,7 +220,7 @@ get_metric_from_resamples <- function(
     )) %>%
     { # first columns mean+sd if not sorted by median
       if (!median_sort) {
-        select(., ends_with("mean"), ends_with("sd"), ends_with("median"))
+        select(., model, ends_with("mean"), ends_with("sd"), ends_with("median"))
       } else { . }
     } %>%
     {
