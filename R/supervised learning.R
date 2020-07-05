@@ -125,9 +125,9 @@ get_model_metrics <- function(models_list,
 
   ### calculate mean and sd for each metric
   metric1.training <- get_metric_from_resamples(
-    resamples.values, metric1, median_sort = FALSE)
+    resamples.values, metric1, median_sort)
   metric2.training <- get_metric_from_resamples(
-    resamples.values, metric2, median_sort = FALSE)
+    resamples.values, metric2, median_sort)
 
   ### visualize the resampling distribution from cross-validation
   metric1.resamples.boxplots <- visualize_resamples_boxplots(
