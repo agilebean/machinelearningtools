@@ -218,24 +218,23 @@ get_metric_from_resamples <- function(
       as.character(metric.mean),
       metric.sd
     )) %>%
+    { # first columns mean+sd if not sorted by median
+      if (!median_sort) {
+        select(., ends_with("mean"), ends_with("sd"), ends_with("median"))
+      } else { . }
+    } %>%
     {
       if (metric == "RMSE") {
+        # tricky: unquote symbol, not quosure
+        # tricky: must use . inside inline dplyr code {}
+        arrange(., !!sort.metric)
+      } else { # for Accuracy, Kappa AND Rsquared: sort by descending order
 
-        { # first columns mean+sd if not sorted by median
-          if (!median_sort) {
-            select(., RMSE.mean, RMSE.sd, RMSE.median)
-          } else { . }
-        } %>%
-
-          # tricky: unquote symbol, not quosure
-          # tricky: must use . inside inline dplyr code {}
-          arrange(., !!sort.metric)
-      } else if (metric == "Accuracy") {
-        # for Accuracy, Kappa AND Rsquared
         arrange(., desc(!!sort.metric))
       }
     }
 }
+
 
 ################################################################################
 # get_metric_resamples
