@@ -184,10 +184,11 @@ get_model_metrics <- function(models_list,
 
 
 ################################################################################
-# get_metrics_from_resamples
+# get_metric_from_resamples
 # Helper function for get_model_metrics
 ################################################################################
-get_metric_from_resamples <- function(resamples_values, metric) {
+get_metric_from_resamples <- function(
+  resamples_values, metric, median_sort = FALSE) {
 
   require(dplyr)
 
@@ -196,27 +197,42 @@ get_metric_from_resamples <- function(resamples_values, metric) {
   # https://stackoverflow.com/a/26497839/7769076
   metric.mean <- rlang::sym(paste0(metric,".mean"))
   metric.sd <- paste0(metric,".sd")
+  metric.median <- rlang::sym(paste0(metric,".median"))
+
+  sort.metric <- ifelse(median_sort, metric.median, metric.mean)
 
   resamples_values %>%
     dplyr::select(ends_with(suffix)) %>%
     rename_with(~gsub(suffix, "", .)) %>%
     summarize(across(everything(),
-                     list(mean = mean, sd = sd))) %>%
+                     list(median = median, mean = mean, sd = sd))) %>%
     # genius tip (.value!): https://stackoverflow.com/a/58880309/7769076
     pivot_longer(
       cols = everything(),
       names_to = c("model", ".value"),
       names_pattern =  "(.+)_(.+$)"
     ) %>%
-    set_names(c("model", as.character(metric.mean), metric.sd)) %>%
+    set_names(c(
+      "model",
+      as.character(metric.median),
+      as.character(metric.mean),
+      metric.sd
+    )) %>%
     {
       if (metric == "RMSE") {
-        # tricky: unquote symbol, not quosure
-        # tricky: must use . inside inline dplyr code {}
-        arrange(., !!metric.mean)
-      } else {
+
+        { # first columns mean+sd if not sorted by median
+          if (!median_sort) {
+            select(., RMSE.mean, RMSE.sd, RMSE.median)
+          } else { . }
+        } %>%
+
+          # tricky: unquote symbol, not quosure
+          # tricky: must use . inside inline dplyr code {}
+          arrange(., !!sort.metric)
+      } else if (metric == "Accuracy") {
         # for Accuracy, Kappa AND Rsquared
-        arrange(., desc(!!metric.mean))
+        arrange(., desc(!!sort.metric))
       }
     }
 }
