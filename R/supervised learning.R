@@ -529,7 +529,7 @@ benchmark_algorithms <- function(
             model <- train(
               x = features,
               y = target,
-              method = "rf",
+              method = algorithm_label,
               preProcess = preprocess_configuration,
               trControl = training_configuration,
               importance = TRUE
@@ -540,7 +540,6 @@ benchmark_algorithms <- function(
               x = features,
               y = target,
               method = algorithm_label,
-              data = training_set,
               preProcess = preprocess_configuration,
               trControl = training_configuration,
               importance = "impurity"
