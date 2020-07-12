@@ -29,6 +29,8 @@ get_xai_explanations <- function(
   get_plot_explanations_LIME = FALSE
 ) {
 
+  require(ggplot2) # ggsave
+
   if (get_explainer_DALEX) {
     require(DALEX)
     require(iBreakDown)
