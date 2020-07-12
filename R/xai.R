@@ -13,6 +13,7 @@
 get_xai_explanations <- function(
   models_list,
   save_path = NULL,
+  suffix = NULL,
   width = 6, height = 6,
   get_explainer_DALEX = TRUE,
   get_varImp_DALEX = FALSE,
@@ -68,14 +69,15 @@ get_xai_explanations <- function(
                                !is.null(varImp.DALEX)) {
         print("*** plot.varImp.DALEX")
         varImp.DALEX %>% plot %T>%
-          {
-            if (!is.null(save_path)) {
-              ggsave(
-                width = width, height = height,
-                filename = paste0(
-                  save_path, "plot.varImp.DALEX.", model_object$method, ".png"))
-            }
+        {
+          if (!is.null(save_path)) {
+            ggsave(
+              width = width, height = height,
+              filename = paste0(
+                save_path, "plot.varImp.DALEX.", model_object$method,
+                suffix, ".png"))
           }
+        }
       } else {
         NULL
       }
@@ -85,14 +87,15 @@ get_xai_explanations <- function(
         print("*** plot.pdp.DALEX")
         pdp.DALEX <- explainer.DALEX %>% ingredients::partial_dependency()
         pdp.DALEX %>% plot %T>%
-          {
-            if (!is.null(save_path)) {
-              ggsave(
-                width = width, height = height,
-                filename = paste0(
-                  save_path, "plot.pdp.DALEX.", model_object$method, ".png"))
-            }
+        {
+          if (!is.null(save_path)) {
+            ggsave(
+              width = width, height = height,
+              filename = paste0(
+                save_path, "plot.pdp.DALEX.", model_object$method,
+                suffix, ".png"))
           }
+        }
       } else {
         NULL
       }
@@ -108,7 +111,8 @@ get_xai_explanations <- function(
               ggsave(
                 width = width, height = height,
                 filename = paste0(
-                  save_path, "plot.attribution.DALEX.", model_object$method, ".png"))
+                  save_path, "plot.attribution.DALEX.", model_object$method,
+                  suffix, ".png"))
             }
           }
       } else {
@@ -130,7 +134,8 @@ get_xai_explanations <- function(
                 width = width, height = height,
                 filename = paste0(
                   save_path, "plot.attribution.uncertainty.DALEX.",
-                  model_object$method, ".png"))
+                  model_object$method,
+                  suffix, ".png"))
             }
           }
       } else {
@@ -175,8 +180,8 @@ get_xai_explanations <- function(
               ggsave(
                 width = width, height = height,
                 filename = paste0(
-                  save_path, "plot.features.LIME.",
-                  model_object$method, ".png"))
+                  save_path, "plot.features.LIME.", model_object$method,
+                  suffix, ".png"))
             }
           }
 
@@ -196,8 +201,8 @@ get_xai_explanations <- function(
               ggsave(
                 width = width, height = height,
                 filename = paste0(
-                  save_path, "plot.explanations.LIME.",
-                  model_object$method, ".png"))
+                  save_path, "plot.explanations.LIME.", model_object$method,
+                  suffix, ".png"))
             }
           }
 
