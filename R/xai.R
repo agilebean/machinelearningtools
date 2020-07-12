@@ -36,22 +36,21 @@ get_xai_explanations <- function(
 
     map(function(model_object) {
 
-      # local observations for prediction
-      local.obs <- if (!is.null(local_obs)) {
-        local_obs
-      } else {
-        training.set %>% sample_n(local_no)
-      }
-
       print(paste("*********", model_object$method))
       training.set <- model_object$trainingData %>%
         select(.outcome, everything())
 
       target <- training.set$.outcome
       print(paste("***target"))
-      # print(target)
 
       features <- training.set %>% select(-.outcome)
+
+      # local observations for prediction
+      local.obs <- if (!is.null(local_obs)) {
+        local_obs
+      } else {
+        training.set %>% sample_n(local_no)
+      }
 
       explainer.DALEX <- if (get_explainer_DALEX) {
 
