@@ -29,8 +29,12 @@ get_xai_explanations <- function(
   get_plot_explanations_LIME = FALSE
 ) {
 
-  if (get_explainer_DALEX) require(DALEX)
-  if (get_explainer_LIME) require(LIME)
+  if (get_explainer_DALEX) {
+    require(DALEX)
+    require(iBreakDown)
+    require(ingredients)
+  }
+  if (get_explainer_LIME) require(lime)
 
   xai.list <- models_list %>%
 
