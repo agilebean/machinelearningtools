@@ -423,14 +423,24 @@ benchmark_algorithms <- function(
 
             model <- train(
               form = formula1,
-              method = "rf",
+              method = algorithm_label,
               data = training_set,
               preProcess = preprocess_configuration,
               trControl = training_configuration,
               importance = TRUE
             )
 
-            # logistic regression
+          } else if (algorithm_label == "ranger") {
+
+            model <- train(
+              form = formula1,
+              method = algorithm_label,
+              data = training_set,
+              preProcess = preprocess_configuration,
+              trControl = training_configuration,
+              importance = "impurity"
+            )
+
           } else if (algorithm_label == "glm" | algorithm_label == "glmnet") {
 
             model <- train(
@@ -524,8 +534,17 @@ benchmark_algorithms <- function(
               trControl = training_configuration,
               importance = TRUE
             )
+          } else if (algorithm_label == "ranger") {
 
-            # logistic regression
+            model <- train(
+              form = formula1,
+              method = algorithm_label,
+              data = training_set,
+              preProcess = preprocess_configuration,
+              trControl = training_configuration,
+              importance = "impurity"
+            )
+
           } else if (class(target) == "factor" &
                      (algorithm_label == "glm" | algorithm_label == "glmnet")
           ) {
