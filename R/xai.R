@@ -12,6 +12,8 @@
 ######################################################################
 get_xai_explanations <- function(
   models_list,
+  save_path = NULL,
+  width = 6, height = 6,
   get_explainer_DALEX = TRUE,
   get_varImp_DALEX = FALSE,
   get_plot_varImp_DALEX = FALSE,
@@ -28,7 +30,7 @@ get_xai_explanations <- function(
   if (get_explainer_LIME) require(LIME)
 
   xai.list <- models_list %>%
-    # future_map(function(model_object) {
+
     map(function(model_object) {
 
       print(paste("*********", model_object$method))
@@ -54,22 +56,9 @@ get_xai_explanations <- function(
         NULL
       }
 
-      explainer.DALEX <- if (get_explainer_DALEX &
-                             !is.null(explainer.DALEX)) {
-        print("*** explainer.DALEX")
-        DALEX::explain(
-          model = model_object,
-          data = features,
-          y = training.set$.outcome >=4,
-          label = paste(model_object$method, " model"),
-          colorize = TRUE
-        )
-      } else {
-        NULL
-      }
-
       varImp.DALEX <- if (get_varImp_DALEX &
                           !is.null(explainer.DALEX)) {
+
         explainer.DALEX %>% variable_importance()
       } else {
         NULL
@@ -78,28 +67,50 @@ get_xai_explanations <- function(
       plot.varImp.DALEX <- if (get_plot_varImp_DALEX &
                                !is.null(varImp.DALEX)) {
         print("*** plot.varImp.DALEX")
-        varImp.DALEX %>% plot
+        varImp.DALEX %>% plot %T>%
+          {
+            if (!is.null(save_path)) {
+              ggsave(
+                width = width, height = height,
+                filename = paste0(
+                  save_path, "plot.varImp.DALEX.", model_object$method, ".png"))
+            }
+          }
       } else {
         NULL
       }
-
 
       plot.pdp.DALEX <- if (get_pdp_plot_DALEX & !is.null(explainer.DALEX)) {
 
         print("*** plot.pdp.DALEX")
         pdp.DALEX <- explainer.DALEX %>% ingredients::partial_dependency()
-        pdp.DALEX %>% plot
+        pdp.DALEX %>% plot %T>%
+          {
+            if (!is.null(save_path)) {
+              ggsave(
+                width = width, height = height,
+                filename = paste0(
+                  save_path, "plot.pdp.DALEX.", model_object$method, ".png"))
+            }
+          }
       } else {
         NULL
       }
-
 
       plot.attribution.DALEX <- if (get_plot_attribution_DALEX &
                                     !is.null(explainer.DALEX)) {
         print("*** plot.attribution.DALEX")
         explainer.DALEX %>%
           iBreakDown::local_attributions(local.obs) %>%
-          plot
+          plot %T>%
+          {
+            if (!is.null(save_path)) {
+              ggsave(
+                width = width, height = height,
+                filename = paste0(
+                  save_path, "plot.attribution.DALEX.", model_object$method, ".png"))
+            }
+          }
       } else {
         NULL
       }
@@ -112,13 +123,20 @@ get_xai_explanations <- function(
         print("*** plot.attribution.uncertainty.DALEX")
         explainer.DALEX %>%
           iBreakDown::break_down_uncertainty(local.obs) %>%
-          plot
+          plot %T>%
+          {
+            if (!is.null(save_path)) {
+              ggsave(
+                width = width, height = height,
+                filename = paste0(
+                  save_path, "plot.attribution.uncertainty.DALEX.",
+                  model_object$method, ".png"))
+            }
+          }
       } else {
         NULL
       }
 
-
-      # lime explanations
       explainer.LIME <- if (get_explainer_LIME) {
 
         print("*** explainer.LIME")
@@ -130,7 +148,6 @@ get_xai_explanations <- function(
       } else {
         NULL
       }
-
 
       explanation.LIME <- if (
         get_explanation_LIME & !is.null(explainer.LIME)) {
@@ -145,7 +162,6 @@ get_xai_explanations <- function(
         NULL
       }
 
-
       plot.features.LIME <- if (
         get_plot_features_LIME & !is.null(explainer.LIME)) {
 
@@ -153,12 +169,20 @@ get_xai_explanations <- function(
         lime::plot_features(
           explanation.LIME,
           ncol = 2
-        ) + ggtitle(model_object$method)
+        ) + ggtitle(model_object$method)  %T>%
+          {
+            if (!is.null(save_path)) {
+              ggsave(
+                width = width, height = height,
+                filename = paste0(
+                  save_path, "plot.features.LIME.",
+                  model_object$method, ".png"))
+            }
+          }
 
       } else {
         NULL
       }
-
 
       plot.explanations.LIME <- if (
         get_plot_explanations_LIME & !is.null(explainer.LIME)) {
@@ -166,12 +190,20 @@ get_xai_explanations <- function(
         print("***plot.explanations.LIME")
         lime::plot_explanations(
           explanation.LIME
-        ) + ggtitle(model_object$method)
+        ) + ggtitle(model_object$method)  %T>%
+          {
+            if (!is.null(save_path)) {
+              ggsave(
+                width = width, height = height,
+                filename = paste0(
+                  save_path, "plot.explanations.LIME.",
+                  model_object$method, ".png"))
+            }
+          }
 
       } else {
         NULL
       }
-
 
       return(
         list(
