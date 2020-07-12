@@ -537,7 +537,8 @@ benchmark_algorithms <- function(
           } else if (algorithm_label == "ranger") {
 
             model <- train(
-              form = formula1,
+              x = features,
+              y = target,
               method = algorithm_label,
               data = training_set,
               preProcess = preprocess_configuration,
