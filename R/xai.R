@@ -137,7 +137,7 @@ get_xai_explanations <- function(
               ggsave(
                 width = width, height = height,
                 filename = paste(
-                  c(save_path, "plot.attribution.DALEX.", model_object$method,
+                  c(save_path, "plot.attribution.DALEX", model_object$method,
                     suffix, "png"),
                   collapse = ".")
               )
@@ -161,7 +161,7 @@ get_xai_explanations <- function(
               ggsave(
                 width = width, height = height,
                 filename = paste(
-                  c(save_path, "plot.attribution.uncertainty.DALEX.",
+                  c(save_path, "plot.attribution.uncertainty.DALEX",
                     model_object$method, suffix, "png"),
                   collapse = ".")
               )
@@ -209,7 +209,7 @@ get_xai_explanations <- function(
               ggsave(
                 width = width, height = height,
                 filename = paste(
-                  c(save_path, "plot.features.LIME.",
+                  c(save_path, "plot.features.LIME",
                     model_object$method, suffix, "png"),
                   collapse = ".")
               )
@@ -231,7 +231,7 @@ get_xai_explanations <- function(
               ggsave(
                 width = width, height = height,
                 filename = paste(
-                  c(save_path, "plot.explanations.LIME.",
+                  c(save_path, "plot.explanations.LIME",
                     model_object$method, suffix, "png"),
                   collapse = ".")
               )
