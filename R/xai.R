@@ -190,6 +190,7 @@ get_xai_explanations <- function(
 
         print("***explanation.LIME")
         lime::explain(
+          # tricky: features not training.set
           x = local.obs %>% select(-.outcome),
           explainer = explainer.LIME,
           n_features = n_features_lime
