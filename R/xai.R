@@ -12,6 +12,7 @@
 ######################################################################
 get_xai_explanations <- function(
   models_list,
+  cutoff_greater = 0,
   local_obs = NULL,
   local_no = 6,
   save_path = NULL,
@@ -65,7 +66,7 @@ get_xai_explanations <- function(
         DALEX::explain(
           model = model_object,
           data = features,
-          y = training.set$.outcome >=4,
+          y = training.set$.outcome >= cutoff_greater,
           label = paste(model_object$method, " model"),
           colorize = TRUE
         )
@@ -176,7 +177,7 @@ get_xai_explanations <- function(
         print("*** explainer.LIME")
         lime::lime(
           # tricky: features not training.set
-          x = training.set,
+          x = features,
           model = model_object
         )
       } else {
