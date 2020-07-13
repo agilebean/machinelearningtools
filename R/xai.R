@@ -13,6 +13,7 @@
 get_xai_explanations <- function(
   models_list,
   cutoff_greater = 0,
+  n_features_lime = 5,
   local_obs = NULL,
   local_no = 6,
   save_path = NULL,
@@ -191,7 +192,7 @@ get_xai_explanations <- function(
         lime::explain(
           x = local.obs,
           explainer = explainer.LIME,
-          n_features = 5
+          n_features = n_features_lime
         ) %T>% print
       } else {
         NULL
