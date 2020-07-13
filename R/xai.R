@@ -190,7 +190,7 @@ get_xai_explanations <- function(
 
         print("***explanation.LIME")
         lime::explain(
-          x = local.obs,
+          x = local.obs %>% select(-.outcome),
           explainer = explainer.LIME,
           n_features = n_features_lime
         ) %T>% print
@@ -222,7 +222,7 @@ get_xai_explanations <- function(
       }
 
       plot.explanations.LIME <- if (
-        get_plot_explanations_LIME & !is.null(explainer.LIME)) {
+        get_plot_explanations_LIME & !is.null(explanation.LIME)) {
 
         print("***plot.explanations.LIME")
         lime::plot_explanations(
