@@ -331,13 +331,12 @@ output_filename <- function(prefix, ..., suffix = "rds") {
 
   require(dplyr)
   require(purrr)
-  dots <- list(...) %>%
-    # tricky: enable variable names that are not defined (NULL)
-    discard(is.null) %>%
-    as.character()
+  # tricky: enable variable names that are not defined (NULL)
+  dots <- list(...) %>% discard(is.null)
 
   paste0(
-    c(prefix, dots, suffix),
+    # tricky: c(list(of characters)) inserts escape characters (\")
+    c(prefix, dots, suffix, recursive = TRUE),
     collapse = "."
   )
 }
