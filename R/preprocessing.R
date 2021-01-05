@@ -53,6 +53,7 @@ print_correlation_table_from_model <- function(
   model_object, digits = 3) {
 
   # must set digits = 4 for mean() to return 3 decimals
+  options.digits.bak <- getOption("digits")
   options(digits = digits)
 
   data.input <- model_object$trainingData %>%
@@ -95,8 +96,10 @@ print_correlation_table_from_model <- function(
 
   # 5) print final table
   html.table <- data.table %>%
-    knitr::kable(format = "html", digits = 3) %>%
+    knitr::kable(format = "html", digits = digits) %>%
     kableExtra::kable_styling(bootstrap_options = c("bordered", "hover"))
+
+  options(digits = options.digits.bak)
 
   return(list(
     html.table = html.table,
