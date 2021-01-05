@@ -1,3 +1,11 @@
+################################################################################
+# perform_max_SMOTE
+# input:  features  dataframe
+#         target    vector
+#         max_k     k nearest neighbors for SMOTE
+#         algorithm "SMOTE" (default), "ADASYN
+#
+################################################################################
 perform_max_SMOTE <- function(
   features, target, max_k = 30, algorithm = "SMOTE") {
 
