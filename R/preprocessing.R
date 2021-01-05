@@ -35,3 +35,63 @@ perform_max_SMOTE <- function(
   }
   return(training.set)
 }
+
+
+################################################################################
+# print_correlation_table_from_model
+# input: caret::train object
+################################################################################
+print_correlation_table_from_model <- function(
+  model_object, digits = 3) {
+
+  # must set digits = 4 for mean() to return 3 decimals
+  options(digits = digits)
+
+  data.input <- model_object$trainingData %>%
+    select(JobPerf = .outcome, everything()) %>%
+    as_tibble()
+
+  # 1) for final table, move all variable names to rows
+  data.transposed <- data.input %>%
+    tibble::rownames_to_column() %>%
+    pivot_longer(-rowname) %>%
+    pivot_wider(
+      # id_cols = name,
+      names_from=rowname,
+      values_from=value)
+
+  # 2) calc mean+sd on data in rows
+  data.stats <- data.transposed %>%
+    # move data from original column vectors into row data
+    nest(data = -name) %>%
+    # create vectors from row data
+    mutate(data = map(data, ~t(.x) %>% as.numeric)) %>%
+    # calculate summary stats
+    mutate(
+      mean = map(data, ~mean(.x)),
+      sd = map(data, ~sd(.x))
+    ) %>%
+    unnest(c(mean, sd)) %>%
+    select(-data)
+
+  # 3) create correlation matrix
+  data.cor <- cor(data.input) %>%
+    as.data.frame() %>%
+    rownames_to_column()
+
+  # 4) final table: merge desc stats with correlation matrix
+  data.table <- merge(data.stats, data.cor,
+                      by.x = "name", by.y = "rowname",
+                      sort = FALSE
+  ) %>% as_tibble()
+
+  # 5) print final table
+  html.table <- data.table %>%
+    knitr::kable(format = "html", digits = 3) %>%
+    kableExtra::kable_styling(bootstrap_options = c("bordered", "hover"))
+
+  return(list(
+    html.table = html.table,
+    data.table = data.table
+  ))
+}
