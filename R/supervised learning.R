@@ -795,6 +795,76 @@ get_testingset_performance <- function(
 }
 
 ################################################################################
+# Visualize variable importance
+# input caret::train object
+################################################################################
+visualize_importance <- function (
+  model_object, relative = FALSE, labels = FALSE) {
+
+  require(caret)
+  require(gbm)
+  require(dplyr)
+  require(ggplot2)
+
+
+  importance_object <- model_object %>% varImp
+
+  unit.label <- ifelse(relative, "%RI", "importance") %T>% print
+  unit.variable <- rlang::sym(unit.label)
+
+
+  if (class(importance_object) == "varImp.train") {
+    importance_object %<>% .$importance
+  }
+  if (!hasName(importance_object, "rowname")) {
+    importance_object %<>% rownames_to_column()
+  }
+
+  importance.table <- importance_object %>%
+    rename(variable = rowname, importance = Overall) %>%
+    arrange(desc(importance)) %>%
+    {
+      if (relative) {
+        mutate(., `%RI` = importance/sum(importance)*100) %>%
+          select(variable, `%RI`)
+      } else {
+        .
+      }
+    }
+
+  importance.plot <- importance.table %>%
+    set_names(c("variable", unit.label)) %>%
+    ggplot(data = .,
+           aes(x = reorder(variable, !!unit.variable), y = !!unit.variable)) +
+    theme_minimal() +
+    geom_bar(stat = "identity", fill = "#114151") +
+    {
+      if (labels) {
+        geom_text(aes(label = round(!!unit.variable, digits = 2)),
+                  # width = 3,
+                  position = position_dodge(width = 5),
+                  hjust = -0.1,
+                  check_overlap = TRUE
+        )
+      }
+    } +
+    coord_flip() +
+    theme(axis.title = element_text(size = 12),
+          axis.text = element_text(size = 12)) +
+    # scale_y_continuous(expand = c(0, 0), limits = c(0, 102)) +
+    labs(
+      x = "item",
+      y = unit.label
+    )
+
+  return(
+    list(
+      importance.table = importance.table,
+      importance.plot = importance.plot
+    ))
+}
+
+################################################################################
 # List variable importance
 # input caret::train object
 ################################################################################
@@ -810,7 +880,7 @@ list_variable_importance <- function(train_model) {
 
 ################################################################################
 # Visualize variable imporance for randomForests objects
-# input randomForests object
+# input randomForest object
 ################################################################################
 visualize_variable_importance_rf <- function(rf_object) {
 
