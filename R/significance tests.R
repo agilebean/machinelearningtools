@@ -137,8 +137,9 @@ create_plots <- function(data_object, model_label = "aov") {
 
 
 print_html <- function(data_set,
-                       param_var = "parameter",
-                       stat_type, grouping = NULL) {
+                       stat_type,
+                       grouping = NULL,
+                       param_var = "parameter") {
 
   data_set %>%
     {
