@@ -277,7 +277,7 @@ remove_descriptive_columns <- function(descriptive_columns_matrix, survey_raw)
 #       LV_scale_list (list)
 # OUT:  out (dataframe)
 ######################################################################
-encode_survey_and_scales <- function(survey_data, LV_labels, LV_scale_list) s{
+encode_survey_and_scales <- function(survey_data, LV_labels, LV_scale_list) {
   ## Create list of item names for each LV
   # 1. LV.item.list: assign item names to latent variable labels
   LV.item.list <- lapply(LV_labels, function(name) assign(name, eval(parse(text = name))))
