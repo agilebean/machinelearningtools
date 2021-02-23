@@ -136,57 +136,59 @@ create_plots <- function(data_object, model_label = "aov") {
 }
 
 
-print_html <- function(data_set, stat_type, grouping = NULL) {
+print_html <- function(data_set,
+                       param_var = "param",
+                       stat_type, grouping = NULL) {
 
   data_set %>%
     {
       if (stat_type == "levened") {
         unnest(., levened) %>%
-          select(param, !!grouping, F.levene = `F value`, p.levene = `Pr(>F)`) %>%
+          select(!!param_var, !!grouping, F.levene = `F value`, p.levene = `Pr(>F)`) %>%
           filter(!is.na(F.levene))
 
       } else if (stat_type == "glanced") {
 
         unnest(., glanced) %>%
-          select(param, !!grouping, F.anova = statistic, p.anova = p.value)
+          select(!!param_var, !!grouping, F.anova = statistic, p.anova = p.value)
 
       } else if (stat_type == "shapiroed") {
 
         unnest(., shapiroed) %>%
-          select(param, !!grouping, W = statistic, p.shapiro = p.value)
+          select(!!param_var, !!grouping, W = statistic, p.shapiro = p.value)
 
       } else if (stat_type == "kruskaled") {
 
         unnest(., kruskaled) %>%
-          select(param, !!grouping, K = statistic, p.kruskal = p.value)
+          select(!!param_var, !!grouping, K = statistic, p.kruskal = p.value)
 
       } else if (stat_type == "tidied") {
 
         unnest(., tidied) %>%
-          select(param, term, !!grouping, F = statistic, p.value)
+          select(!!param_var, term, !!grouping, F = statistic, p.value)
       } else if (stat_type == "durbined") {
 
         unnest(., durbined) %>%
-          select(param, !!grouping, autocorrelation,
+          select(!!param_var, !!grouping, autocorrelation,
                  dw = statistic, p.durbin = p.value)
 
       } else if (stat_type == "tidied") {
 
         unnest(., tidied) %>%
-          select(param, term, !!grouping, F = statistic, p.value)
+          select(!!param_var, term, !!grouping, F = statistic, p.value)
 
       } else if (stat_type == "brownforsythed") {
 
         unnest(., tidied) %>%
-          select(param, term, !!grouping, F = statistic, p.value)
+          select(!!param_var, term, !!grouping, F = statistic, p.value)
       } else {
         unnest(., stat_type) %>%
-          select(param, !!grouping, statistic, p.value)
+          select(!!param_var, !!grouping, statistic, p.value)
       }
     } %>%
     {
       if (!is.null(grouping)) {
-        arrange(., param, !!rlang::sym(grouping))
+        arrange(., !!param_var, !!rlang::sym(grouping))
       } else {
         .
       }
