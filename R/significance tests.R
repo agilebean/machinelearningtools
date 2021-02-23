@@ -11,11 +11,12 @@ perform_aov <- function(data_object, formula_aov) {
 
 test_independence <- function(data_object, model_label = "aov") {
 
+  require(DescTools)
   model <- rlang::sym(model_label)
   data_object %>%
     mutate(
       # independent samples test
-      durbin = map(!!model, ~ durbinWatsonTest(.x)),
+      durbin = map(!!model, ~ DescTools::durbinWatsonTest(.x)),
       durbined = map(durbin, broom::glance),
     )
 }
@@ -42,11 +43,13 @@ test_normality <- function(data_object, formula) {
 
 test_homogeneity <- function(data_object, formula) {
 
-  require(onewaytests) # # Brown-Forsythe Tes
+  require(onewaytests) # # Brown-Forsythe Test
+  require(DescTools)
+
   data_object %>%
     mutate(
       # Levene test: homogeneious if p > 0.05, works only on factor
-      levened = map(data, ~ leveneTest(formula, data = .x)),
+      levened = map(data, ~ DescTools::LeveneTest(formula, data = .x)),
 
       # Bartlett Test of Homogeneity of Variances BUT only one-way ANOVA!
       bartletted = map(data, ~ bartlett.test(formula, data = .x) %>%
