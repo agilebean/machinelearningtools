@@ -10,8 +10,7 @@
 # OUT:  output (dataframe) factors transformed into numerical
 ######################################################################
 # convert dataframe with factors into dataframe with numeric values
-convert_numeric <- function(userdata)
-{
+convert_numeric <- function(userdata) {
   numeric_matrix <- lapply(userdata, function(x) if(is.factor(x)) { # lapply not sapply (returns 1 col)!!!
     as.numeric(as.character(x)) } else if (is.character(x))
     { as.numeric(x) }
@@ -26,8 +25,7 @@ convert_numeric <- function(userdata)
 # OUT:  output (text)
 #
 ######################################################################
-determine_factor_extraction_no <- function(items_df)
-{
+determine_factor_extraction_no <- function(items_df) {
   # set max.#cores by parallel::detectCores()
   options(mc.cores=4)
   # getOption("mc.cores")
@@ -45,8 +43,7 @@ determine_factor_extraction_no <- function(items_df)
 # OUT:  output (dataframe)
 ######################################################################
 do_factor_analysis <- function(items_input, n_factors = 3, factor_method = "fa",
-                               corr_type = "cor", cut_off = NULL)
-{
+                               corr_type = "cor", cut_off = NULL) {
   require(dplyr)
   items <- na.omit(items_input)
   items <- data.matrix(items)
@@ -79,8 +76,7 @@ do_factor_analysis <- function(items_input, n_factors = 3, factor_method = "fa",
 # IN:   data (dataframe)
 # OUT:  cronbach alpha & r.drop corrected by smc (list)
 ######################################################################
-get_alpha <- function(data)
-{
+get_alpha <- function(data) {
   # cronbach alpha short form
   data <- data.matrix(data)
   # alpha function was overriden, must be called from package!
@@ -126,8 +122,7 @@ quartzFonts(gillsans = c("Gill Sans Light", "Gill Sans Light", "Gill Sans Italic
 # OUT:  encoded_df (dataframe)
 #
 ######################################################################
-encode_scale_labels <- function (scale_data_frame, scale_labels)
-{
+encode_scale_labels <- function (scale_data_frame, scale_labels) {
   matrix <- as.matrix(scale_data_frame)
   scale.codes <- 1:length(scale_labels)
   matrix[matrix == ""] <- NA
@@ -143,8 +138,7 @@ encode_scale_labels <- function (scale_data_frame, scale_labels)
 }
 
 # create mean scores of a Latent Variable
-get_mean_score <- function(data)
-{
+get_mean_score <- function(data) {
   return(rowMeans(data.matrix(data), na.rm = TRUE))
 }
 
@@ -283,8 +277,7 @@ remove_descriptive_columns <- function(descriptive_columns_matrix, survey_raw)
 #       LV_scale_list (list)
 # OUT:  out (dataframe)
 ######################################################################
-encode_survey_and_scales <- function(survey_data, LV_labels, LV_scale_list)
-{
+encode_survey_and_scales <- function(survey_data, LV_labels, LV_scale_list) s{
   ## Create list of item names for each LV
   # 1. LV.item.list: assign item names to latent variable labels
   LV.item.list <- lapply(LV_labels, function(name) assign(name, eval(parse(text = name))))
@@ -329,8 +322,7 @@ encode_survey_and_scales <- function(survey_data, LV_labels, LV_scale_list)
 remove_failed_attention_checks <- function(attention_items_matrix,
                                            survey_numeric,
                                            survey_descriptive,
-                                           scales_raw)
-{
+                                           scales_raw) {
   # set label and name for descriptive.columns
   attention_items <- attention_items_matrix %>%
     as.data.frame %>%
@@ -375,8 +367,7 @@ remove_failed_attention_checks <- function(attention_items_matrix,
 #       best.mediators.IDE (IDE=TRUE)
 #
 ######################################################################
-mediate_each <- function(vars, data, no_simulations=10, IDE = FALSE)
-{
+mediate_each <- function(vars, data, no_simulations=10, IDE = FALSE) {
   require(dplyr)
   require(mediation)
   predictor <- vars["predictor"]
@@ -438,8 +429,7 @@ mediate_each <- function(vars, data, no_simulations=10, IDE = FALSE)
 # SAVE: best.models.IDE.rds
 #
 ######################################################################
-eval_mediations_detailed <- function(mediation_vars, data, p_cutoff)
-{
+eval_mediations_detailed <- function(mediation_vars, data, p_cutoff) {
   # estimate all mediation models
   mediation.models <- mediation_vars %>%
     apply(., 1, mediate_each, data, IDE = TRUE) %>%
@@ -484,8 +474,7 @@ eval_mediations_detailed <- function(mediation_vars, data, p_cutoff)
 #
 ######################################################################
 eval_mediations_ACME <- function(mediation_vars, data, no_simulations,
-                                 p_cutoff, output_dir)
-{
+                                 p_cutoff, output_dir) {
   # enable parallel processing with cluster
   require(parallel)
   # Calculate the number of cores
