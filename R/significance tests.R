@@ -1,3 +1,34 @@
+# create grouped data for group comparisons
+summarise_wins <- function(result_data, max_wins, grouping) {
+
+  result_data %>%
+    group_by(across(all_of(grouping))) %>%
+    summarise(
+      mean = mean(wins / max_wins),
+      sd = sd(wins / max_wins),
+      se = sd / sqrt(n())
+    )
+}
+
+summary_stats <- function(data_set, grouping_labels, dv_label) {
+
+  dv <- rlang::sym(dv_label)
+
+  data_set %>%
+    group_by(across(all_of(grouping_labels))) %>%
+    summarize(
+      across(!!dv,
+             list(
+               mean = mean,
+               se = ~ sd(.) / sqrt(n()),
+               var = var,
+               sd = sd,
+               n = ~ n()
+             ),
+             .names = "{fn}" )
+    )
+}
+
 perform_aov <- function(data_object, formula_aov) {
 
   data_object %>%
@@ -214,14 +245,4 @@ analyze_aov <- function(
     }
 }
 
-# create grouped data for group comparisons
-summarise_wins <- function(result_data, max_wins, grouping) {
 
-  result_data %>%
-    group_by(across(all_of(grouping))) %>%
-    summarise(
-      mean = mean(wins / max_wins),
-      sd = sd(wins / max_wins),
-      se = sd / sqrt(n())
-    )
-}
