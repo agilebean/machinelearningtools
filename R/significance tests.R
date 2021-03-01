@@ -68,7 +68,9 @@ test_normality <- function(data_object, formula) {
       # ANOVA alternative: if no normality BUT only one-way ANOVA!
       # Kruskal-Wallis rank sum test: non-parametric test
       # uses sample medians instead of means
-      kruskaled = map(data, ~ kruskal.test(formula, data = .x) %>% broom::glance)
+      kruskaled = map(data, ~ kruskal.test(formula, data = .x) %>%
+                        broom::glance(.) %>%
+                        rename(df = parameter))
     )
 }
 
