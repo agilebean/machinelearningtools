@@ -6,7 +6,8 @@ summarise_wins <- function(result_data, max_wins, grouping) {
     summarise(
       mean = mean(wins / max_wins),
       sd = sd(wins / max_wins),
-      se = sd / sqrt(n())
+      se = sd / sqrt(n()),
+      n = n()
     )
 }
 
@@ -61,8 +62,8 @@ test_normality <- function(data_object, formula) {
       shapiroed = map(shapiro, broom::glance),
 
       # # Kolmogorov-Smirnov test
-      # smirnov = map(data, ~ ks.test(.x, "pnorm", mean = mean(.x), sd = sd(.x))),
-      # smirnoved = map(smirnov, broom::glance),
+      smirnov = map(data, ~ ks.test(.x, "pnorm", mean = mean(.x), sd = sd(.x))),
+      smirnoved = map(smirnov, broom::glance),
 
       # ANOVA alternative: if no normality BUT only one-way ANOVA!
       # Kruskal-Wallis rank sum test: non-parametric test
