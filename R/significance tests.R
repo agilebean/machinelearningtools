@@ -57,10 +57,11 @@ test_normality <- function(data_object, formula) {
 
   data_object %>%
     mutate(
-      # Shapiro-Wilk test
-      shapiroed = map(data, ~ shapiro.test(.$wins) %>% broom::glance(.)),
-      shapiroed.res = map(aov, ~ .x %>% residuals %>%
+      # Shapiro-Wilk test: preferably on residuals than DV
+      # Source: https://psychometroscar.com/2018/07/11/normality-residuals-or-dependent-variable/
+      shapiroed = map(aov, ~ .x %>% residuals %>%
                         shapiro.test %>% broom::glance(.)),
+      shapiroed2 = map(data, ~ shapiro.test(.$wins) %>% broom::glance(.)),
 
       # Kruskal-Wallis test: non-parametric alternative to one-way ANOVA
       # uses sample medians instead of means
