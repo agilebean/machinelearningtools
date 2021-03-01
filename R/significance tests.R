@@ -58,8 +58,8 @@ test_normality <- function(data_object, formula) {
   data_object %>%
     mutate(
       # Shapiro-Wilk test
-      # shapiroed = map(aov, ~ shapiro.test(.$wins) %>% broom::glance(.)),
-      shapiroed = map(aov, ~ .x %>% residuals %>%
+      shapiroed = map(data, ~ shapiro.test(.$wins) %>% broom::glance(.),
+      shapiroed.res = map(aov, ~ .x %>% residuals %>%
                         shapiro.test %>% broom::glance(.)),
       # # Kolmogorov-Smirnov test
       smirnov = map(data, ~ ks.test(.x, "pnorm", mean = mean(.x), sd = sd(.x))),
