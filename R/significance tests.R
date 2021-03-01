@@ -61,16 +61,23 @@ test_normality <- function(data_object, formula) {
       shapiroed = map(data, ~ shapiro.test(.$wins) %>% broom::glance(.)),
       shapiroed.res = map(aov, ~ .x %>% residuals %>%
                         shapiro.test %>% broom::glance(.)),
-      # # Kolmogorov-Smirnov test
-      smirnov = map(data, ~ ks.test(.x, "pnorm", mean = mean(.x), sd = sd(.x))),
-      smirnoved = map(smirnov, broom::glance),
 
-      # ANOVA alternative: if no normality BUT only one-way ANOVA!
-      # Kruskal-Wallis rank sum test: non-parametric test
+      # Kruskal-Wallis test: non-parametric alternative to one-way ANOVA
       # uses sample medians instead of means
       kruskaled = map(data, ~ kruskal.test(formula, data = .x) %>%
                         broom::glance(.) %>%
                         rename(df = parameter))
+    )
+}
+
+test_smirnov <- function(data_object, score_var = "wins", cum_fun = "pnorm") {
+
+  data_object %>%
+    mutate(
+      # Kolmogorov-Smirnov test
+      smirnoved = map(data, ~ .x[[!!score_var]] %>%
+          ks.test(., y = cum_fun, mean = mean(.), sd = sd(.)) %>%
+            broom::glance(.))
     )
 }
 
