@@ -203,7 +203,7 @@ print_html <- function(data_set,
       } else {
         .
       }
-    } %>%
+    } %T>% print %>%
     knitr::kable(format = "html", digits = 4) %>%
     kableExtra::kable_styling(bootstrap_options = c("bordered", "hover")) %>% print
 
