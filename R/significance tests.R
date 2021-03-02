@@ -47,7 +47,7 @@ test_non_parametric <- function(data_object, formula_nonparam) {
     mutate(
       # Kruskal-Wallis test: non-parametric alternative to one-way ANOVA
       # uses sample medians instead of means
-      kruskaled = map(data, ~ kruskal.test(formula, data = .x) %>%
+      kruskaled = map(data, ~ kruskal.test(formula_nonparam, data = .x) %>%
                         broom::glance(.) %>%
                         rename(df = parameter)),
 
