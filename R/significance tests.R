@@ -215,6 +215,7 @@ print_html <- function(data_set,
 
 analyze_aov <- function(
   data_object, nesting_labels, formula_aov,
+  test_independence = TRUE,
   test_homogeneity = TRUE,
   test_normality = TRUE,
   create_plots_lm = TRUE
