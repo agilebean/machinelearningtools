@@ -128,7 +128,7 @@ test_independence <- function(data_object, model_label = "aov") {
     mutate(
       # independent samples test
       durbined = map(!!model, ~ DescTools::DurbinWatsonTest(.x) %>%
-                     broom::glance)
+                     broom::glance(.))
     )
 }
 
