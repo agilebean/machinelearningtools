@@ -67,7 +67,12 @@ test_normality <- function(data_object, formula) {
       # uses sample medians instead of means
       kruskaled = map(data, ~ kruskal.test(formula, data = .x) %>%
                         broom::glance(.) %>%
-                        rename(df = parameter))
+                        rename(df = parameter)),
+
+      # Welch test is a form of ANOVA that allows for heterogeneity
+      welched = map(data,
+                    ~ oneway.test(formula, data = .x, var.equal = FALSE) %>%
+                      broom::glance)
     )
 }
 
@@ -114,11 +119,6 @@ perform_nonparametric <- function(data_object, formula) {
 
   data_object %>%
     mutate(
-      # ANOVA alternative: if no homogeneity
-      # Welch test
-      welch = map(data,
-                  ~ oneway.test(formula, data = .x, var.equal = FALSE)),
-      welched = map(welch, broom::glance)
 
       # Bartlett test
     )
