@@ -41,16 +41,19 @@ perform_aov <- function(data_object, formula_aov) {
     )
 }
 
-test_independence <- function(data_object, model_label = "aov") {
+test_non_parametric <- function(data_object, formula_nonparam) {
 
-  require(DescTools)
-  model <- rlang::sym(model_label)
   data_object %>%
     mutate(
-      # independent samples test
-      durbin = map(!!model, ~ DescTools::DurbinWatsonTest(.x)),
-      durbined = map(durbin, broom::glance),
+      # Kruskal-Wallis test: non-parametric alternative to one-way ANOVA
+      # uses sample medians instead of means
+      kruskaled = map(data, ~ kruskal.test(formula, data = .x) %>%
+                        broom::glance(.) %>%
+                        rename(df = parameter)),
+
+
     )
+
 }
 
 test_normality <- function(data_object, formula) {
@@ -62,12 +65,6 @@ test_normality <- function(data_object, formula) {
       shapiroed = map(aov, ~ .x %>% residuals %>%
                         shapiro.test %>% broom::glance(.)),
       shapiroed2 = map(data, ~ shapiro.test(.$wins) %>% broom::glance(.)),
-
-      # Kruskal-Wallis test: non-parametric alternative to one-way ANOVA
-      # uses sample medians instead of means
-      kruskaled = map(data, ~ kruskal.test(formula, data = .x) %>%
-                        broom::glance(.) %>%
-                        rename(df = parameter)),
 
       # Welch test is a form of ANOVA that allows for heterogeneity
       welched = map(
@@ -114,6 +111,17 @@ test_homogeneity <- function(data_object, formula) {
     )
 }
 
+test_independence <- function(data_object, model_label = "aov") {
+
+  require(DescTools)
+  model <- rlang::sym(model_label)
+  data_object %>%
+    mutate(
+      # independent samples test
+      durbined = map(!!model, ~ DescTools::DurbinWatsonTest(.x) %>%
+                     broom::glance)
+    )
+}
 
 perform_posthoc_tests <- function(data_object, formula) {
 
@@ -202,12 +210,13 @@ print_html <- function(data_set,
 
 }
 
+
+
 analyze_aov <- function(
   data_object, nesting_labels, formula_aov,
-  test_independence = TRUE,
+  test_independence = FALSE,
   test_homogeneity = TRUE,
   test_normality = TRUE,
-  perform_nonparametric = TRUE,
   create_plots = TRUE
 ) {
 
@@ -236,8 +245,26 @@ analyze_aov <- function(
       }
     } %>%
     {
-      if (perform_nonparametric) {
-        perform_nonparametric(., formula_aov)
+      if (create_plots) {
+        create_plots(.)
+      } else {
+        .
+      }
+    }
+}
+
+analyze_non_parametric <- function(
+  data_object, nesting_labels, formula_nonparam,
+  test_non_parametric = TRUE,
+  create_plots = TRUE
+) {
+
+  data_object %>%
+    nest(data = -nesting_labels) %>%
+    test_non_parametric(formula_nonparam) %>%
+    {
+      if (test_homogeneity) {
+        test_homogeneity(., formula_nonparam)
       } else {
         .
       }
