@@ -45,18 +45,24 @@ perform_aov <- function(data_object, formula_aov) {
 
 test_non_parametric <- function(data_object, formula_nonparam) {
 
+  require(DescTools)
+
+  response <- formula_nonparam %>% all.vars() %>% .[1]
+  group <- formula_nonparam %>% all.vars() %>% .[2]
+
   data_object %>%
     mutate(
       # Kruskal-Wallis test: non-parametric alternative to one-way ANOVA
       # uses sample medians instead of means
-      kruskaled = map(data, ~ kruskal.test(formula_nonparam, data = .x) %>%
-                        broom::glance(.) %>%
-                        rename(df = parameter)),
-      wilcoxed = map(
-        data, ~ pairwise.wilcox.test(x = .x$wins, g = .x$agegroup)),
-
+      kruskaled = map(data,
+        ~ kruskal.test(formula_nonparam, data = .x) %>%
+          broom::glance(.) %>%
+          rename(df = parameter)),
+      # wilcox does not correct for multiple comparisons with pooled variance
+      wilcoxed = map(data, ~ pairwise.wilcox.test(x = response, g = group)),
+      # dunn better than wilcox
+      dunned = map(data, ~ DescTools::DunnTest(formula_nonparam, data = .x))
     )
-
 }
 
 test_normality <- function(data_object, formula) {
@@ -127,8 +133,9 @@ test_independence <- function(data_object, model_label = "aov") {
 }
 
 
-create_plots <- function(data_object, model_label = "aov") {
+create_plots_lm  <- function(data_object, model_label = "aov") {
 
+  require(gglm)
   model <- rlang::sym(model_label)
   data_object %>%
     mutate(
@@ -210,7 +217,7 @@ analyze_aov <- function(
   data_object, nesting_labels, formula_aov,
   test_homogeneity = TRUE,
   test_normality = TRUE,
-  create_plots = TRUE
+  create_plots_lm = TRUE
 ) {
 
   data_object %>%
@@ -238,8 +245,8 @@ analyze_aov <- function(
       }
     } %>%
     {
-      if (create_plots) {
-        create_plots(.)
+      if (create_plots_lm) {
+        create_plots_lm(.)
       } else {
         .
       }
@@ -248,8 +255,7 @@ analyze_aov <- function(
 
 analyze_non_parametric <- function(
   data_object, nesting_labels, formula_nonparam,
-  test_homogeneity = TRUE,
-  create_plots = TRUE
+  test_homogeneity = TRUE
 ) {
 
   data_object %>%
@@ -258,13 +264,6 @@ analyze_non_parametric <- function(
     {
       if (test_homogeneity) {
         test_homogeneity(., formula_nonparam)
-      } else {
-        .
-      }
-    } %>%
-    {
-      if (create_plots) {
-        create_plots(.)
       } else {
         .
       }
