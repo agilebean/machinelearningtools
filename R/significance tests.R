@@ -70,9 +70,9 @@ test_normality <- function(data_object, formula) {
                         rename(df = parameter)),
 
       # Welch test is a form of ANOVA that allows for heterogeneity
-      welched = map(data,
-                    ~ oneway.test(formula, data = .x, var.equal = FALSE) %>%
-                      broom::glance)
+      welched = map(
+        data, ~ oneway.test(formula, data = .x, var.equal = FALSE) %>%
+          broom::glance(.))
     )
 }
 
@@ -115,20 +115,13 @@ test_homogeneity <- function(data_object, formula) {
 }
 
 
-perform_nonparametric <- function(data_object, formula) {
-
-  data_object %>%
-    mutate(
-
-      # Bartlett test
-    )
-}
-
 perform_posthoc_tests <- function(data_object, formula) {
 
   data_object %>%
     mutate(
       scheffe = map(aov, ~ DescTools::ScheffeTest(.x)), # only on factor
+      wilcoxed = map(
+        data, ~ pairwise.wilcox.test(x = .x$wins, g = .x$agegroup))
     )
 }
 
