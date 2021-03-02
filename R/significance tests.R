@@ -38,6 +38,8 @@ perform_aov <- function(data_object, formula_aov) {
       lm = map(data, ~ lm(formula_aov, data = .x)),
       glanced = map(lm, broom::glance), # aov doesn't yield "statistic"
       tidied = map(aov, broom::tidy),
+      # posthoc scheffe shows which mean differences are significant
+      scheffe = map(aov, ~ DescTools::ScheffeTest(.x)) # only on factor
     )
 }
 
@@ -50,7 +52,8 @@ test_non_parametric <- function(data_object, formula_nonparam) {
       kruskaled = map(data, ~ kruskal.test(formula_nonparam, data = .x) %>%
                         broom::glance(.) %>%
                         rename(df = parameter)),
-
+      wilcoxed = map(
+        data, ~ pairwise.wilcox.test(x = .x$wins, g = .x$agegroup))
     )
 
 }
@@ -122,15 +125,6 @@ test_independence <- function(data_object, model_label = "aov") {
     )
 }
 
-perform_posthoc_tests <- function(data_object, formula) {
-
-  data_object %>%
-    mutate(
-      scheffe = map(aov, ~ DescTools::ScheffeTest(.x)), # only on factor
-      wilcoxed = map(
-        data, ~ pairwise.wilcox.test(x = .x$wins, g = .x$agegroup))
-    )
-}
 
 create_plots <- function(data_object, model_label = "aov") {
 
