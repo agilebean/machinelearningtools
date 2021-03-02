@@ -53,7 +53,8 @@ test_non_parametric <- function(data_object, formula_nonparam) {
                         broom::glance(.) %>%
                         rename(df = parameter)),
       wilcoxed = map(
-        data, ~ pairwise.wilcox.test(x = .x$wins, g = .x$agegroup))
+        data, ~ pairwise.wilcox.test(x = .x$wins, g = .x$agegroup)),
+
     )
 
 }
@@ -247,8 +248,7 @@ analyze_aov <- function(
 
 analyze_non_parametric <- function(
   data_object, nesting_labels, formula_nonparam,
-  test_non_parametric = TRUE,
-  perform_posthoc_tests = TRUE,
+  test_homogeneity = TRUE,
   create_plots = TRUE
 ) {
 
@@ -256,8 +256,8 @@ analyze_non_parametric <- function(
     nest(data = -nesting_labels) %>%
     test_non_parametric(formula_nonparam) %>%
     {
-      if (perform_posthoc_tests) {
-        perform_posthoc_tests(., formula_nonparam)
+      if (test_homogeneity) {
+        test_homogeneity(., formula_nonparam)
       } else {
         .
       }
