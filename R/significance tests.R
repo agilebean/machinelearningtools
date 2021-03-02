@@ -51,7 +51,6 @@ test_non_parametric <- function(data_object, formula_nonparam) {
                         broom::glance(.) %>%
                         rename(df = parameter)),
 
-
     )
 
 }
@@ -214,7 +213,6 @@ print_html <- function(data_set,
 
 analyze_aov <- function(
   data_object, nesting_labels, formula_aov,
-  test_independence = FALSE,
   test_homogeneity = TRUE,
   test_normality = TRUE,
   create_plots = TRUE
@@ -256,6 +254,7 @@ analyze_aov <- function(
 analyze_non_parametric <- function(
   data_object, nesting_labels, formula_nonparam,
   test_non_parametric = TRUE,
+  perform_posthoc_tests = TRUE,
   create_plots = TRUE
 ) {
 
@@ -263,8 +262,8 @@ analyze_non_parametric <- function(
     nest(data = -nesting_labels) %>%
     test_non_parametric(formula_nonparam) %>%
     {
-      if (test_homogeneity) {
-        test_homogeneity(., formula_nonparam)
+      if (perform_posthoc_tests) {
+        perform_posthoc_tests(., formula_nonparam)
       } else {
         .
       }
