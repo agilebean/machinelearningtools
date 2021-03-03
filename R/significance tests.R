@@ -213,11 +213,11 @@ print_html <- function(data_set,
     {
       if (convert_kable) {
 
-        convert_kable(digits = digits, ...)
+        convert_kable(., digits = digits, ...)
 
       } else if (convert_latex) {
 
-        convert_latex(digits = digits, ...)
+        convert_latex(., digits = digits, ...)
 
       } else
         .
