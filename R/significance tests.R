@@ -240,7 +240,7 @@ convert_latex <- function(data, digits = 4, ...) {
 
   require(xtable)
   data %>%
-    xtable(digits = digits, ...)
+    xtable(digits = digits, ...) %>% print
 
 }
 
