@@ -151,7 +151,9 @@ create_plots_lm  <- function(data_object, model_label = "aov") {
 print_html <- function(data_set,
                        stat_type,
                        grouping = NULL,
-                       param_var = "parameter") {
+                       param_var = "parameter",
+                       convert_kable = TRUE,
+                       digits = 4) {
 
   data_set %>%
     {
@@ -205,12 +207,24 @@ print_html <- function(data_set,
       } else {
         .
       }
-    } %T>% print %>%
-    knitr::kable(format = "html", digits = 4) %>%
+    } %>%
+    {
+      if (convert_kable) {
+        convert_kable(digits = digits)
+      } else if () {
+
+      } else
+        .
+    }
+}
+
+convert_kable <- function(data, digits = 4) {
+
+  data %>%
+    knitr::kable(format = "html", digits = digits) %>%
     kableExtra::kable_styling(bootstrap_options = c("bordered", "hover")) %>% print
 
 }
-
 
 
 analyze_aov <- function(
