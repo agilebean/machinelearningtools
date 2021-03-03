@@ -148,14 +148,16 @@ create_plots_lm  <- function(data_object, model_label = "aov") {
 }
 
 
-print_html <- function(data_set,
-                       stat_type,
-                       grouping = NULL,
-                       param_var = "parameter",
-                       convert_kable = FALSE,
-                       convert_latex = FALSE,
-                       digits = 4,
-                       ...) {
+print_stats <- function(data_set,
+                        stat_type,
+                        grouping = NULL,
+                        param_var = "parameter",
+                        save_label = "",
+                        format = "html",
+                        convert_kable = FALSE,
+                        convert_latex = FALSE,
+                        digits = 4,
+                        ...) {
 
   result.table <- data_set %>%
     {
@@ -214,22 +216,44 @@ print_html <- function(data_set,
 
   if (convert_kable) {
 
-    result.table %>% convert_kable(., digits = digits, ...)
+    result.table %>%
+      convert_kable(., digits = digits, ...) %>%
+      {
+        if (save_label != "") {
+
+          cat(., file = paste0(save_label, ".", format))
+
+        } else {
+          .
+        }
+      }
   }
 
   if (convert_latex) {
 
-    result.table %>% convert_latex(., digits = digits, ...)
+    result.table %>%
+      convert_latex(., digits = digits, ...) %>%
+      {
+        if (save_label != "") {
+
+          require(stargazer)
+          stargazer(., out = paste0(save_label, ".tex"))
+
+        } else {
+          .
+        }
+      }
   }
 
   result.table
 
 }
 
-convert_kable <- function(data, format = "html", digits = 4,  ...) {
+convert_kable <- function(data, digits = 4, format = "html", ...) {
 
   require(knitr)
   require(kableExtra)
+
   data %>%
     knitr::kable(format = format, digits = digits) %>%
     kableExtra::kable_styling(bootstrap_options = c("bordered", "hover")) %>% print
