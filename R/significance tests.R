@@ -154,7 +154,8 @@ print_html <- function(data_set,
                        param_var = "parameter",
                        convert_kable = FALSE,
                        convert_latex = FALSE,
-                       digits = 4) {
+                       digits = 4,
+                       ...) {
 
   data_set %>%
     {
@@ -223,7 +224,7 @@ print_html <- function(data_set,
     }
 }
 
-convert_kable <- function(data, digits = 4, format = "html") {
+convert_kable <- function(data, format = "html", digits = 4,  ...) {
 
   require(knitr)
   require(kableExtra)
