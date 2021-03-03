@@ -187,7 +187,7 @@ print_stats <- function(data_set,
 
         unnest(., dunned2) %>%
           select(!!param_var, !!grouping, group1, group2, F = statistic,
-                 p, p.adj. p.adj.signif) %>%
+                 p, p.adj., p.adj.signif) %>%
           unite("groups", c(group1, group2), sep = "~")
 
       } else if (stat_type == "tidied") {
