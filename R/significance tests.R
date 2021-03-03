@@ -46,6 +46,7 @@ perform_aov <- function(data_object, formula_aov) {
 test_non_parametric <- function(data_object, formula_nonparam) {
 
   require(DescTools)
+  require(rstatix)
 
   response <- formula_nonparam %>% all.vars() %>% .[1]
   group <- formula_nonparam %>% all.vars() %>% .[2]
@@ -61,7 +62,8 @@ test_non_parametric <- function(data_object, formula_nonparam) {
       # wilcox does not correct for multiple comparisons with pooled variance
       wilcoxed = map(data, ~ pairwise.wilcox.test(x = response, g = group)),
       # dunn better than wilcox
-      dunned = map(data, ~ DescTools::DunnTest(formula_nonparam, data = .x))
+      dunned = map(data, ~ DescTools::DunnTest(formula_nonparam, data = .x)),
+      dunned2 = map(data, ~ rstatix::dunn_test(formula_nonparam, data = .x))
     )
 }
 
@@ -180,6 +182,13 @@ print_stats <- function(data_set,
 
         unnest(., kruskaled) %>%
           select(!!param_var, !!grouping, K = statistic, p.kruskal = p.value)
+
+      } else if (stat_type == "dunned2") {
+
+        unnest(., dunned2) %>%
+          select(!!param_var, !!grouping, group1, group2, F = statistic,
+                 p, p.adj. p.adj.signif) %>%
+          unite("groups", c(group1, group2), sep = "~")
 
       } else if (stat_type == "tidied") {
 
