@@ -123,19 +123,22 @@ quartzFonts(gillsans = c("Gill Sans Light", "Gill Sans Light", "Gill Sans Italic
 #
 ######################################################################
 encode_scale_labels <- function (scale_data_frame, scale_labels) {
+
   matrix <- as.matrix(scale_data_frame)
   scale.codes <- 1:length(scale_labels)
   matrix[matrix == ""] <- NA
 
-  for (index in scale.codes)
-  {
+  for (index in scale.codes) {
     matrix[matrix == scale_labels[index]] <- scale.codes[index]
   }
 
-  # retain the colum names in list
-  encoded_df <- as.data.frame(matrix)
+  encoded_df <- matrix %>%
+    as.data.frame() %>%
+    map_df(as.numeric)
+
   return(encoded_df)
 }
+
 
 # create mean scores of a Latent Variable
 get_mean_score <- function(data) {
