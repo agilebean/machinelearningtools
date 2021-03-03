@@ -157,7 +157,7 @@ print_html <- function(data_set,
                        digits = 4,
                        ...) {
 
-  data_set %>%
+  result.table <- data_set %>%
     {
       if (stat_type == "levened") {
         unnest(., levened) %>%
@@ -209,19 +209,21 @@ print_html <- function(data_set,
       } else {
         .
       }
-    } %>%
-    {
-      if (convert_kable) {
-
-        convert_kable(., digits = digits, ...)
-
-      } else if (convert_latex) {
-
-        convert_latex(., digits = digits, ...)
-
-      } else
-        .
     }
+
+
+  if (convert_kable) {
+
+    result.table %>% convert_kable(., digits = digits, ...)
+  }
+
+  if (convert_latex) {
+
+    result.table %>% convert_latex(., digits = digits, ...)
+  }
+
+  result.table
+
 }
 
 convert_kable <- function(data, format = "html", digits = 4,  ...) {
