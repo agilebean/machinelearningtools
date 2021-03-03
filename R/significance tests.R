@@ -152,7 +152,8 @@ print_html <- function(data_set,
                        stat_type,
                        grouping = NULL,
                        param_var = "parameter",
-                       convert_kable = TRUE,
+                       convert_kable = FALSE,
+                       convert_latex = FALSE,
                        digits = 4) {
 
   data_set %>%
@@ -210,22 +211,35 @@ print_html <- function(data_set,
     } %>%
     {
       if (convert_kable) {
-        convert_kable(digits = digits)
-      } else if () {
+
+        convert_kable(digits = digits, ...)
+
+      } else if (convert_latex) {
+
+        convert_latex(digits = digits, ...)
 
       } else
         .
     }
 }
 
-convert_kable <- function(data, digits = 4) {
+convert_kable <- function(data, digits = 4, format = "html") {
 
+  require(knitr)
+  require(kableExtra)
   data %>%
-    knitr::kable(format = "html", digits = digits) %>%
+    knitr::kable(format = format, digits = digits) %>%
     kableExtra::kable_styling(bootstrap_options = c("bordered", "hover")) %>% print
 
 }
 
+convert_latex <- function(data, digits = 4, ...) {
+
+  require(xtable)
+  data %>%
+    xtable(digits = digits, ...)
+
+}
 
 analyze_aov <- function(
   data_object, nesting_labels, formula_aov,
