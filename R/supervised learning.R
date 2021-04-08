@@ -74,7 +74,7 @@ get_model_metrics <- function(models_list,
                               target_label = NULL,
                               testing_set = NULL,
                               median_sort = FALSE,
-                              palette = "Set1", direction = 1,
+                              palette = "Set1",
                               colors = NULL,
                               boxplot_fill = "grey95",
                               boxplot_color = "grey25") {
@@ -110,9 +110,11 @@ get_model_metrics <- function(models_list,
   if (is.factor(target)) {
     metric1 = "Accuracy"
     metric2 = "Kappa"
+    reverse = FALSE
   } else if (is.numeric(target)) {
     metric1 = "RMSE"
     metric2 = "Rsquared"
+    reverse = TRUE
   }
 
   ### get metrics from original resamples' folds
@@ -131,9 +133,9 @@ get_model_metrics <- function(models_list,
 
   ### visualize the resampling distribution from cross-validation
   metric1.resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values, metric1, palette)
+    resamples.values, metric1, palette, reverse)
   metric2.resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values, metric2, palette)
+    resamples.values, metric2, palette, reverse)
 
   if (!is.null(testing.set)) {
     metrics.testing <- get_testingset_performance(
@@ -262,13 +264,14 @@ visualize_resamples_boxplots <- function(
   resamples_values,
   METRIC,
   palette = "Set1",
+  reverse = FALSE,
   color_count = NULL,
   dot_size = NULL,
   boxplot_fill = "grey95",
   boxplot_color = "grey25",
   colors = NULL,
   exclude_light_hues = NULL
-  ) {
+) {
   require(dplyr)
   require(ggplot2)
   require(RColorBrewer)
@@ -277,7 +280,16 @@ visualize_resamples_boxplots <- function(
   if (is.null(dot_size)) dot_size <- 1/logb(nrow(resamples_values), 5)
 
   # extract the resamples values for selected METRIC (e.g. "Accuracy" or "RMSE")
-  resamples_by_metric <- resamples_values %>% dplyr::select(ends_with(METRIC))
+  resamples.by.metric <- resamples_values %>%
+    dplyr::select(ends_with(METRIC)) %>%
+    purrr::set_names(~ gsub(paste0("~", METRIC), "", .)) %>%
+    drop_na() %>%
+    pivot_longer(
+      cols = everything(),
+      names_to = "model",
+      values_to = METRIC,
+      names_transform = list(model = as.factor)
+    ) %>% print
 
   # create HEX color codes from palette with 8+ colors
   ## Source: http://novyden.blogspot.com/2013/09/how-to-expand-color-palette-with-ggplot.html
@@ -289,38 +301,42 @@ visualize_resamples_boxplots <- function(
   }
 
   # the # colors needed depends on # extracted resamples for selected METRIC
-  if (is.null(color_count)) color_count <- ncol(resamples_by_metric)
+  if (is.null(color_count)) color_count <- ncol(resamples_values)
 
   # generate the color palette by extrapolation from color.codes to color_count
-  color.palette.generated <- colorRampPalette(color.codes)(color_count)
+  color.palette.generated <- colorRampPalette(color.codes)(color_count) %T>% print
 
-  resamples.boxplots <- resamples_by_metric %>%
-    purrr::set_names(~ gsub(paste0("~", METRIC), "", .)) %>%
-    drop_na() %>%
-    gather(key = model, value = METRIC) %>%
+  resamples.boxplots <- resamples.by.metric %>%
     ggplot(aes(
-      x = reorder(model, METRIC, median),
-      y = METRIC,
+      {
+        if (reverse) {
+          x = reorder(model, desc(!!sym(METRIC)), median)
+        } else {
+          x = reorder(model, !!sym(METRIC), median)
+        }
+      },
+      y = !!sym(METRIC),
       color = model
     )) +
-    theme_minimal() +
-    geom_jitter(size = dot_size) +
     geom_boxplot(
       width = 0.7,
       fill = boxplot_fill,
       color = boxplot_color,
       alpha = 0.3
     ) +
+    geom_jitter(size = dot_size) +
     coord_flip() +
     scale_color_manual(
       values = if (!is.null(colors)) colors else color.palette.generated
     ) +
     labs(x = "model", y = METRIC) +
+    theme_minimal() +
     theme(
       legend.position = "none",
       axis.title = element_text(size = 14),
       axis.text = element_text(size = 14)
     )
+
   return(resamples.boxplots)
 }
 
