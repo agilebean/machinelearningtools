@@ -304,7 +304,7 @@ visualize_resamples_boxplots <- function(
   if (is.null(color_count)) color_count <- ncol(resamples_values)
 
   # generate the color palette by extrapolation from color.codes to color_count
-  color.palette.generated <- colorRampPalette(color.codes)(color_count) %T>% print
+  color.palette.generated <- colorRampPalette(color.codes)(color_count)
 
   resamples.boxplots <- resamples.by.metric %>%
     ggplot(aes(
