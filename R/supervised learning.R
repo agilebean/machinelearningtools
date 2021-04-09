@@ -75,6 +75,7 @@ get_model_metrics <- function(models_list,
                               testing_set = NULL,
                               median_sort = FALSE,
                               palette = "Set1",
+                              # descending = FALSE,
                               colors = NULL,
                               boxplot_fill = "grey95",
                               boxplot_color = "grey25") {
@@ -110,11 +111,14 @@ get_model_metrics <- function(models_list,
   if (is.factor(target)) {
     metric1 = "Accuracy"
     metric2 = "Kappa"
-    reverse = FALSE
+    metric1.descending = FALSE
+    metric2.descending = FALSE
+
   } else if (is.numeric(target)) {
     metric1 = "RMSE"
     metric2 = "Rsquared"
-    reverse = TRUE
+    metric1.descending = TRUE
+    metric2.descending = FALSE
   }
 
   ### get metrics from original resamples' folds
@@ -133,9 +137,9 @@ get_model_metrics <- function(models_list,
 
   ### visualize the resampling distribution from cross-validation
   metric1.resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values, metric1, palette, reverse)
+    resamples.values, metric1, palette, metric1.descending)
   metric2.resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values, metric2, palette, reverse)
+    resamples.values, metric2, palette, metric2.descending)
 
   if (!is.null(testing.set)) {
     metrics.testing <- get_testingset_performance(
@@ -264,7 +268,7 @@ visualize_resamples_boxplots <- function(
   resamples_values,
   METRIC,
   palette = "Set1",
-  reverse = FALSE,
+  descending = FALSE,
   color_count = NULL,
   dot_size = NULL,
   boxplot_fill = "grey95",
@@ -309,7 +313,7 @@ visualize_resamples_boxplots <- function(
   resamples.boxplots <- resamples.by.metric %>%
     ggplot(aes(
       {
-        if (reverse) {
+        if (descending) {
           x = reorder(model, desc(!!sym(METRIC)), median)
         } else {
           x = reorder(model, !!sym(METRIC), median)
