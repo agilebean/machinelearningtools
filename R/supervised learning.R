@@ -75,7 +75,7 @@ get_model_metrics <- function(models_list,
                               testing_set = NULL,
                               median_sort = FALSE,
                               palette = "Set1",
-                              # descending = FALSE,
+                              reverse = FALSE,
                               colors = NULL,
                               boxplot_fill = "grey95",
                               boxplot_color = "grey25") {
@@ -119,6 +119,12 @@ get_model_metrics <- function(models_list,
     metric2 = "Rsquared"
     metric1.descending = TRUE
     metric2.descending = FALSE
+  }
+
+  # reverse default sorting order
+  if (reverse) {
+    metric1.descending %<>% !.
+    metric2.descending %<>% !.
   }
 
   ### get metrics from original resamples' folds
@@ -293,7 +299,7 @@ visualize_resamples_boxplots <- function(
       names_to = "model",
       values_to = METRIC,
       names_transform = list(model = as.factor)
-    ) %>% print
+    )
 
   # create HEX color codes from palette with 8+ colors
   ## Source: http://novyden.blogspot.com/2013/09/how-to-expand-color-palette-with-ggplot.html
