@@ -825,7 +825,7 @@ get_testingset_performance <- function(
 # input caret::train object
 ################################################################################
 visualize_importance <- function (
-  model_object, relative = FALSE, labels = FALSE) {
+  model_object, relative = FALSE, labels = FALSE, axis_limit = NULL) {
 
   require(caret)
   require(gbm)
@@ -877,7 +877,12 @@ visualize_importance <- function (
     coord_flip() +
     theme(axis.title = element_text(size = 12),
           axis.text = element_text(size = 12)) +
-    # scale_y_continuous(expand = c(0, 0), limits = c(0, 102)) +
+    {
+      if (!is.null(axis_limit)) {
+        scale_y_continuous(expand = c(0, 0),
+                           limits = c(0, axis_limit))
+      }
+    } +
     labs(
       x = "item",
       y = unit.label
