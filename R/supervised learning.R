@@ -117,14 +117,16 @@ get_model_metrics <- function(models_list,
   } else if (is.numeric(target)) {
     metric1 = "RMSE"
     metric2 = "Rsquared"
+    metric3 = "R"
     metric1.descending = TRUE
     metric2.descending = FALSE
+    metric3.descending = FALSE
   }
 
-  # reverse default sorting order
   if (reverse) {
-    metric1.descending %<>% !.
-    metric2.descending %<>% !.
+    metric1.descending
+    metric2.descending
+    metric3.descending
   }
 
   ### get metrics from original resamples' folds
@@ -133,19 +135,36 @@ get_model_metrics <- function(models_list,
     # retrieve RMSE, Rsquared but not MAE
     ## tricky: select without dplyr:: prefix does NOT work
     # dplyr::select(ends_with("RMSE"), ends_with("Rsquared"))
-    dplyr::select(ends_with(metric1), ends_with(metric2))
+    dplyr::select(ends_with(metric1), ends_with(metric2)) %>%
+    # calculate R from R-squared variables
+    mutate(
+      across(
+        .cols = ends_with(metric2), # R-squared
+        .fns = sqrt,
+        .names = "{.col}.R"
+      )
+    ) %>%
+    set_names(~gsub(paste0(metric2, ".R"), "R", .)) %>% print
 
   ### calculate mean and sd for each metric
   metric1.training <- get_metric_from_resamples(
     resamples.values, metric1, median_sort)
   metric2.training <- get_metric_from_resamples(
     resamples.values, metric2, median_sort)
+  metric3.training <- if (is.numeric(target)) {
+    get_metric_from_resamples(resamples.values, metric3, median_sort)
+  } else {
+    NULL
+  }
 
   ### visualize the resampling distribution from cross-validation
   metric1.resamples.boxplots <- visualize_resamples_boxplots(
     resamples.values, metric1, palette, metric1.descending)
   metric2.resamples.boxplots <- visualize_resamples_boxplots(
     resamples.values, metric2, palette, metric2.descending)
+  metric3.resamples.boxplots <- visualize_resamples_boxplots(
+    resamples.values, metric3, palette, metric3.descending)
+
 
   if (!is.null(testing.set)) {
     metrics.testing <- get_testingset_performance(
@@ -155,7 +174,7 @@ get_model_metrics <- function(models_list,
     metrics.testing <- NULL
   }
 
-  if (is.factor(target)) {
+  if (is.factor(target)) { # classification
 
     benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
       {
@@ -169,9 +188,10 @@ get_model_metrics <- function(models_list,
       } %>%
       as_tibble(.)
 
-  } else if (is.numeric(target)) {
+  } else if (is.numeric(target)) { # regression
 
     benchmark.all <- merge(metric1.training, metric2.training, by = "model") %>%
+      merge(metric3.training, by = "model") %>%
       {
         if (!is.null(metrics.testing)) {
           # tricky: within conditional {} block, must reference to LHS (.)
@@ -190,8 +210,10 @@ get_model_metrics <- function(models_list,
               resamples.values = resamples.values,
               metric1.training = metric1.training,
               metric2.training = metric2.training,
-              metric2.resamples.boxplots = metric2.resamples.boxplots,
+              metric3.training = metric3.training,
               metric1.resamples.boxplots = metric1.resamples.boxplots,
+              metric2.resamples.boxplots = metric2.resamples.boxplots,
+              metric3.resamples.boxplots = metric3.resamples.boxplots,
               metrics.testing = metrics.testing,
               benchmark.all = benchmark.all
   ))
