@@ -144,7 +144,7 @@ get_model_metrics <- function(models_list,
         .names = "{.col}.R"
       )
     ) %>%
-    set_names(~gsub(paste0(metric2, ".R"), "R", .)) %>% print
+    set_names(~gsub(paste0(metric2, ".R"), "R", .))
 
   ### calculate mean and sd for each metric
   metric1.training <- get_metric_from_resamples(
