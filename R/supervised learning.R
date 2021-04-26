@@ -159,11 +159,11 @@ get_model_metrics <- function(models_list,
 
   ### visualize the resampling distribution from cross-validation
   metric1.resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values, metric1, palette, metric1.descending)
+    resamples.values, metric1, palette, colors = colors, metric1.descending)
   metric2.resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values, metric2, palette, metric2.descending)
+    resamples.values, metric2, palette, colors = colors, metric2.descending)
   metric3.resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values, metric3, palette, metric3.descending)
+    resamples.values, metric3, palette, colors = colors, metric3.descending)
 
 
   if (!is.null(testing.set)) {
