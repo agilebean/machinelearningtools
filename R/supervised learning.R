@@ -847,7 +847,10 @@ get_testingset_performance <- function(
 # input caret::train object
 ################################################################################
 visualize_importance <- function (
-  model_object, relative = FALSE, labels = FALSE, axis_limit = NULL) {
+  model_object,
+  relative = FALSE, labels = FALSE, axis_limit = NULL,
+  save_label = "", width = 4, height = 3, dpi = 300
+  ) {
 
   require(caret)
   require(gbm)
@@ -909,6 +912,16 @@ visualize_importance <- function (
       x = "item",
       y = unit.label
     )
+
+  if (save_label != "") {
+    ggsave(
+      filename = save_label,
+      plot = importance.plot,
+      dpi = dpi,
+      width = width,
+      height = height
+    )
+  }
 
   return(
     list(
