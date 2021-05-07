@@ -848,9 +848,10 @@ get_testingset_performance <- function(
 ################################################################################
 visualize_importance <- function (
   model_object,
-  relative = FALSE, labels = FALSE, axis_limit = NULL,
-  save_label = "", width = 4, height = 3, dpi = 300
-  ) {
+  relative = FALSE, axis_limit = NULL,
+  text_labels = FALSE, axis_tick_labels = NULL, save_label = "",
+  width = 4, height = 3, dpi = 300
+) {
 
   require(caret)
   require(gbm)
@@ -890,9 +891,8 @@ visualize_importance <- function (
     theme_minimal() +
     geom_bar(stat = "identity", fill = "#114151") +
     {
-      if (labels) {
+      if (text_labels) {
         geom_text(aes(label = round(!!unit.variable, digits = 2)),
-                  # width = 3,
                   position = position_dodge(width = 5),
                   hjust = -0.1,
                   check_overlap = TRUE
@@ -906,6 +906,11 @@ visualize_importance <- function (
       if (!is.null(axis_limit)) {
         scale_y_continuous(expand = c(0, 0),
                            limits = c(0, axis_limit))
+      }
+    } +
+    {
+      if (!is.null(axis_tick_labels)) {
+        scale_x_discrete(labels = axis_tick_labels)
       }
     } +
     labs(
