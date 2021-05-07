@@ -847,10 +847,14 @@ get_testingset_performance <- function(
 # input caret::train object
 ################################################################################
 visualize_importance <- function (
-  model_object,
-  relative = FALSE, axis_limit = NULL,
-  text_labels = FALSE, axis_tick_labels = NULL, save_label = "",
-  width = 4, height = 3, dpi = 300
+  model_object, # caret::train object
+  relative = FALSE, # calculate relative importance scores (not normalized)
+  axis_label = NULL, # label for vertical axis
+  axis_tick_labels = NULL, # labels for items/facets/factors
+  text_labels = FALSE, # labels showing numeric scores next to bar
+  axis_limit = NULL, # max. axis score displayed
+  width = 4, height = 3, dpi = 300, # specs for saved plot
+  save_label = "" # filename for saved plot
 ) {
 
   require(caret)
@@ -858,8 +862,8 @@ visualize_importance <- function (
   require(dplyr)
   require(ggplot2)
 
-
-  importance_object <- model_object %>% varImp
+  # calculate feature importance
+  importance_object <- model_object %>% caret::varImp()
 
   unit.label <- ifelse(relative, "%RI", "importance") %T>% print
   unit.variable <- rlang::sym(unit.label)
@@ -914,7 +918,7 @@ visualize_importance <- function (
       }
     } +
     labs(
-      x = "item",
+      x = axis_label,
       y = unit.label
     )
 
@@ -934,6 +938,7 @@ visualize_importance <- function (
       importance.plot = importance.plot
     ))
 }
+
 
 ################################################################################
 # List variable importance
