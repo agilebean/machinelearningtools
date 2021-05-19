@@ -902,7 +902,7 @@ visualize_importance <- function (
                   position = position_dodge(width = 5),
                   hjust = -0.1,
                   check_overlap = TRUE,
-                  size = font_size
+                  size = font_size * 0.33
         )
       }
     } +
