@@ -902,7 +902,9 @@ visualize_importance <- function (
                   position = position_dodge(width = 5),
                   hjust = -0.1,
                   check_overlap = TRUE,
-                  size = font_size * 0.33
+                  # tricky: font size must be scaled down
+                  # https://stackoverflow.com/a/17312440/7769076
+                  size = font_size / ggplot2:::.pt
         )
       }
     } +
