@@ -50,14 +50,15 @@ perform_max_SMOTE <- function(
 # input: caret::train object
 ################################################################################
 print_correlation_table_from_model <- function(
-  model_object, digits = 3) {
+  model_object, target_label, digits = 3) {
 
   # must set digits = 4 for mean() to return 3 decimals
   options.digits.bak <- getOption("digits")
   options(digits = digits)
 
   data.input <- model_object$trainingData %>%
-    select(JobPerf = .outcome, everything()) %>%
+    select(!!target_label := .outcome, everything()) %>%
+    select(is.numeric) %>%
     as_tibble()
 
   # 1) for final table, move all variable names to rows
