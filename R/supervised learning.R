@@ -855,6 +855,7 @@ visualize_importance <- function (
   axis_limit = NULL, # max. axis score displayed
   width = 4, height = 3, dpi = 300, # specs for saved plot
   fill_color = "#114151",
+  font_size = "10",
   save_label = "" # filename for saved plot
 ) {
 
@@ -905,8 +906,8 @@ visualize_importance <- function (
       }
     } +
     coord_flip() +
-    theme(axis.title = element_text(size = 12),
-          axis.text = element_text(size = 12)) +
+    theme(axis.title = element_text(size = font_size),
+          axis.text = element_text(size = font_size)) +
     {
       if (!is.null(axis_limit)) {
         scale_y_continuous(expand = c(0, 0),
