@@ -901,7 +901,8 @@ visualize_importance <- function (
         geom_text(aes(label = round(!!unit.variable, digits = 2)),
                   position = position_dodge(width = 5),
                   hjust = -0.1,
-                  check_overlap = TRUE
+                  check_overlap = TRUE,
+                  size = font_size
         )
       }
     } +
