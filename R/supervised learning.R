@@ -855,7 +855,7 @@ visualize_importance <- function (
   axis_limit = NULL, # max. axis score displayed
   width = 4, height = 3, dpi = 300, # specs for saved plot
   fill_color = "#114151",
-  font_size = "10",
+  font_size = 10,
   save_label = "" # filename for saved plot
 ) {
 
