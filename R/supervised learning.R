@@ -854,6 +854,7 @@ visualize_importance <- function (
   text_labels = FALSE, # labels showing numeric scores next to bar
   axis_limit = NULL, # max. axis score displayed
   width = 4, height = 3, dpi = 300, # specs for saved plot
+  fill_color = "#114151",
   save_label = "" # filename for saved plot
 ) {
 
@@ -893,7 +894,7 @@ visualize_importance <- function (
     ggplot(data = .,
            aes(x = reorder(variable, !!unit.variable), y = !!unit.variable)) +
     theme_minimal() +
-    geom_bar(stat = "identity", fill = "#114151") +
+    geom_bar(stat = "identity", fill = fill_color) +
     {
       if (text_labels) {
         geom_text(aes(label = round(!!unit.variable, digits = 2)),
