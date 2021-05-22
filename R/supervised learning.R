@@ -867,7 +867,7 @@ visualize_importance <- function (
   # calculate feature importance
   importance_object <- model_object %>% caret::varImp()
 
-  unit.label <- ifelse(relative, "%RI", "importance") %T>% print
+  unit.label <- ifelse(relative, "%RI", "importance")
   unit.variable <- rlang::sym(unit.label)
 
 
