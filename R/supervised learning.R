@@ -109,12 +109,16 @@ get_model_metrics <- function(models_list,
   target <- models_list[[1]]$trainingData$.outcome
 
   if (is.factor(target)) {
+
     metric1 = "Accuracy"
     metric2 = "Kappa"
+    metric3 = NULL
     metric1.descending = FALSE
     metric2.descending = FALSE
+    metric3.descending = FALSE
 
   } else if (is.numeric(target)) {
+
     metric1 = "RMSE"
     metric2 = "Rsquared"
     metric3 = "R"
@@ -151,20 +155,23 @@ get_model_metrics <- function(models_list,
     resamples.values, metric1, median_sort)
   metric2.training <- get_metric_from_resamples(
     resamples.values, metric2, median_sort)
-  metric3.training <- if (is.numeric(target)) {
-    get_metric_from_resamples(resamples.values, metric3, median_sort)
-  } else {
+  metric3.training <- ifelse (
+    !is.null(metric3), # instead of: is.numeric(target) = test on a vector
+    get_metric_from_resamples(resamples.values, metric3, median_sort),
     NULL
-  }
+  )
 
   ### visualize the resampling distribution from cross-validation
   metric1.resamples.boxplots <- visualize_resamples_boxplots(
     resamples.values, metric1, palette, colors = colors, metric1.descending)
   metric2.resamples.boxplots <- visualize_resamples_boxplots(
     resamples.values, metric2, palette, colors = colors, metric2.descending)
-  metric3.resamples.boxplots <- visualize_resamples_boxplots(
-    resamples.values, metric3, palette, colors = colors, metric3.descending)
 
+  metric3.resamples.boxplots <- ifelse (
+    !is.null(metric3),
+    visualize_resamples_boxplots(
+      resamples.values, metric3, palette, colors = colors, metric3.descending),
+    NULL)
 
   if (!is.null(testing.set)) {
     metrics.testing <- get_testingset_performance(
