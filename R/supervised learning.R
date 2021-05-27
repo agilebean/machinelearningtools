@@ -155,7 +155,7 @@ get_model_metrics <- function(models_list,
     resamples.values, metric1, median_sort)
   metric2.training <- get_metric_from_resamples(
     resamples.values, metric2, median_sort)
-  metric3.training <- ifelse (
+  metric3.training <- switch (
     !is.null(metric3), # instead of: is.numeric(target) = test on a vector
     get_metric_from_resamples(resamples.values, metric3, median_sort),
     NULL
@@ -167,7 +167,7 @@ get_model_metrics <- function(models_list,
   metric2.resamples.boxplots <- visualize_resamples_boxplots(
     resamples.values, metric2, palette, colors = colors, metric2.descending)
 
-  metric3.resamples.boxplots <- ifelse (
+  metric3.resamples.boxplots <- switch (
     !is.null(metric3),
     visualize_resamples_boxplots(
       resamples.values, metric3, palette, colors = colors, metric3.descending),
