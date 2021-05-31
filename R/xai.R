@@ -371,6 +371,63 @@ get_pimp_range_List_models_list <- function(
 }
 
 ################################################################################
+# save feature importance plots
+################################################################################
+save_pimp_plots <- function(
+  datasets_pimp_lists,
+  model_string = "",
+  scaling_factor = 1,
+  width = "automatic",
+  height = "automatic",
+  axis_tick_labels = NULL) {
+
+  pimp.max <- datasets_pimp_lists %>%
+    get_pimp_range_List_models_list(model_string) %>%
+    max %>%
+    print
+
+  pimp.min <- datasets_pimp_lists %>%
+    get_pimp_range_List_models_list(model_string, min) %>%
+    min %>%
+    print
+
+  no.features <- function(model) {
+    model %>%
+      pluck("DALEX.explainer") %>%
+      pluck("data") %>%
+      ncol %>% print
+  }
+
+  datasets_pimp_lists %>%
+    get_list_elements_by_string(model_string) %>%
+    imap(function(model, model_label) {
+      model %>%
+        imap(
+          ~ .x %>%
+            {
+              .$DALEX.permutation.fi.plot +
+                # same scale on flipped x-asis for same datasets_pimp_lists
+                scale_y_continuous(limits = c(pimp.min, pimp.max)) +
+                # next layer must be added within code block of plot object
+                {
+                  if (!is.null(axis_tick_labels)) {
+                    scale_x_discrete(labels = axis_tick_labels)
+                  }
+                }
+            } %>%
+            ggsave(
+              filename = paste0(c("figures/pimp", model_label, .y, "png"), collapse = "."),
+              plot = .,
+              scale = scaling_factor,
+              width = ifelse(is.numeric(width), width, log(no.features(.x)) * 3),
+              height = ifelse(is.numeric(height), height, log(no.features(.x)) * 2.2),
+              dpi = 150
+            )
+        )
+    })
+}
+
+################################################################################
 # List variable importance scores
 # input caret::train object
 ################################################################################
