@@ -261,3 +261,34 @@ get_xai_explanations <- function(
       )
     })
 }
+
+
+
+visualize_varImp <- function (
+  model_object,
+  x_label = "",
+  y_label = "feature importance",
+  fill_color = "#114151") {
+
+  require(caret)
+
+  importance_object <- model_object %>% varImp()
+
+  if (class(importance_object) == "varImp.train") {
+    importance_object %<>% .$importance
+  }
+  if (!hasName(importance_object, "rowname")) {
+    importance_object %<>% rownames_to_column()
+  }
+
+  importance_object %>%
+    setNames(c("variable", "Importance")) %>%
+    ggplot(data = ., aes(x = reorder(variable, Importance), y = Importance)) +
+    theme_minimal() +
+    geom_bar(stat = "identity", fill = fill_color) +
+    coord_flip() +
+    theme(axis.title = element_text(size = 12),
+          axis.text = element_text(size = 12)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 102)) +
+    xlab(x_label) + ylab(y_label)
+}
