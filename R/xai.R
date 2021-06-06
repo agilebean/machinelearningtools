@@ -19,7 +19,7 @@ get_xai_explanations <- function(
   suffix = NULL,
   width = 6, height = 6,
   get_DALEX_explainer = TRUE,
-  get_residual_plot_DALEX = TRUE,
+  get_DALEX_residual_plot = TRUE,
   get_DALEX_variable_importance = FALSE,
   get_DALEX_variable_importance_plot = TRUE,
   get_DALEX_pdp_plot = TRUE,
@@ -34,7 +34,7 @@ get_xai_explanations <- function(
 
   require(ggplot2) # ggsave
 
-  if (get_explainer_DALEX) {
+  if (get_DALEX_explainer) {
     require(DALEX)
     require(iBreakDown)
     require(ingredients)
@@ -80,7 +80,7 @@ get_xai_explanations <- function(
       DALEX.performance <- DALEX.explainer %>%
         DALEX::model_performance()
 
-      DALEX.residual.plot <- if (get_residual_plot_DALEX) {
+      DALEX.residual.plot <- if (get_DALEX_residual_plot) {
 
           DALEX.performance %>% plot(geom = "histogram")
 
