@@ -212,7 +212,7 @@ get_xai_explanations <- function(
         NULL
       }
 
-      DALEX.shapley <- if (get_DALEX_shapley_plot &
+      DALEX.shapley.plot <- if (get_DALEX_shapley_plot &
                            !is.null(DALEX.explainer)) {
 
         print("*** DALEX.shapley.plot")
