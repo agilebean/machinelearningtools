@@ -40,7 +40,7 @@ get_xai_explanations <- function(
     require(iBreakDown)
     require(ingredients)
   }
-  if (get_explainer_LIME) require(lime)
+  if (get_LIME_explainer) require(lime)
 
   xai.list <- models_list %>%
 
@@ -223,7 +223,7 @@ get_xai_explanations <- function(
       }
 
 
-      LIME.explainer <- if (get_explainer_LIME) {
+      LIME.explainer <- if (get_LIME_explainer) {
 
         print("*** LIME.explainer")
         lime::lime(
