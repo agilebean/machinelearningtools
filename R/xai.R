@@ -4,7 +4,6 @@
 #
 ################################################################################
 
-
 ######################################################################
 # Function get_xai_explanations()
 # IN:   models_list (list) containing caret models
@@ -20,6 +19,7 @@ get_xai_explanations <- function(
   suffix = NULL,
   width = 6, height = 6,
   get_explainer_DALEX = TRUE,
+  get_residual_plot_DALEX = FALSE,
   get_varImp_DALEX = FALSE,
   get_plot_varImp_DALEX = FALSE,
   get_pdp_plot_DALEX = FALSE,
@@ -71,6 +71,17 @@ get_xai_explanations <- function(
           label = paste(model_object$method, " model"),
           colorize = TRUE
         )
+      } else {
+        NULL
+      }
+
+      # for residual plots by plot(geom = "histogram")
+      performance.DALEX <- explainer.DALEX %>%
+        DALEX::model_performance()
+
+      plot.residual.DALEX <- if (get_residual_plot_DALEX) {
+
+          performance.DALEX %>% plot(geom = histogram)
       } else {
         NULL
       }
@@ -248,6 +259,7 @@ get_xai_explanations <- function(
       return(
         list(
           explainer.DALEX = explainer.DALEX
+          , performance.DALEX = performance.DALEX
           , varImp.DALEX = varImp.DALEX
           , plot.varImp.DALEX = plot.varImp.DALEX
           , plot.pdp.DALEX = plot.pdp.DALEX
@@ -268,11 +280,13 @@ get_xai_explanations <- function(
 get_pimp_for_models_list <- function(
   models_list, no_permutations = 50, seed = 171) {
 
+  require(dplyr)
+  require(DALEX)
+
   fi.list.DALEX <- models_list %>%
 
     imap(function(model_object, model_name) {
 
-      # model_object <- models.list$SVM
       print(paste("*********", model_object$method))
 
       training.set <- model_object$trainingData %>%
