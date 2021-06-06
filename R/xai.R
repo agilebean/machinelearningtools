@@ -18,13 +18,14 @@ get_xai_explanations <- function(
   save_path = NULL,
   suffix = NULL,
   width = 6, height = 6,
-  get_explainer_DALEX = TRUE,
+  get_DALEX_explainer = TRUE,
   get_residual_plot_DALEX = TRUE,
-  get_varImp_DALEX = FALSE,
-  get_plot_varImp_DALEX = TRUE,
-  get_pdp_plot_DALEX = TRUE,
-  get_plot_attribution_DALEX = TRUE,
-  get_plot_attribution_uncertainty_DALEX = FALSE,
+  get_DALEX_variable_importance = FALSE,
+  get_DALEX_variable_importance_plot = TRUE,
+  get_DALEX_pdp_plot = TRUE,
+  get_DALEX_attribution_plot = TRUE,
+  get_DALEX_attribution_text = TRUE,
+  get_DALEX_attribution_uncertainty_plot = FALSE,
   get_explainer_LIME = FALSE,
   get_explanation_LIME = FALSE,
   get_plot_features_LIME = FALSE,
@@ -60,9 +61,9 @@ get_xai_explanations <- function(
         training.set %>% sample_n(local_no)
       }
 
-      explainer.DALEX <- if (get_explainer_DALEX) {
+      DALEX.explainer <- if (get_DALEX_explainer) {
 
-        print("*** explainer.DALEX")
+        print("*** DALEX.explainer")
 
         DALEX::explain(
           model = model_object,
@@ -76,38 +77,38 @@ get_xai_explanations <- function(
       }
 
       # for residual plots by plot(geom = "histogram")
-      performance.DALEX <- explainer.DALEX %>%
+      DALEX.performance <- DALEX.explainer %>%
         DALEX::model_performance()
 
-      plot.residual.DALEX <- if (get_residual_plot_DALEX) {
+      DALEX.residual.plot <- if (get_residual_plot_DALEX) {
 
-          performance.DALEX %>% plot(geom = "histogram")
-
-      } else {
-        NULL
-      }
-
-      varImp.DALEX <- if (get_varImp_DALEX &
-                          !is.null(explainer.DALEX)) {
-
-        explainer.DALEX %>% variable_importance()
+          DALEX.performance %>% plot(geom = "histogram")
 
       } else {
         NULL
       }
 
-      plot.varImp.DALEX <- if (get_plot_varImp_DALEX &
-                               !is.null(varImp.DALEX)) {
+      DALEX.variable.importance <- if (get_DALEX_variable_importance &
+                          !is.null(DALEX.explainer)) {
 
-        print("*** plot.varImp.DALEX")
+        DALEX.explainer %>% variable_importance()
 
-        varImp.DALEX %>% plot %T>%
+      } else {
+        NULL
+      }
+
+      DALEX.variable.importance.plot <- if (get_DALEX_variable_importance_plot &
+                               !is.null(DALEX.variable.importance)) {
+
+        print("*** DALEX.variable.importance.plot")
+
+        DALEX.variable.importance %>% plot %T>%
         {
           if (!is.null(save_path)) {
             ggsave(
               width = width, height = height,
               filename = paste(
-                c(save_path, "plot.varImp.DALEX", model_object$method,
+                c(save_path, "DALEX.variable.importance.plot", model_object$method,
                 suffix, "png"),
                 collapse = ".")
             )
@@ -117,12 +118,13 @@ get_xai_explanations <- function(
         NULL
       }
 
-      plot.pdp.DALEX <- if (get_pdp_plot_DALEX & !is.null(explainer.DALEX)) {
+      DALEX.pdp.plot <- if (get_DALEX_pdp_plot & !is.null(DALEX.explainer)) {
 
-        print("*** plot.pdp.DALEX")
+        print("*** DALEX.pdp.plot")
 
-        pdp.DALEX <- explainer.DALEX %>% ingredients::partial_dependency()
-        pdp.DALEX %>% plot %T>%
+        DALEX.pdp <- DALEX.explainer %>% ingredients::partial_dependency()
+
+        DALEX.pdp %>% plot %T>%
         {
           if (!is.null(save_path)) {
             ggsave(
@@ -138,20 +140,39 @@ get_xai_explanations <- function(
         NULL
       }
 
-      plot.attribution.DALEX <- if (get_plot_attribution_DALEX &
-                                    !is.null(explainer.DALEX)) {
+      DALEX.attribution <- DALEX.explainer %>%
+        iBreakDown::local_attributions(
+          local.obs,
+          keep_distributions = TRUE
+        )
+      print("*** DALEX.attribution")
 
-        print("*** plot.attribution.DALEX")
+      DALEX.attribution.text <- if(get_DALEX_attribution_text) {
+        DALEX.attribution %>%
+          iBreakDown::describe()
+      } else {
+        NULL
+      }
 
-        explainer.DALEX %>%
-          iBreakDown::local_attributions(local.obs) %>%
-          plot %T>%
+      DALEX.attribution.plot <- if (get_DALEX_attribution_plot &
+                                    !is.null(DALEX.explainer)) {
+
+        print("*** DALEX.attribution.plot")
+
+        DALEX.explainer %>%
+          iBreakDown::local_attributions(
+            local.obs,
+            keep_distributions = TRUE
+            ) %>%
+          plot(
+            shift_contributions = 0.03
+          ) %T>%
           {
             if (!is.null(save_path)) {
               ggsave(
                 width = width, height = height,
                 filename = paste(
-                  c(save_path, "plot.attribution.DALEX", model_object$method,
+                  c(save_path, "DALEX.attribution.plot", model_object$method,
                     suffix, "png"),
                   collapse = ".")
               )
@@ -161,13 +182,18 @@ get_xai_explanations <- function(
         NULL
       }
 
-      plot.attribution.uncertainty.DALEX <- if (
+      DALEX.distribution.plot <- DALEX.attribution %>%
+        plot(plot_distributions = TRUE)
 
-        get_plot_attribution_uncertainty_DALEX &
-        !is.null(explainer.DALEX)) {
+      print("*** DALEX.distribution.plot")
 
-        print("*** plot.attribution.uncertainty.DALEX")
-        explainer.DALEX %>%
+      DALEX.attribution.uncertainty.plot <- if (
+
+        get_DALEX_attribution_uncertainty_plot &
+        !is.null(DALEX.explainer)) {
+
+        print("*** DALEX.attribution.uncertainty.plot")
+        DALEX.explainer %>%
           iBreakDown::break_down_uncertainty(local.obs) %>%
           plot %T>%
           {
@@ -175,7 +201,7 @@ get_xai_explanations <- function(
               ggsave(
                 width = width, height = height,
                 filename = paste(
-                  c(save_path, "plot.attribution.uncertainty.DALEX",
+                  c(save_path, "DALEX.attribution.uncertainty.plot",
                     model_object$method, suffix, "png"),
                   collapse = ".")
               )
@@ -259,13 +285,15 @@ get_xai_explanations <- function(
 
       return(
         list(
-          explainer.DALEX = explainer.DALEX
-          , performance.DALEX = performance.DALEX
-          , varImp.DALEX = varImp.DALEX
-          , plot.varImp.DALEX = plot.varImp.DALEX
-          , plot.pdp.DALEX = plot.pdp.DALEX
-          , plot.attribution.DALEX = plot.attribution.DALEX
-          , plot.attribution.uncertainty.DALEX = plot.attribution.uncertainty.DALEX
+          DALEX.explainer = DALEX.explainer
+          , DALEX.performance = DALEX.performance
+          , DALEX.residual.plot = DALEX.residual.plot
+          , DALEX.variable.importance = DALEX.variable.importance
+          , DALEX.variable.importance.plot = DALEX.variable.importance.plot
+          , DALEX.pdp.plot = DALEX.pdp.plot
+          , DALEX.attribution.plot = DALEX.attribution.plot
+          , DALEX.attribution.uncertainty.plot = DALEX.attribution.uncertainty.plot
+          , DALEX.distribution.plot = DALEX.distribution.plot
           , explainer.LIME = explainer.LIME
           , explanation.LIME = explanation.LIME
           , plot.features.LIME = plot.features.LIME
