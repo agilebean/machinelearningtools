@@ -34,6 +34,7 @@ get_xai_explanations <- function(
 ) {
 
   require(ggplot2) # ggsave
+  require(dplyr)
 
   if (get_DALEX_explainer) {
     require(DALEX)
