@@ -30,7 +30,7 @@ get_xai_explanations <- function(
   get_LIME_explainer = FALSE,
   get_LIME_explanations = FALSE,
   get_LIME_explanations_plot = FALSE,
-  get_LIME_features_plot = FALSE,
+  get_LIME_features_plot = FALSE
 ) {
 
   require(ggplot2) # ggsave
