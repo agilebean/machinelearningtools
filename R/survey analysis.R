@@ -20,6 +20,20 @@ convert_numeric <- function(userdata) {
 }
 
 ######################################################################
+# function preprocess_survey()
+# IN:   data_survey (dataframe)
+# OUT:  output (dataframe) names lowercase & no spaces, removed variables
+#
+######################################################################
+preprocess_survey <- function(data_survey, remove_vars = NULL, sep = "_") {
+
+  data_survey %>%
+    rename_with(~ tolower(.x) %>% gsub(" ", "_", .)) %>%
+    select(-remove_vars)
+
+}
+
+######################################################################
 # Function determine_factor_extraction_no()
 # IN:   items_df (dataframe)
 # OUT:  output (text)
