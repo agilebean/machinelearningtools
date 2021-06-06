@@ -28,9 +28,9 @@ get_xai_explanations <- function(
   get_DALEX_attribution_uncertainty_plot = TRUE,
   get_DALEX_shapley_plot = TRUE,
   get_LIME_explainer = FALSE,
-  get_LIME_explanation = FALSE,
+  get_LIME_explanations = FALSE,
+  get_LIME_explanations_plot = FALSE,
   get_LIME_features_plot = FALSE,
-  get_LIME_explanations_plot = FALSE
 ) {
 
   require(ggplot2) # ggsave
@@ -236,7 +236,7 @@ get_xai_explanations <- function(
       }
 
       LIME.explanation <- if (
-        get_explanation_LIME & !is.null(LIME.explainer)) {
+        get_LIME_explanations & !is.null(LIME.explainer)) {
 
         print("***LIME.explanation")
         lime::explain(
@@ -249,31 +249,8 @@ get_xai_explanations <- function(
         NULL
       }
 
-      LIME.features.plot <- if (
-        get_plot_features_LIME & !is.null(LIME.explainer)) {
-
-        print("***LIME.features.plot")
-        lime::plot_features(
-          LIME.explanation,
-          ncol = 2
-        ) + ggtitle(model_object$method)  %T>%
-          {
-            if (!is.null(save_path)) {
-              ggsave(
-                width = width, height = height,
-                filename = paste(
-                  c(save_path, "LIME.features.plot",
-                    model_object$method, suffix, "png"),
-                  collapse = ".")
-              )
-            }
-          }
-      } else {
-        NULL
-      }
-
       LIME.explanations.plot <- if (
-        get_plot_explanations_LIME & !is.null(LIME.explanation)) {
+        get_LIME_explanations_plot & !is.null(LIME.explanation)) {
 
         print("***LIME.explanations.plot")
         lime::plot_explanations(
@@ -291,6 +268,29 @@ get_xai_explanations <- function(
             }
           }
 
+      } else {
+        NULL
+      }
+
+      LIME.features.plot <- if (
+        get_LIME_features_plot & !is.null(LIME.explainer)) {
+
+        print("***LIME.features.plot")
+        lime::plot_features(
+          LIME.explanation,
+          ncol = 2
+        ) + ggtitle(model_object$method)  %T>%
+          {
+            if (!is.null(save_path)) {
+              ggsave(
+                width = width, height = height,
+                filename = paste(
+                  c(save_path, "LIME.features.plot",
+                    model_object$method, suffix, "png"),
+                  collapse = ".")
+              )
+            }
+          }
       } else {
         NULL
       }
