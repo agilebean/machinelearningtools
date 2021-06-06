@@ -25,11 +25,12 @@ get_xai_explanations <- function(
   get_DALEX_pdp_plot = TRUE,
   get_DALEX_attribution_plot = TRUE,
   get_DALEX_attribution_text = TRUE,
-  get_DALEX_attribution_uncertainty_plot = FALSE,
-  get_explainer_LIME = FALSE,
-  get_explanation_LIME = FALSE,
-  get_plot_features_LIME = FALSE,
-  get_plot_explanations_LIME = FALSE
+  get_DALEX_attribution_uncertainty_plot = TRUE,
+  get_DALEX_shapley_plot = TRUE,
+  get_LIME_explainer = FALSE,
+  get_LIME_explanation = FALSE,
+  get_LIME_features_plot = FALSE,
+  get_LIME_explanations_plot = FALSE
 ) {
 
   require(ggplot2) # ggsave
@@ -187,9 +188,8 @@ get_xai_explanations <- function(
 
       print("*** DALEX.distribution.plot")
 
-      DALEX.attribution.uncertainty.plot <- if (
-
-        get_DALEX_attribution_uncertainty_plot &
+      DALEX.attribution.uncertainty.plot <-
+        if (get_DALEX_attribution_uncertainty_plot &
         !is.null(DALEX.explainer)) {
 
         print("*** DALEX.attribution.uncertainty.plot")
@@ -211,9 +211,21 @@ get_xai_explanations <- function(
         NULL
       }
 
-      explainer.LIME <- if (get_explainer_LIME) {
+      DALEX.shapley <- if (get_DALEX_shapley_plot &
+                           !is.null(DALEX.explainer)) {
 
-        print("*** explainer.LIME")
+        print("*** DALEX.shapley.plot")
+
+        DALEX.explainer %>%
+          iBreakDown::shap(random.case,
+                           B = 25) %>%
+          plot()
+      }
+
+
+      LIME.explainer <- if (get_explainer_LIME) {
+
+        print("*** LIME.explainer")
         lime::lime(
           # tricky: features not training.set
           x = features,
@@ -223,26 +235,26 @@ get_xai_explanations <- function(
         NULL
       }
 
-      explanation.LIME <- if (
-        get_explanation_LIME & !is.null(explainer.LIME)) {
+      LIME.explanation <- if (
+        get_explanation_LIME & !is.null(LIME.explainer)) {
 
-        print("***explanation.LIME")
+        print("***LIME.explanation")
         lime::explain(
           # tricky: features not training.set
           x = local.obs %>% select(-.outcome),
-          explainer = explainer.LIME,
+          explainer = LIME.explainer,
           n_features = n_features_lime
         ) %T>% print
       } else {
         NULL
       }
 
-      plot.features.LIME <- if (
-        get_plot_features_LIME & !is.null(explainer.LIME)) {
+      LIME.features.plot <- if (
+        get_plot_features_LIME & !is.null(LIME.explainer)) {
 
-        print("***plot.features.LIME")
+        print("***LIME.features.plot")
         lime::plot_features(
-          explanation.LIME,
+          LIME.explanation,
           ncol = 2
         ) + ggtitle(model_object$method)  %T>%
           {
@@ -250,7 +262,7 @@ get_xai_explanations <- function(
               ggsave(
                 width = width, height = height,
                 filename = paste(
-                  c(save_path, "plot.features.LIME",
+                  c(save_path, "LIME.features.plot",
                     model_object$method, suffix, "png"),
                   collapse = ".")
               )
@@ -260,19 +272,19 @@ get_xai_explanations <- function(
         NULL
       }
 
-      plot.explanations.LIME <- if (
-        get_plot_explanations_LIME & !is.null(explanation.LIME)) {
+      LIME.explanations.plot <- if (
+        get_plot_explanations_LIME & !is.null(LIME.explanation)) {
 
-        print("***plot.explanations.LIME")
+        print("***LIME.explanations.plot")
         lime::plot_explanations(
-          explanation.LIME
+          LIME.explanation
         ) + ggtitle(model_object$method)  %T>%
           {
             if (!is.null(save_path)) {
               ggsave(
                 width = width, height = height,
                 filename = paste(
-                  c(save_path, "plot.explanations.LIME",
+                  c(save_path, "LIME.explanations.plot",
                     model_object$method, suffix, "png"),
                   collapse = ".")
               )
@@ -294,10 +306,11 @@ get_xai_explanations <- function(
           , DALEX.attribution.plot = DALEX.attribution.plot
           , DALEX.attribution.uncertainty.plot = DALEX.attribution.uncertainty.plot
           , DALEX.distribution.plot = DALEX.distribution.plot
-          , explainer.LIME = explainer.LIME
-          , explanation.LIME = explanation.LIME
-          , plot.features.LIME = plot.features.LIME
-          , plot.explanations.LIME = plot.explanations.LIME
+          , DALEX.shapley.plot = DALEX.shapley.plot
+          , LIME.explainer = LIME.explainer
+          , LIME.explanation = LIME.explanation
+          , LIME.explanations.plot = LIME.explanations.plot
+          , LIME.features.plot = LIME.features.plot
         )
       )
     })
