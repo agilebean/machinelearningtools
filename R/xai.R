@@ -81,7 +81,8 @@ get_xai_explanations <- function(
 
       plot.residual.DALEX <- if (get_residual_plot_DALEX) {
 
-          performance.DALEX %>% plot(geom = histogram)
+          performance.DALEX %>% plot(geom = "histogram")
+
       } else {
         NULL
       }
