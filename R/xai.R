@@ -95,13 +95,13 @@ get_xai_explanations <- function(
         get_DALEX_feature_importance &
         !is.null(DALEX.explainer)) {
 
+        print("*** DALEX.permutation.feature.importance")
+
         DALEX.explainer %>%
           model_parts(
             B = no_permutations,
             type = "ratio"
           )
-
-        print("*** DALEX.permutation.fi")
 
       } else {
         NULL
@@ -110,6 +110,8 @@ get_xai_explanations <- function(
       DALEX.feature.importance.plot <- if (
         get_DALEX_feature_importance_plot &
         !is.null(DALEX.feature.importance)) {
+
+        print("*** DALEX.feature.importance.plot")
 
         DALEX.feature.importance %>% plot %T>%
         {
@@ -123,7 +125,6 @@ get_xai_explanations <- function(
             )
           }
         }
-        print("*** DALEX.feature.importance.plot")
 
       } else {
         NULL
