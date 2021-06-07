@@ -97,7 +97,6 @@ get_xai_explanations <- function(
 
         DALEX.explainer %>%
           model_parts(
-            explainer = DALEX.explainer,
             B = no_permutations,
             type = "ratio"
           )
