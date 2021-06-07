@@ -113,7 +113,15 @@ get_xai_explanations <- function(
 
         print("*** DALEX.feature.importance.plot")
 
-        DALEX.feature.importance %>% plot %T>%
+        DALEX.feature.importance %>%
+          plot(
+            bar_width = 20 / log(ncol(features))
+            , show_boxplots = FALSE
+            , title = "Permutation Feature importance"
+            , subtitle = ""
+          ) +
+          # reduce space to axis
+          scale_y_continuous(expand = expansion()) %T>%
         {
           if (!is.null(save_path)) {
             ggsave(
