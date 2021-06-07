@@ -342,7 +342,11 @@ get_xai_explanations <- function(
           , LIME.features.plot = LIME.features.plot
         )
       )
-    })
+    },
+    .options = furrr_options(
+      seed = SEED
+      , packages = c("dplyr", "DALEX")
+    ))
 }
 
 ################################################################################
