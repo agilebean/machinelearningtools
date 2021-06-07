@@ -20,8 +20,9 @@ get_xai_explanations <- function(
   width = 6, height = 6,
   get_DALEX_explainer = TRUE,
   get_DALEX_residual_plot = TRUE,
-  get_DALEX_variable_importance = FALSE,
-  get_DALEX_variable_importance_plot = TRUE,
+  no_permutations = 50,
+  get_DALEX_feature_importance = TRUE,
+  get_DALEX_feature_importance_plot = TRUE,
   get_DALEX_pdp_plot = TRUE,
   get_DALEX_attribution_plot = TRUE,
   get_DALEX_attribution_text = TRUE,
@@ -90,32 +91,41 @@ get_xai_explanations <- function(
         NULL
       }
 
-      DALEX.variable.importance <- if (get_DALEX_variable_importance &
-                          !is.null(DALEX.explainer)) {
+      DALEX.feature.importance <- if (
+        get_DALEX_feature_importance &
+        !is.null(DALEX.explainer)) {
 
-        DALEX.explainer %>% variable_importance()
+        DALEX.explainer %>%
+          model_parts(
+            explainer = DALEX.explainer,
+            B = no_permutations,
+            type = "ratio"
+          )
+
+        print("*** DALEX.permutation.fi")
 
       } else {
         NULL
       }
 
-      DALEX.variable.importance.plot <- if (get_DALEX_variable_importance_plot &
-                               !is.null(DALEX.variable.importance)) {
+      DALEX.feature.importance.plot <- if (
+        get_DALEX_feature_importance_plot &
+        !is.null(DALEX.feature.importance)) {
 
-        print("*** DALEX.variable.importance.plot")
-
-        DALEX.variable.importance %>% plot %T>%
+        DALEX.feature.importance %>% plot %T>%
         {
           if (!is.null(save_path)) {
             ggsave(
               width = width, height = height,
               filename = paste(
-                c(save_path, "DALEX.variable.importance.plot", model_object$method,
+                c(save_path, "DALEX.feature.importance.plot", model_object$method,
                 suffix, "png"),
                 collapse = ".")
             )
           }
         }
+        print("*** DALEX.feature.importance.plot")
+
       } else {
         NULL
       }
@@ -219,7 +229,7 @@ get_xai_explanations <- function(
 
         DALEX.explainer %>%
           iBreakDown::shap(random.case,
-                           B = 25) %>%
+                           B = no_permutations) %>%
           plot()
       }
 
@@ -301,8 +311,8 @@ get_xai_explanations <- function(
           DALEX.explainer = DALEX.explainer
           , DALEX.performance = DALEX.performance
           , DALEX.residual.plot = DALEX.residual.plot
-          , DALEX.variable.importance = DALEX.variable.importance
-          , DALEX.variable.importance.plot = DALEX.variable.importance.plot
+          , DALEX.feature.importance = DALEX.feature.importance
+          , DALEX.feature.importance.plot = DALEX.feature.importance.plot
           , DALEX.pdp.plot = DALEX.pdp.plot
           , DALEX.attribution.plot = DALEX.attribution.plot
           , DALEX.attribution.uncertainty.plot = DALEX.attribution.uncertainty.plot
