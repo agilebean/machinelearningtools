@@ -318,10 +318,11 @@ get_xai_explanations <- function(
         list(
           DALEX.explainer = DALEX.explainer
           , DALEX.performance = DALEX.performance
-          , DALEX.residual.plot = DALEX.residual.plot
           , DALEX.feature.importance = DALEX.feature.importance
           , DALEX.feature.importance.plot = DALEX.feature.importance.plot
+          , DALEX.residual.plot = DALEX.residual.plot
           , DALEX.pdp.plot = DALEX.pdp.plot
+          , DALEX.attribution.text = DALEX.attribution.text
           , DALEX.attribution.plot = DALEX.attribution.plot
           , DALEX.attribution.uncertainty.plot = DALEX.attribution.uncertainty.plot
           , DALEX.distribution.plot = DALEX.distribution.plot
