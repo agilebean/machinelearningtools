@@ -36,6 +36,7 @@ get_xai_explanations <- function(
 
   require(ggplot2) # ggsave
   require(dplyr)
+  require(furrr)
 
   if (get_DALEX_explainer) {
     require(DALEX)
@@ -44,9 +45,12 @@ get_xai_explanations <- function(
   }
   if (get_LIME_explainer) require(lime)
 
+  options(parallelly.fork.enable = TRUE)
+  plan(multicore, workers = 8)
+
   xai.list <- models_list %>%
 
-    map(function(model_object) {
+    future_map(function(model_object) {
 
       print(paste("*********", model_object$method))
       training.set <- model_object$trainingData %>%
@@ -168,6 +172,9 @@ get_xai_explanations <- function(
       print("*** DALEX.attribution")
 
       DALEX.attribution.text <- if(get_DALEX_attribution_text) {
+
+        print("*** DALEX.attribution.text")
+
         DALEX.attribution %>%
           iBreakDown::describe()
       } else {
@@ -202,33 +209,35 @@ get_xai_explanations <- function(
         NULL
       }
 
+      DALEX.attribution.uncertainty.plot <-
+        if (get_DALEX_attribution_uncertainty_plot &
+            !is.null(DALEX.explainer)) {
+
+          print("*** DALEX.attribution.uncertainty.plot")
+          DALEX.explainer %>%
+            iBreakDown::break_down_uncertainty(local.obs) %>%
+            plot %T>%
+            {
+              if (!is.null(save_path)) {
+                ggsave(
+                  width = width, height = height,
+                  filename = paste(
+                    c(save_path, "DALEX.attribution.uncertainty.plot",
+                      model_object$method, suffix, "png"),
+                    collapse = ".")
+                )
+              }
+            }
+        } else {
+          NULL
+        }
+
+
       DALEX.distribution.plot <- DALEX.attribution %>%
         plot(plot_distributions = TRUE)
 
       print("*** DALEX.distribution.plot")
 
-      DALEX.attribution.uncertainty.plot <-
-        if (get_DALEX_attribution_uncertainty_plot &
-        !is.null(DALEX.explainer)) {
-
-        print("*** DALEX.attribution.uncertainty.plot")
-        DALEX.explainer %>%
-          iBreakDown::break_down_uncertainty(local.obs) %>%
-          plot %T>%
-          {
-            if (!is.null(save_path)) {
-              ggsave(
-                width = width, height = height,
-                filename = paste(
-                  c(save_path, "DALEX.attribution.uncertainty.plot",
-                    model_object$method, suffix, "png"),
-                  collapse = ".")
-              )
-            }
-          }
-      } else {
-        NULL
-      }
 
       DALEX.shapley.plot <- if (get_DALEX_shapley_plot &
                            !is.null(DALEX.explainer)) {
