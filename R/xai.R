@@ -11,10 +11,12 @@
 ######################################################################
 get_xai_explanations <- function(
   models_list,
+  seed = 171,
   cutoff_greater = 0,
   n_features_lime = 5,
   local_obs = NULL,
   local_no = 6,
+  random_case = NULL,
   save_path = NULL,
   suffix = NULL,
   width = 6, height = 6,
@@ -239,13 +241,14 @@ get_xai_explanations <- function(
       print("*** DALEX.distribution.plot")
 
 
-      DALEX.shapley.plot <- if (get_DALEX_shapley_plot &
-                           !is.null(DALEX.explainer)) {
+      DALEX.shapley.plot <- if (
+        get_DALEX_shapley_plot &
+        !is.null(DALEX.explainer) & !is.null(random_case)) {
 
         print("*** DALEX.shapley.plot")
 
         DALEX.explainer %>%
-          iBreakDown::shap(random.case,
+          iBreakDown::shap(random_case,
                            B = no_permutations) %>%
           plot()
       }
@@ -344,8 +347,8 @@ get_xai_explanations <- function(
       )
     },
     .options = furrr_options(
-      seed = SEED
-      , packages = c("dplyr", "DALEX")
+      seed = seed
+      , packages = c("DALEX", "iBreakDown", "ingredients", "LIME")
     ))
 }
 
