@@ -348,7 +348,7 @@ get_xai_explanations <- function(
     },
     .options = furrr_options(
       seed = seed
-      , packages = c("DALEX", "iBreakDown", "ingredients", "LIME")
+      , packages = c("DALEX", "iBreakDown", "ingredients", "lime")
     ))
 }
 
