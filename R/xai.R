@@ -86,6 +86,12 @@ get_xai_explanations <- function(
           sample_n(local_no)
       }
 
+      random.case <- if (!is.null(random_case)) {
+        random_case
+      } else {
+        local.obs %>% sample_n(1)
+      }
+
       DALEX.explainer <- if (get_DALEX_explainer) {
 
         print("*** DALEX.explainer")
