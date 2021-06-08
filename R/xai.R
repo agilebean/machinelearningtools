@@ -5,6 +5,17 @@
 ################################################################################
 
 ######################################################################
+# Function get_percentile_from_model()
+# INPUT model (caret::train)
+# OUTPUT percentile (numeric)
+######################################################################
+get_percentile_from_model <- function(model, percentile) {
+
+  model$trainingData$.outcome %>%
+    quantile(percentile)
+}
+
+######################################################################
 # Function get_xai_explanations()
 # IN:   models_list (list) containing caret models
 # OUT:  xai output by DALEX or LIME
@@ -266,7 +277,7 @@ get_xai_explanations <- function(
         NULL
       }
 
-      LIME.explanation <- if (
+      LIME.explanations <- if (
         get_LIME_explanations & !is.null(LIME.explainer)) {
 
         print("***LIME.explanation")
@@ -285,7 +296,7 @@ get_xai_explanations <- function(
 
         print("***LIME.explanations.plot")
         lime::plot_explanations(
-          LIME.explanation
+          LIME.explanations
         ) + ggtitle(model_object$method)  %T>%
           {
             if (!is.null(save_path)) {
@@ -308,7 +319,7 @@ get_xai_explanations <- function(
 
         print("***LIME.features.plot")
         lime::plot_features(
-          LIME.explanation,
+          LIME.explanations,
           ncol = 2
         ) + ggtitle(model_object$method)  %T>%
           {
