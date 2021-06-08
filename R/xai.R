@@ -291,7 +291,7 @@ get_xai_explanations <- function(
       LIME.explanations <- if (
         get_LIME_explanations & !is.null(LIME.explainer)) {
 
-        print("***LIME.explanation")
+        print("***LIME.explanations")
         lime::explain(
           # tricky: features not training.set
           x = local.obs %>% select(-.outcome),
@@ -303,7 +303,7 @@ get_xai_explanations <- function(
       }
 
       LIME.explanations.plot <- if (
-        get_LIME_explanations_plot & !is.null(LIME.explanation)) {
+        get_LIME_explanations_plot & !is.null(LIME.explanations)) {
 
         print("***LIME.explanations.plot")
         lime::plot_explanations(
@@ -362,7 +362,7 @@ get_xai_explanations <- function(
           , DALEX.distribution.plot = DALEX.distribution.plot
           , DALEX.shapley.plot = DALEX.shapley.plot
           , LIME.explainer = LIME.explainer
-          , LIME.explanation = LIME.explanation
+          , LIME.explanations = LIME.explanations
           , LIME.explanations.plot = LIME.explanations.plot
           , LIME.features.plot = LIME.features.plot
         )
