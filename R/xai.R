@@ -26,6 +26,7 @@ get_xai_explanations <- function(
   cutoff_greater = 0,
   n_features_lime = 5,
   local_obs = NULL,
+  local_min_cutoff = 0.95,
   local_no = 6,
   random_case = NULL,
   save_path = NULL,
@@ -78,7 +79,11 @@ get_xai_explanations <- function(
       local.obs <- if (!is.null(local_obs)) {
         local_obs
       } else {
-        training.set %>% sample_n(local_no)
+        training.set %>%
+          filter(
+            .outcome >=
+              get_percentile_from_model(model_object, local_min_cutoff)) %>%
+          sample_n(local_no)
       }
 
       DALEX.explainer <- if (get_DALEX_explainer) {
