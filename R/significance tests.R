@@ -12,23 +12,30 @@ summarise_wins <- function(result_data, max_wins, grouping) {
     )
 }
 
-summary_stats <- function(data_set, grouping_labels, dv_label) {
+summary_stats <- function(
+  data_set, grouping_labels, dv_label, retain_data = FALSE) {
 
   dv <- rlang::sym(dv_label)
 
   data_set %>%
-    group_by(across(all_of(grouping_labels))) %>%
-    summarize(
-      across(!!dv,
-             list(
-               mean = mean,
-               se = ~ sd(.) / sqrt(n()),
-               var = var,
-               sd = sd,
-               n = ~ n()
-             ),
-             .names = "{fn}" )
-    )
+    nest(data = !any_of(grouping_labels)) %>%
+    mutate(
+      ci = map(data, ~ MeanCI(.x$wins)),
+      var = map(data, ~ var(.x$wins)),
+      sd = map(data, ~ sd(.x$wins)),
+      se = map(data, ~ sd(.x$wins) / sqrt(nrow(.x))),
+      n = map(data, ~ nrow(.x))
+    ) %>%
+    unnest(var, sd, se, n) %>%
+    unnest_wider(ci) %>%
+    {
+      if (retain_data) {
+        select(-data)
+      } else {
+        .
+      }
+    }
+
 }
 
 perform_aov <- function(data_object, formula_aov) {
