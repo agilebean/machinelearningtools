@@ -26,7 +26,7 @@ summary_stats <- function(
       se = map(data, ~ sd(.x$wins) / sqrt(nrow(.x))),
       n = map(data, ~ nrow(.x))
     ) %>%
-    unnest(var, sd, se, n) %>%
+    unnest(c(var, sd, se, n)) %>%
     unnest_wider(ci) %>%
     {
       if (retain_data) {
