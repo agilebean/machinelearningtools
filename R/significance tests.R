@@ -20,10 +20,10 @@ summary_stats <- function(
   data_set %>%
     nest(data = !any_of(grouping_labels)) %>%
     mutate(
-      ci = map(data, ~ MeanCI(.x$wins)),
-      var = map(data, ~ var(.x$wins)),
-      sd = map(data, ~ sd(.x$wins)),
-      se = map(data, ~ sd(.x$wins) / sqrt(nrow(.x))),
+      ci = map(data, ~ MeanCI(.x[[dv]])),
+      var = map(data, ~ var(.x[[dv]])),
+      sd = map(data, ~ sd(.x[[dv]])),
+      se = map(data, ~ sd(.x[[dv]]) / sqrt(nrow(.x))),
       n = map(data, ~ nrow(.x))
     ) %>%
     unnest(c(var, sd, se, n)) %>%
