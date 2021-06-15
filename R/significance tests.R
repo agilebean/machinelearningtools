@@ -34,7 +34,8 @@ summary_stats <- function(
       } else {
         .
       }
-    }
+    } %>%
+    arrange(across(grouping_labels))
 
 }
 
