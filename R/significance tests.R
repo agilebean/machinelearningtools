@@ -176,8 +176,8 @@ print_stats <- function(data_set,
                         param_var = "parameter",
                         save_label = "",
                         format = "html",
-                        convert_kable = FALSE,
-                        convert_latex = FALSE,
+                        kable = FALSE,
+                        latex = FALSE,
                         digits = 4,
                         ...) {
 
@@ -252,7 +252,7 @@ print_stats <- function(data_set,
     }
 
 
-  if (convert_kable) {
+  if (kable) {
 
     result.table %>%
       convert_kable(., digits = digits, ...) %>%
@@ -267,7 +267,7 @@ print_stats <- function(data_set,
       }
   }
 
-  if (convert_latex) {
+  if (latex) {
 
     result.table %>%
       convert_latex(., digits = digits, ...) %>%
