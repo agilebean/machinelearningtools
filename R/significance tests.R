@@ -47,7 +47,8 @@ perform_aov <- function(data_object, formula_aov) {
       lm = map(data, ~ lm(formula_aov, data = .x)),
       glanced = map(lm, broom::glance), # aov doesn't yield "statistic"
       tidied = map(aov, broom::tidy),
-      ci = map(data, ~ MeanCI(.x[[all.vars(formula_aov)[1]]]))
+      # CIs on DV extracted from formula
+      ci = map(data, ~ MeanCI(.x[[all.vars(formula_aov)[1]]])),
       # posthoc scheffe shows which mean differences are significant
       scheffe = map(aov, ~ DescTools::ScheffeTest(.x)) # only on factor
     )
