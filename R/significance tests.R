@@ -51,7 +51,7 @@ perform_aov <- function(data_object, formula_aov) {
       tidied = map(aov, broom::tidy),
       # CIs on DV extracted from formula
       ci = map(data, ~ MeanCI(.x[[response]])),
-      se = map(data, ~ sd(.x[[response]]) / sqrt(nrow(.x)))
+      se = map(data, ~ sd(.x[[response]]) / sqrt(nrow(.x))),
       # posthoc scheffe shows which mean differences are significant
       scheffe = map(aov, ~ DescTools::ScheffeTest(.x)) # only on factor
     )
