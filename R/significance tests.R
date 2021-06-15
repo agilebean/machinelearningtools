@@ -81,13 +81,19 @@ test_non_parametric <- function(data_object, formula_nonparam) {
 
 test_normality <- function(data_object, formula) {
 
+  response <- all.vars(formula)[1]
+
   data_object %>%
     mutate(
       # Shapiro-Wilk test: preferably on residuals than DV
       # Source: https://psychometroscar.com/2018/07/11/normality-residuals-or-dependent-variable/
-      shapiroed = map(aov, ~ .x %>% residuals %>%
-                        shapiro.test %>% broom::glance(.)),
-      shapiroed2 = map(data, ~ shapiro.test(.$wins) %>% broom::glance(.)),
+      shapiroed = map(aov, ~ .x %>%
+                        residuals %>%
+                        shapiro.test %>%
+                        broom::glance(.)),
+      shapiroed2 = map(data, ~ .x[[response]] %>%
+                         shapiro.test() %>%
+                         broom::glance(.)),
 
       # Welch test is a form of ANOVA that allows for heterogeneity
       welched = map(
