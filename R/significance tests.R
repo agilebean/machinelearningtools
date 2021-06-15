@@ -194,7 +194,7 @@ print_stats <- function(data_set,
 
       } else if (stat_type == "glanced") {
 
-        unnest(., glanced) %>%
+        unnest(., c(glanced, se)) %>%
           unnest_wider(ci) %>%
           select(param, !!grouping,
                  F.anova = statistic, p.anova = p.value, # glanced
