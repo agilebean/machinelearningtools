@@ -197,8 +197,8 @@ print_stats <- function(data_set,
         unnest(., c(glanced, se)) %>%
           unnest_wider(ci) %>%
           select(param, !!grouping,
-                 F.anova = statistic, p.anova = p.value, # glanced
-                 mean, se, lwr.ci, upr.ci # MeanCI
+                 mean, se, lwr.ci, upr.ci, # MeanCI
+                 F.anova = statistic, p.anova = p.value # glanced
           )
 
       } else if (stat_type == "shapiroed") {
