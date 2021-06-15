@@ -38,6 +38,7 @@ summary_stats <- function(
 
 }
 
+# assumes data_object is nested into a data column
 perform_aov <- function(data_object, formula_aov) {
 
   data_object %>%
@@ -46,6 +47,7 @@ perform_aov <- function(data_object, formula_aov) {
       lm = map(data, ~ lm(formula_aov, data = .x)),
       glanced = map(lm, broom::glance), # aov doesn't yield "statistic"
       tidied = map(aov, broom::tidy),
+      ci = map(data, ~ MeanCI(.x[[all.vars(formula_aov)[1]]]))
       # posthoc scheffe shows which mean differences are significant
       scheffe = map(aov, ~ DescTools::ScheffeTest(.x)) # only on factor
     )
@@ -183,7 +185,11 @@ print_stats <- function(data_set,
       } else if (stat_type == "glanced") {
 
         unnest(., glanced) %>%
-          select(!!param.sym, !!grouping, F.anova = statistic, p.anova = p.value)
+          unnest_wider(ci) %>%
+          select(param, !!grouping,
+                 F.anova = statistic, p.anova = p.value, # glanced
+                 mean, lwr.ci, upr.ci # MeanCI
+          )
 
       } else if (stat_type == "shapiroed") {
 
