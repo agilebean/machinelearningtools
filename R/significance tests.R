@@ -169,63 +169,67 @@ print_stats <- function(data_set,
                         digits = 4,
                         ...) {
 
+  require(dplyr)
+
+  param.sym = rlang::sym(param_var)
+
   result.table <- data_set %>%
     {
       if (stat_type == "levened") {
         unnest(., levened) %>%
-          select(!!param_var, !!grouping, F.levene = `F value`, p.levene = `Pr(>F)`) %>%
+          select(!!param.sym, !!grouping, F.levene = `F value`, p.levene = `Pr(>F)`) %>%
           filter(!is.na(F.levene))
 
       } else if (stat_type == "glanced") {
 
         unnest(., glanced) %>%
-          select(!!param_var, !!grouping, F.anova = statistic, p.anova = p.value)
+          select(!!param.sym, !!grouping, F.anova = statistic, p.anova = p.value)
 
       } else if (stat_type == "shapiroed") {
 
         unnest(., shapiroed) %>%
-          select(!!param_var, !!grouping, W = statistic, p.shapiro = p.value)
+          select(!!param.sym, !!grouping, W = statistic, p.shapiro = p.value)
 
       } else if (stat_type == "kruskaled") {
 
         unnest(., kruskaled) %>%
-          select(!!param_var, !!grouping, K = statistic, p.kruskal = p.value)
+          select(!!param.sym, !!grouping, K = statistic, p.kruskal = p.value)
 
       } else if (stat_type == "dunned2") {
 
         unnest(., dunned2) %>%
-          select(!!param_var, !!grouping, group1, group2, F = statistic,
+          select(!!param.sym, !!grouping, group1, group2, F = statistic,
                  p, p.adj, p.adj.signif) %>%
           unite("groups", c(group1, group2), sep = "~")
 
       } else if (stat_type == "tidied") {
 
         unnest(., tidied) %>%
-          select(!!param_var, term, !!grouping, F = statistic, p.value)
+          select(!!param.sym, term, !!grouping, F = statistic, p.value)
 
       } else if (stat_type == "durbined") {
 
         unnest(., durbined) %>%
-          select(!!param_var, !!grouping, autocorrelation,
+          select(!!param.sym, !!grouping, autocorrelation,
                  dw = statistic, p.durbin = p.value)
 
       } else if (stat_type == "tidied") {
 
         unnest(., tidied) %>%
-          select(!!param_var, term, !!grouping, F = statistic, p.value)
+          select(!!param.sym, term, !!grouping, F = statistic, p.value)
 
       } else if (stat_type == "brownforsythed") {
 
         unnest(., tidied) %>%
-          select(!!param_var, term, !!grouping, F = statistic, p.value)
+          select(!!param.sym, term, !!grouping, F = statistic, p.value)
       } else {
         unnest(., stat_type) %>%
-          select(!!param_var, !!grouping, statistic, p.value)
+          select(!!param.sym, !!grouping, statistic, p.value)
       }
     } %>%
     {
       if (!is.null(grouping)) {
-        arrange(., !!param_var, !!rlang::sym(grouping))
+        arrange(., !!param.sym, !!rlang::sym(grouping))
       } else {
         .
       }
