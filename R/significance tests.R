@@ -162,7 +162,13 @@ create_plots_lm  <- function(data_object, model_label = "aov") {
   data_object %>%
     mutate(
       plot.residuals = map(!!model, ~ ggplot(data = .x) + stat_fitted_resid() ),
-      plot.qq = map(!!model, ~ ggplot(data = .x) + stat_normal_qq() ),
+      plot.qq = imap(!!model, ~ ggplot(data = .x) +
+                      stat_normal_qq(alpha = 0.2) +
+                      labs(
+                        title = paste(.y),
+                        x = "", y = ""
+                      )
+                    ),
       plot.leverage = map(!!model, ~ ggplot(data = .x) + stat_resid_leverage() ),
       plot.hist  = map(!!model, ~ ggplot(data = .x) + stat_resid_hist() ),
       plot.scale = map(!!model, ~ ggplot(data = .x) + stat_scale_location() ),
