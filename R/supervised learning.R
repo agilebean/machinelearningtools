@@ -988,8 +988,7 @@ push_message <- function(
       "The training finished",
       algorithm_list_string,
       models_list_string
-    ),
-    devices = "ujyr8RSNXs4sjAsoeMFET6"
+    )
   )
 }
 
