@@ -961,11 +961,6 @@ visualize_importance <- function (
 push_message <- function(
   time_in_seconds = 60, algorithm_list = NULL, models_list_name = NULL) {
 
-  require(RPushbullet)
-  # fix Error: curl & HTTP2.0
-  # https://github.com/eddelbuettel/rpushbullet/issues/57#issuecomment-573431381
-  options("rpushbullet.useHTTP11" = TRUE)
-
   algorithm_list_string <- if (!is.null(algorithm_list)) {
     paste("for machine learning algorithms:", paste0(algorithm_list, collapse = ", "))
   } else {
@@ -978,17 +973,11 @@ push_message <- function(
     ""
   }
 
-  RPushbullet::pbPost(
-    type = "note",
-    title = paste(
-      "caret training finished after",
-      round(time_in_seconds/60, digits = 2), "min"
-    ),
-    body = paste(
-      "The training finished",
-      algorithm_list_string,
-      models_list_string
-    )
+  pushoverr::pushover(
+    title = paste("ml training finished after",
+                  round(time_in_seconds/60, digits = 2), "min"),
+    message = paste("Trained models: ",
+                    algorithm_list_string, models_list_string),
   )
 }
 
