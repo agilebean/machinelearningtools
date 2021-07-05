@@ -70,15 +70,11 @@ clusterOff <- function(cluster_name) {
 ##  colors: "#4DAF4A" green "#377EB8" blue "#E41A1C" red "#FF7F00" orange
 ##
 ################################################################################
-get_model_metrics <- function(models_list,
-                              target_label = NULL,
-                              testing_set = NULL,
-                              median_sort = FALSE,
-                              palette = "Set1",
-                              reverse = FALSE,
-                              colors = NULL,
-                              boxplot_fill = "grey95",
-                              boxplot_color = "grey25") {
+get_model_metrics <- function(
+  models_list, target_label = NULL, testing_set = NULL,
+  median_sort = FALSE, reverse = FALSE,
+  palette = "Set1", colors = NULL,
+  boxplot_fill = "grey95", boxplot_color = "grey25") {
 
   require(RColorBrewer)
 
@@ -132,7 +128,7 @@ get_model_metrics <- function(models_list,
   }
 
   ### get metrics from original resamples' folds
-  resamples.values <- models_list %>% caret::resamples %>% .$values %>%
+  resamples.values <- models_list %>% caret::resamples() %>% .$values %>%
     # select_if(is.numeric) %>%
     # retrieve RMSE, Rsquared but not MAE
     ## tricky: select without dplyr:: prefix does NOT work
