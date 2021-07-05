@@ -79,9 +79,7 @@ get_model_metrics <- function(models_list,
                               colors = NULL,
                               boxplot_fill = "grey95",
                               boxplot_color = "grey25") {
-  require(dplyr)
-  require(purrr)
-  require(ggplot2)
+
   require(RColorBrewer)
 
   # retrieve target.label & testing.set from models_list
@@ -134,7 +132,7 @@ get_model_metrics <- function(models_list,
   }
 
   ### get metrics from original resamples' folds
-  resamples.values <- models_list %>% resamples %>% .$values %>%
+  resamples.values <- models_list %>% caret::resamples %>% .$values %>%
     # select_if(is.numeric) %>%
     # retrieve RMSE, Rsquared but not MAE
     ## tricky: select without dplyr:: prefix does NOT work
@@ -959,7 +957,9 @@ visualize_importance <- function (
 # input caret::train object
 ################################################################################
 push_message <- function(
-  time_in_seconds = 60, algorithm_list = NULL, models_list_name = NULL) {
+  algorithm_list = NULL, models_list_name = NULL,
+  time_in_seconds = 60, sound = "classical"
+  ) {
 
   algorithm_list_string <- if (!is.null(algorithm_list)) {
     paste("for machine learning algorithms:", paste0(algorithm_list, collapse = ", "))
@@ -978,6 +978,7 @@ push_message <- function(
                   round(time_in_seconds/60, digits = 2), "min"),
     message = paste("Trained models: ",
                     algorithm_list_string, models_list_string),
+    sound = sound
   )
 }
 
