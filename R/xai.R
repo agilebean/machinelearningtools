@@ -32,7 +32,7 @@ get_xai_explanations <- function(
   save_path = NULL,
   suffix = NULL,
   width = 6, height = 6,
-  get_DALEX_explainer = TRUE,
+  # get_DALEX_explainer = TRUE,
   get_DALEX_residual_plot = TRUE,
   no_permutations = 50,
   get_DALEX_feature_importance = TRUE,
@@ -92,20 +92,14 @@ get_xai_explanations <- function(
         local.obs %>% sample_n(1)
       }
 
-      DALEX.explainer <- if (get_DALEX_explainer) {
-
-        print("*** DALEX.explainer")
-
-        DALEX::explain(
+      print("*** DALEX.explainer")
+      DALEX.explainer <- DALEX::explain(
           model = model_object,
           data = features,
           y = training.set$.outcome >= cutoff_greater,
           label = paste(model_object$method, " model"),
           colorize = TRUE
         )
-      } else {
-        NULL
-      }
 
       # for residual plots by plot(geom = "histogram")
       DALEX.performance <- DALEX.explainer %>%
@@ -120,8 +114,7 @@ get_xai_explanations <- function(
       }
 
       DALEX.feature.importance <- if (
-        get_DALEX_feature_importance &
-        !is.null(DALEX.explainer)) {
+        get_DALEX_feature_importance & !is.null(DALEX.explainer)) {
 
         print("*** DALEX.permutation.feature.importance")
 
