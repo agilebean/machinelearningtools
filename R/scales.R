@@ -103,6 +103,43 @@ scale.esteem.semdiff.5 <- c(
   "5 Very true of me"
 )
 
+# BIS/BAS
+scale.truth.4 <- c(
+  "Very false for me",
+  "Somewhat false for me",
+  "Somewhat true for me",
+  "Very true for me"
+)
+
+# self-efficacy (Sherer1982)
+scale.agreement.7 <- c(
+  "Strongly disagree",
+  "Disagree",
+  "Somewhat disagree",
+  "Neither agree nor disagree",
+  "Somewhat agree",
+  "Agree",
+  "Strongly agree"
+)
+
+# self-control
+scale.control.5 <- c(
+  "1 Not at all like me",
+  "2",
+  "3",
+  "4",
+  "5 Very much like me"
+)
+
+scale.describe.semdiff.5 <- c(
+  "1 Does not describe me at all",
+  "2",
+  "3",
+  "4",
+  "5 Describes me very well"
+)
+
+
 # Fordyce SISE
 scale.happy.11 <- c(
   "0 Extremely unhappy (utterly depressed, completely down)",
