@@ -37,6 +37,36 @@ scale.agreement.slightly.7 <- c(
   "Strongly agree"
 )
 
+name_by_item_dict <- function(data, lv_item_dict) {
+
+  names(data) <- lv_item_dict %>%
+    map(pluck("item.labels")) %>%
+    unlist %>%
+    as.vector()
+
+  return(data)
+}
+
+encode_by_item_dict <- function(data, lv_item_dict) {
+
+  lv_item_dict %>%
+    map( ~ .x %>%
+           pluck("item.labels") %>%
+           # put all the items into a list of scales
+           data[.] %>%
+           # tricky: use .x containing encoding defined in item.dict.e1
+           encode_scale_labels(.x %>% pluck("encoding"))
+    ) %>%
+    set_names(lv_item_dict %>% map_chr(~ .x %>% pluck("scale.label")))
+}
+
+encode_survey_by_item_dict <- function(survey_data, lv_item_dict) {
+
+  survey_data %>%
+    name_by_item_dict(lv_item_dict) %>%
+    encode_by_item_dict(lv_item_dict)
+}
+
 # UCLA Loneliness
 scale.frequency.4 <- c(
   "Never",

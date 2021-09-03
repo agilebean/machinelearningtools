@@ -33,29 +33,6 @@ preprocess_survey <- function(data_survey, remove_vars = NULL, sep = "_") {
 
 }
 
-name_by_item_list <- function(data, lv_item_list) {
-
-  names(data) <- lv_item_list %>%
-    map(pluck("item.labels")) %>%
-    unlist %>%
-    as.vector()
-
-  return(data)
-}
-
-encode_into_item_list <- function(data, lv_item_list) {
-
-  lv_item_list %>%
-    map( ~ .x %>%
-           pluck("item.labels") %>%
-           # put all the items into a list of scales
-           data[.] %>%
-           # tricky: use .x containing encoding defined in item.dict.e1
-           encode_scale_labels(.x %>% pluck("encoding"))
-    ) %>%
-    set_names(lv_item_list %>% map_chr(~ .x %>% pluck("scale.label")))
-}
-
 ######################################################################
 # Function determine_factor_extraction_no()
 # IN:   items_df (dataframe)
