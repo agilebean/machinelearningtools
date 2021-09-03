@@ -80,8 +80,8 @@ scale.agreement.slightly.7 <- c(
 scale.frequency.4 <- c(
   "Never",
   "Rarely",
-  "Sometimes",
-  "Often"
+  "Often",
+  "Always"
 )
 
 # FFMQ
