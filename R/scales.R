@@ -37,6 +37,14 @@ scale.truth.rarely.5 <- c(
   "Very often true"
 )
 
+# Self-esteem Rosenberg
+scale.agreement.strongly.4 <- c(
+  "Strongly disagree",
+  "Disagree",
+  "Agree",
+  "Strongly agree"
+)
+
 scale.agreement.strongly.5 <- c(
   "Strongly disagree",
   "Disagree",
@@ -74,8 +82,6 @@ scale.agreement.slightly.7 <- c(
   "Strongly agree"
 )
 
-
-
 # UCLA Loneliness
 scale.frequency.4 <- c(
   "Never",
@@ -109,6 +115,13 @@ scale.truth.4 <- c(
   "Somewhat false for me",
   "Somewhat true for me",
   "Very true for me"
+)
+
+scale.truth.4.muris <- c(
+  "Not true",
+  "Somewhat true",
+  "True",
+  "Very true"
 )
 
 # self-efficacy (Sherer1982)
