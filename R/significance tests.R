@@ -20,7 +20,7 @@ summary_stats <- function(
   data_set %>%
     nest(data = !any_of(grouping_labels)) %>%
     mutate(
-      ci = map(data, ~ MeanCI(.x[[dv]])),
+      ci = map(data, ~ DescTools::MeanCI(.x[[dv]])),
       var = map(data, ~ var(.x[[dv]])),
       sd = map(data, ~ sd(.x[[dv]])),
       se = map(data, ~ sd(.x[[dv]]) / sqrt(nrow(.x))),
@@ -36,7 +36,6 @@ summary_stats <- function(
       }
     } %>%
     arrange(across(grouping_labels))
-
 }
 
 # assumes data_object is nested into a data column
