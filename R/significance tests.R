@@ -13,7 +13,7 @@ summarise_wins <- function(result_data, max_wins, grouping) {
 }
 
 summary_stats <- function(
-  data_set, grouping_labels, dv_label, retain_data = FALSE) {
+  data_set, grouping_labels, dv_label, remove_data = TRUE) {
 
   dv <- rlang::sym(dv_label)
 
@@ -29,8 +29,8 @@ summary_stats <- function(
     unnest(c(var, sd, se, n)) %>%
     unnest_wider(ci) %>%
     {
-      if (retain_data) {
-        select(-data)
+      if (remove_data) {
+        select(., -data)
       } else {
         .
       }
