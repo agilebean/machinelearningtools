@@ -120,7 +120,7 @@ scale.truth.4 <- c(
 scale.truth.4.muris <- c(
   "Not true",
   "Somewhat true",
-  "True",
+  "TRUE", # "True" gets converted to "TRUE" in googlesheets
   "Very true"
 )
 
