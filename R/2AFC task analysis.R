@@ -36,7 +36,6 @@ plot.2AFC <- function(
   indiff_group = NULL,
   param_var = "parameter", param_select = NULL,
   grouping = NULL, max_wins = 3,
-  x_group = NULL,
   x_variable,
   color_label = NULL,
   palette = "Set1",
@@ -44,6 +43,7 @@ plot.2AFC <- function(
   save_label = "", dpi = 450, width = 7, height = 3.5) {
 
   data.comparisons <- data_2afc_indiff %>%
+    # indiff_group used in group_by, so can be NULL
     comparisons_function(indiff_group = indiff_group) %>% print
 
   data.2afc <- summarise_wins(
@@ -59,22 +59,19 @@ plot.2AFC <- function(
     as.vector()
 
   nrow <- 1
+  no.colors <- 0
+  # if more than 2 conditions
   if (!is.null(indiff_group) & length(grouping) > 3) {
+    # display 2 more rows in facet_wrap
     nrow <- nrow + 2
+    # display different colors
+    no.colors <- data.2afc[[x_group]] %>% as.factor %>% nlevels
   }
-
-  # display different colors if more than 2 conditions
-  no.conditions <- data.2afc[[x_group]] %>% as.factor %>% nlevels
 
   # show only one parameter
   if (!is.null(param_select)) {
     # tricky: filter does not work if argument is called parameter
     data.2afc %<>% filter(!!sym(param_var) == param_select)
-  }
-
-  # for no grouping, use the default x variable
-  if (is.null(x_group)) {
-    x_group <- x_variable
   }
 
   # for geom_line, convert x_variable to numeric
@@ -107,9 +104,9 @@ plot.2AFC <- function(
       }
     } +
     {
-      if (no.conditions > 2) {
+      if (no.colors > 2) {
         scale_color_manual(
-          values = colorRampPalette(RColorBrewer::brewer.pal(8, palette))(no.conditions)
+          values = colorRampPalette(RColorBrewer::brewer.pal(8, palette))(no.colors)
         )
       } else {
         scale_color_brewer(palette = palette)
@@ -120,71 +117,42 @@ plot.2AFC <- function(
       y = "probability chosen",
       color = color_label
     ) +
-    theme(
-      # legend.position = "top"
-      legend.position = "bottom"
-    )
+    theme(legend.position = "bottom")
+
 
   if (lined == TRUE) {
 
-    x_group_sym <- rlang::sym(x_group)
     color = "darkblue"
 
-    # tricky: The longer form && evaluates left to right until result
-    if (!is.null(indiff_group) && (x_variable == x_group)) {
+    x_group <- ifelse(!is.null(indiff_group), indiff_group, "")
 
-      plot.result <- plot.base +
-        geom_line(size = 0.05, color = color) +
-        geom_point() +
-        geom_errorbar(
-          aes(
-            ymin = mean - se, ymax = mean + se,
-            width = 2
-          ),
-          color = color,
-          size = 0.15 # line thickness
-        ) +
-        # replace facewrap lavels by variable names
-        scale_x_continuous(
-          breaks = x.labels,
-          labels = x.labels
-        ) +
-        # let y-axis start from 0
-        scale_y_continuous(
-          limits = c(0, NA),
-          expand = expansion(mult = c(0, 0.1))
-        )
+    plot.result <- plot.base +
+      geom_point(aes(color = !!sym(x_group))) +
+      geom_line(
+        aes(color = !!sym(x_group)),
+        size = 0.05
+      ) +
+      geom_errorbar(
+        aes(
+          ymin = mean - se, ymax = mean + se,
+          color = !!sym(x_group),
+          width = 2,
+        ),
+        # line thickness
+        size = 0.15
+      ) +
+      # replace facewrap lavels by variable names
+      scale_x_continuous(
+        breaks = x.labels,
+        labels = x.labels
+      ) +
+      # let y-axis start from 0
+      scale_y_continuous(
+        limits = c(0, NA),
+        expand = expansion(mult = c(0, 0.1))
+      )
 
-    } else { # no indiff group
-
-      plot.result <- plot.base +
-        geom_point(aes(color = !!sym(x_group))) +
-        geom_line(
-          aes(color = !!sym(x_group)),
-          size = 0.05
-        ) +
-        geom_errorbar(
-          aes(
-            ymin = mean - se, ymax = mean + se,
-            color = !!sym(x_group),
-            width = 2,
-          ),
-          # line thickness
-          size = 0.15
-        ) +
-        # replace facewrap lavels by variable names
-        scale_x_continuous(
-          breaks = x.labels,
-          labels = x.labels
-        ) +
-        # let y-axis start from 0
-        scale_y_continuous(
-          limits = c(0, NA),
-          expand = expansion(mult = c(0, 0.1))
-        )
-    }
-
-  } else {
+  } else { # no lines
 
     plot.result <- plot.base +
       geom_point(aes(color = !!sym(x_group))) +
