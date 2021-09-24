@@ -61,12 +61,19 @@ plot.2AFC <- function(
 
   nrow <- 1
   no.colors <- 0
-  # if more than 2 conditions
-  if (!is.null(indiff_group) & length(grouping) > 3) {
-    # display 2 more rows in facet_wrap
-    nrow <- nrow + 2
-    # display different colors
-    no.colors <- data.2afc[[x_group]] %>% as.factor %>% nlevels
+
+  # determine group for aes(color)
+  color.group <- if (!is.null(indiff_group)) {
+    indiff_group
+  } else if (!is.null(stimulus_group)) {
+    stimulus_group
+  } else {
+    ""
+  }
+
+  # display different colors for many conditions
+  if (color.group != "") {
+    no.colors <- data.2afc[[color.group]] %>% as.factor %>% nlevels
   }
 
   # show only one parameter
@@ -121,29 +128,21 @@ plot.2AFC <- function(
     theme(legend.position = "bottom")
 
 
-  # determine group for aes(color)
-  color_group <- if (!is.null(indiff_group)) {
-    indiff_group
-  } else if (!is.null(stimulus_group)) {
-    stimulus_group
-  } else {
-    ""
-  }
-
+  # create main plot
   if (lined == TRUE) {
 
     color = "darkblue"
 
     plot.result <- plot.base +
-      geom_point(aes(color = !!sym(color_group))) +
+      geom_point(aes(color = !!sym(color.group))) +
       geom_line(
-        aes(color = !!sym(color_group)),
+        aes(color = !!sym(color.group)),
         size = 0.05
       ) +
       geom_errorbar(
         aes(
           ymin = mean - se, ymax = mean + se,
-          color = !!sym(color_group),
+          color = !!sym(color.group),
           width = 2,
         ),
         # line thickness
@@ -163,11 +162,11 @@ plot.2AFC <- function(
   } else { # no lines
 
     plot.result <- plot.base +
-      geom_point(aes(color = !!sym(color_group))) +
+      geom_point(aes(color = !!sym(color.group))) +
       geom_errorbar(
         aes(ymin = mean - se, ymax = mean + se,
             width = 0.2,
-            color = !!sym(color_group)),
+            color = !!sym(color.group)),
         size = 0.25
       )
   }
