@@ -1,21 +1,57 @@
 
-# plot 2AFC analysis
+group_high_low <- function(data, indiff_labels) {
+
+  data %>%
+    # add suffix ".score" to indiff variables
+    rename_with(.cols = indiff_labels,
+                .fn = ~ paste0(.x, ".score")
+    ) %>%
+    # classify each indiff into high/low > mean(indiff)
+    mutate(across(
+      ends_with(".score"),
+      .fns = list(group = ~ ifelse(.x > median(.x), "high", "low")),
+      .names = "{.col}.{.fn}"
+    ),
+    # keep all original variables Except the ones mutated
+    .keep = "unused",
+    # insert the new variables after last column
+    .after = last_col()
+    ) %>%
+    # name the new vars as the original indiff vars
+    rename_with(
+      .cols = ends_with(".score.group"),
+      ~ gsub(".score.group", "", .x)
+    )
+}
+
+################################################################################
+# plot.2AFC
+# Input:
+#   data_2afc_indiff:     the raw survey data including indiff groups
+#   comparisons_function: creates the long table of pairwise comparisons
+################################################################################
 plot.2AFC <- function(
-  data_2afc,
-  param_label,
-  param_var = "parameter",
-  condition = NULL,
+  data_2afc_indiff,
+  comparisons_function,
   indiff_group = NULL,
-  x_group,
+  param_var = "parameter", param_select = NULL,
+  grouping = NULL, max_wins = 3,
+  x_group = NULL,
   x_variable,
   color_label = NULL,
   palette = "Set1",
-  lined = TRUE, nrow = 1,
+  lined = TRUE,
   save_label = "", dpi = 450, width = 7, height = 3.5) {
 
-  print(x_group)
+  data.comparisons <- data_2afc_indiff %>%
+    comparisons_function(indiff_group = indiff_group) %>% print
+
+  data.2afc <- summarise_wins(
+    data.comparisons, max_wins = max_wins,
+    grouping = grouping) %>% print
+
   # create axis tick labels
-  x.labels <- data_2afc %>%
+  x.labels <- data.2afc %>%
     ungroup() %>%
     select(x_variable) %>%
     distinct() %>%
@@ -23,56 +59,48 @@ plot.2AFC <- function(
     as.vector()
 
   nrow <- 1
-  if (!is.null(indiff_group) & !is.null(condition)) {
+  if (!is.null(indiff_group) & length(grouping) > 3) {
     nrow <- nrow + 2
   }
 
   # display different colors if more than 2 conditions
-  no.conditions <- data_2afc[[x_group]] %>% nlevels
+  no.conditions <- data.2afc[[x_group]] %>% as.factor %>% nlevels
 
   # show only one parameter
-  if (!missing(param_label)) {
+  if (!is.null(param_select)) {
     # tricky: filter does not work if argument is called parameter
-    data_2afc %<>% filter(!!sym(param_var) == param_label)
+    data.2afc %<>% filter(!!sym(param_var) == param_select)
   }
 
   # for no grouping, use the default x variable
-  if (missing(x_group)) {
+  if (is.null(x_group)) {
     x_group <- x_variable
   }
 
   # for geom_line, convert x_variable to numeric
   if (lined == TRUE) {
-    if (!is.numeric(data_2afc[[x_variable]])) {
+    if (!is.numeric(data.2afc[[x_variable]])) {
       # conversion from factor only works if x_variable is char
-      data_2afc %<>% mutate(
+      data.2afc %<>% mutate(
         across(x_variable,
                ~as.numeric(as.character(.x)))
       )
     }
 
   } else {
-    data_2afc %<>% mutate(across(x_variable, as.factor))
+    data.2afc %<>% mutate(across(x_variable, as.factor))
   }
-
-  formula_string <- paste("~ ", param_var)
-  if (!is.null(condition) & !is.null(indiff_group)) {
-    formula_string <- paste(formula_string, "~", condition)
-  }
-  formula1 <- as.formula(formula_string)
-
-  print(data_2afc)
 
   # create base plot
-  plot.base <- data_2afc %>%
+  plot.base <- data.2afc %>%
     ggplot(data = ., aes(x = !!sym(x_variable), y = mean)) +
     theme_minimal(base_size = 11) +
     {
       # show all parameters
-      if (missing(param_label)) {
+      if (is.null(param_select)) {
 
         # scales = "free_x" repeats x-axis tick labels for each facet
-        facet_wrap(formula1,
+        facet_wrap(as.formula(paste("~ ", param_var)),
                    scales = "free_x",
                    nrow = nrow
         )
@@ -81,7 +109,7 @@ plot.2AFC <- function(
     {
       if (no.conditions > 2) {
         scale_color_manual(
-          values = colorRampPalette(brewer.pal(8, palette))(no.conditions)
+          values = colorRampPalette(RColorBrewer::brewer.pal(8, palette))(no.conditions)
         )
       } else {
         scale_color_brewer(palette = palette)
@@ -99,7 +127,7 @@ plot.2AFC <- function(
 
   if (lined == TRUE) {
 
-    x_group_sym <- sym(x_group)
+    x_group_sym <- rlang::sym(x_group)
     color = "darkblue"
 
     # tricky: The longer form && evaluates left to right until result
@@ -130,15 +158,15 @@ plot.2AFC <- function(
     } else { # no indiff group
 
       plot.result <- plot.base +
+        geom_point(aes(color = !!sym(x_group))) +
         geom_line(
-          aes(color = !!x_group_sym),
+          aes(color = !!sym(x_group)),
           size = 0.05
         ) +
-        geom_point(aes(color = !!x_group_sym)) +
         geom_errorbar(
           aes(
             ymin = mean - se, ymax = mean + se,
-            color = !!x_group_sym,
+            color = !!sym(x_group),
             width = 2,
           ),
           # line thickness
@@ -176,60 +204,10 @@ plot.2AFC <- function(
            dpi = dpi, width = width, height = height)
   }
 
-  return(plot.result)
-}
-
-
-
-plot_grouped_2AFC_data <- function(
-  data_preprocessed,
-  param_var = "parameter",
-  indiff_group = NULL,
-  condition = NULL,
-  x_variable = "angle",
-  save_label = "",
-  ...) {
-
-  # analysis per condition & indiff_group
-  if (!is.null(condition) & !is.null(indiff_group)) {
-    grouping <- c(param_var, condition, indiff_group, x_variable)
-    x_group <- indiff_group
-
-  } else if (!is.null(condition)) { # analysis per condition
-    grouping <- c(param_var, condition, x_variable)
-    x_group <- condition
-
-  } else if (!is.null(indiff_group)) { # analysis per indiff_group
-    grouping <- c(param_var, indiff_group, x_variable)
-    x_group <- indiff_group
-
-  } else { # analysis across all x_variable without group/condition
-    grouping <- c(param_var, x_variable)
-    x_group <- x_variable
-  }
-
-  data.comparisons <- data_preprocessed %>%
-    create_comparisons_data(indiff_group)
-
-  data.2afc <- data.comparisons %>%
-    summarise_wins(max_wins = 3, grouping)
-
-  plot.indiff <- plot.2AFC(
-    data_2afc = data.2afc,
-    param_var = param_var,
-    condition = condition,
-    indiff_group = indiff_group,
-    x_group = x_group,
-    x_variable = x_variable,
-    nrow = nrow,
-    save_label = save_label,
-    ...
-  )
-
   return(list(
-    comp  = data.comparisons,
     table = data.2afc,
-    plot  = plot.indiff))
+    plot = plot.result
+  ))
 }
 
 
