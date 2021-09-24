@@ -34,6 +34,31 @@ preprocess_survey <- function(data_survey, remove_vars = NULL, sep = "_") {
 }
 
 ######################################################################
+# function check_attention_items()
+# attention check
+# this function assumes that attention check item names start with "attention"
+######################################################################
+check_attention_items <- function(data, attention_dict) {
+
+  no.attention.items <- ncol(attention_dict)
+  # add row index
+  data.indexed <- data %>% rownames_to_column(var = "row")
+  # extract attention items with row index
+  attention.items <- data.indexed %>% select(1: (1+no.attention.items) )  %>%
+    set_names(c("row", paste0("attention", 1:no.attention.items)))
+
+  ## remove failed attention checks AND attention items
+  # remove.rows <- which(aa$attention1 != "Agree" | aa$attention2 != "2")
+  # data[-remove.rows, -c(1:2)]
+
+  # VERY TRICKY: extract the attention checks that passed
+  # https://stackoverflow.com/a/49381716/7769076
+  passed <- attention_dict %>% inner_join(attention.items)
+  data.indexed[data.indexed$row %in% passed$row,
+               !grepl(c("row|attention"), names(data.indexed))]
+}
+
+######################################################################
 # Function determine_factor_extraction_no()
 # IN:   items_df (dataframe)
 # OUT:  output (text)
