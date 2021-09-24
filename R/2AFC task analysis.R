@@ -32,7 +32,7 @@ group_high_low <- function(data, indiff_labels) {
 ################################################################################
 plot.2AFC <- function(
   data_2afc_indiff,
-  comparisons_function,
+  comparisons_function = NULL,
   indiff_group = NULL,
   stimulus_group = NULL,
   param_var = "parameter", param_select = NULL,
@@ -43,13 +43,21 @@ plot.2AFC <- function(
   lined = TRUE,
   save_label = "", dpi = 450, width = 7, height = 3.5) {
 
-  data.comparisons <- data_2afc_indiff %>%
-    # indiff_group used in group_by, so can be NULL
-    comparisons_function(indiff_group = indiff_group) %>% print
+  # give direct input of summarised 2AFC data
+  if (is.null(comparisons_function)) {
 
-  data.2afc <- summarise_wins(
-    data.comparisons, max_wins = max_wins,
-    grouping = grouping) %>% print
+    data.2afc <- data_2afc_indiff
+
+  } else {
+
+    data.comparisons <- data_2afc_indiff %>%
+      # indiff_group used in group_by, so can be NULL
+      comparisons_function(indiff_group = indiff_group) %>% print
+
+    data.2afc <- summarise_wins(
+      data.comparisons, max_wins = max_wins,
+      grouping = grouping) %>% print
+  }
 
   # create axis tick labels
   x.labels <- data.2afc %>%
