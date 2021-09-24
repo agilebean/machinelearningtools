@@ -136,7 +136,8 @@ quartzFonts(gillsans = c("Gill Sans Light", "Gill Sans Light", "Gill Sans Italic
 # OUT:  encoded_df (dataframe)
 #
 ######################################################################
-encode_scale_labels <- function (scale_data_frame, scale_labels) {
+encode_scale_labels <- function(
+  scale_data_frame, scale_labels, reverse_index) {
 
   matrix <- as.matrix(scale_data_frame)
   scale.codes <- 1:length(scale_labels)
@@ -149,6 +150,11 @@ encode_scale_labels <- function (scale_data_frame, scale_labels) {
   encoded_df <- matrix %>%
     as.data.frame() %>%
     map_df(as.numeric)
+
+  # reverse-coding
+  if (!is.null(reverse_index)) {
+    encoded_df[reverse_index] %<>% map(~ max(scale.codes) + 1 - .x)
+  }
 
   return(encoded_df)
 }
