@@ -59,17 +59,6 @@ plot.2AFC <- function(
       grouping = grouping) %>% print
   }
 
-  # create axis tick labels
-  x.labels <- data.2afc %>%
-    ungroup() %>%
-    select(x_variable) %>%
-    distinct() %>%
-    unlist() %>%
-    as.vector()
-
-  nrow <- 1
-  no.colors <- 0
-
   # determine group for aes(color)
   color.group <- if (!is.null(indiff_group)) {
     indiff_group
@@ -114,8 +103,7 @@ plot.2AFC <- function(
 
         # scales = "free_x" repeats x-axis tick labels for each facet
         facet_wrap(as.formula(paste("~ ", param_var)),
-                   scales = "free_x",
-                   nrow = nrow
+                   scales = "free_x"
         )
       }
     } +
@@ -135,6 +123,16 @@ plot.2AFC <- function(
     ) +
     theme(legend.position = "bottom")
 
+  # create axis tick labels
+  x.labels <- data.2afc %>%
+    ungroup() %>%
+    select(x_variable) %>%
+    distinct() %>%
+    unlist() %>%
+    as.vector()
+
+  # calculate error bar width ~ 1/11 of one interval
+  width.errorbar <- max(x.labels)/22
 
   # create main plot
   if (lined == TRUE) {
@@ -151,7 +149,7 @@ plot.2AFC <- function(
         aes(
           ymin = mean - se, ymax = mean + se,
           color = !!sym(color.group),
-          width = 2,
+          width = width.errorbar,
         ),
         # line thickness
         size = 0.15
