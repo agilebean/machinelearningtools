@@ -34,6 +34,7 @@ plot.2AFC <- function(
   data_2afc_indiff,
   comparisons_function,
   indiff_group = NULL,
+  stimulus_group = NULL,
   param_var = "parameter", param_select = NULL,
   grouping = NULL, max_wins = 3,
   x_variable,
@@ -120,22 +121,29 @@ plot.2AFC <- function(
     theme(legend.position = "bottom")
 
 
+  # determine group for aes(color)
+  color_group <- if (!is.null(indiff_group)) {
+    indiff_group
+  } else if (!is.null(stimulus_group)) {
+    stimulus_group
+  } else {
+    ""
+  }
+
   if (lined == TRUE) {
 
     color = "darkblue"
 
-    x_group <- ifelse(!is.null(indiff_group), indiff_group, "")
-
     plot.result <- plot.base +
-      geom_point(aes(color = !!sym(x_group))) +
+      geom_point(aes(color = !!sym(color_group))) +
       geom_line(
-        aes(color = !!sym(x_group)),
+        aes(color = !!sym(color_group)),
         size = 0.05
       ) +
       geom_errorbar(
         aes(
           ymin = mean - se, ymax = mean + se,
-          color = !!sym(x_group),
+          color = !!sym(color_group),
           width = 2,
         ),
         # line thickness
@@ -155,11 +163,11 @@ plot.2AFC <- function(
   } else { # no lines
 
     plot.result <- plot.base +
-      geom_point(aes(color = !!sym(x_group))) +
+      geom_point(aes(color = !!sym(color_group))) +
       geom_errorbar(
         aes(ymin = mean - se, ymax = mean + se,
             width = 0.2,
-            color = !!sym(x_group)),
+            color = !!sym(color_group)),
         size = 0.25
       )
   }
