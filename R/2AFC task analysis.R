@@ -71,6 +71,8 @@ plot.2AFC <- function(
   # display different colors for many conditions
   if (color.group != "") {
     no.colors <- data.2afc[[color.group]] %>% as.factor %>% nlevels
+  } else {
+    no.colors <- 1
   }
 
   # show only one parameter
