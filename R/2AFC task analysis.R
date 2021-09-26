@@ -1,5 +1,6 @@
 
-group_high_low <- function(data, indiff_labels) {
+group_high_low <- function(
+  data, indiff_labels, split_fct = median) {
 
   data %>%
     # add suffix ".score" to indiff variables
@@ -9,7 +10,7 @@ group_high_low <- function(data, indiff_labels) {
     # classify each indiff into high/low > mean(indiff)
     mutate(across(
       ends_with(".score"),
-      .fns = list(group = ~ ifelse(.x > median(.x), "high", "low")),
+      .fns = list(group = ~ ifelse(.x > split_fct(.x), "high", "low")),
       .names = "{.col}.{.fn}"
     ),
     # keep all original variables Except the ones mutated
