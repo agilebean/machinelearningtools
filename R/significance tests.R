@@ -260,7 +260,7 @@ print_stats <- function(data_set,
   if (kable) {
 
     result.table %>%
-      convert_kable(., digits = digits, ...) %>%
+      convert_kable(., digits = digits) %>%
       {
         if (save_label != "") {
 
@@ -275,7 +275,7 @@ print_stats <- function(data_set,
   if (latex) {
 
     result.table %>%
-      convert_latex(., digits = digits, ...) %>%
+      convert_latex(., digits = digits) %>%
       {
         if (save_label != "") {
 
