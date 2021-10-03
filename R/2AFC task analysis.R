@@ -10,7 +10,8 @@ group_high_low <- function(
     # classify each indiff into high/low > mean(indiff)
     mutate(across(
       ends_with(".score"),
-      .fns = list(group = ~ ifelse(.x > split_fct(.x), "high", "low")),
+      .fns = list(group = ~ ifelse(.x > split_fct(.x), "high", "low") %>%
+                    factor(levels = c("low", "high"))),
       .names = "{.col}.{.fn}"
     ),
     # keep all original variables Except the ones mutated
