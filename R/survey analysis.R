@@ -3,6 +3,13 @@
 # Survey Functions
 #
 ################################################################################
+######################################################################
+# Function authenticate_googledrive()
+######################################################################
+authenticate_googledrive <- function() {
+  googledrive::drive_auth(email = "cso@yonsei.ac.kr")
+  gs4_auth(token = googledrive::drive_token())
+}
 
 ######################################################################
 # Function convert_numeric()
