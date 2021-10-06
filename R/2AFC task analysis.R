@@ -107,7 +107,7 @@ plot.2AFC <- function(
 
         # scales = "free_x" repeats x-axis tick labels for each facet
         facet_wrap(as.formula(paste("~ ", param_var)),
-                   scales = "free_x"
+                   scales = "free" # repeat y-axis tick labels
         )
       }
     } +
@@ -120,6 +120,8 @@ plot.2AFC <- function(
         scale_color_brewer(palette = palette)
       }
     } +
+    # repeat y-axis tick labels
+    coord_cartesian(ylim = c(0, 0.75)) +
     labs(
       x = x_variable,
       y = "probability chosen",
