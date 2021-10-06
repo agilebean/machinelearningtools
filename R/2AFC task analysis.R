@@ -78,7 +78,7 @@ plot.2AFC <- function(
   }
 
   # show only one parameter
-  if (!is.null(param_select) & facet_wrap) {
+  if (!is.null(param_select)) {
     # tricky: filter does not work if argument is called parameter
     data.2afc %<>% filter(!!sym(param_var) == param_select)
   }
@@ -107,7 +107,7 @@ plot.2AFC <- function(
     theme_minimal(base_size = 11) +
     {
       # show all parameters
-      if (is.null(param_select)) {
+      if (is.null(param_select) & facet_wrap) {
 
         # scales = "free_x" repeats x-axis tick labels for each facet
         facet_wrap(as.formula(paste("~ ", param_var)),
