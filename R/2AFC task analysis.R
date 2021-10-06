@@ -37,7 +37,7 @@ plot.2AFC <- function(
   comparisons_function = NULL,
   indiff_group = NULL,
   stimulus_group = NULL,
-  param_var = "parameter", param_select = NULL,
+  param_var = "parameter", param_select = NULL, facet_wrap = TRUE,
   grouping = NULL, max_wins = 3,
   x_variable,
   color_label = NULL,
@@ -78,7 +78,7 @@ plot.2AFC <- function(
   }
 
   # show only one parameter
-  if (!is.null(param_select)) {
+  if (!is.null(param_select) & facet_wrap) {
     # tricky: filter does not work if argument is called parameter
     data.2afc %<>% filter(!!sym(param_var) == param_select)
   }
