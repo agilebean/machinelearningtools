@@ -97,6 +97,10 @@ plot.2AFC <- function(
     data.2afc %<>% mutate(across(x_variable, as.factor))
   }
 
+  # get max probability
+  max.prob <- data.2afc$mean %>% max
+
+
   # create base plot
   plot.base <- data.2afc %>%
     ggplot(data = ., aes(x = !!sym(x_variable), y = mean)) +
@@ -121,7 +125,7 @@ plot.2AFC <- function(
       }
     } +
     # repeat y-axis tick labels
-    coord_cartesian(ylim = c(0, 0.75)) +
+    coord_cartesian(ylim = c(0, max.prob)) +
     labs(
       x = x_variable,
       y = "probability chosen",
