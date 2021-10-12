@@ -27,18 +27,36 @@ convert_numeric <- function(userdata) {
 }
 
 ######################################################################
+# function get_rowwise_stats()
+# IN:   data_survey (dataframe)
+# OUT:  output (dataframe) names lowercase & no spaces, removed variables
+#
+######################################################################
+get_rowwise_stats <- function(
+  data, id_label = "id", sort = "sd", sort_fct = "desc", print_max = 100) {
+
+  data %>%
+    rowwise(!!rlang::sym(id_label)) %>%
+    mutate(
+      sd = sd(c_across(everything())),
+      mean = mean(c_across(everything()))) %>%
+    {
+      if (sort_fct == "desc") {
+        arrange(., desc(!!rlang::sym(sort)))
+      } else {
+        arrange(., !!rlang::sym(sort))
+      }
+    } %>%
+    print(n = print_max)
+}
+
+######################################################################
 # function preprocess_survey()
 # IN:   data_survey (dataframe)
 # OUT:  output (dataframe) names lowercase & no spaces, removed variables
 #
 ######################################################################
-preprocess_survey <- function(data_survey, remove_vars = NULL, sep = "_") {
 
-  data_survey %>%
-    rename_with(~ tolower(.x) %>% gsub(" ", "_", .)) %>%
-    select(-remove_vars)
-
-}
 
 ######################################################################
 # function check_attention_items()
