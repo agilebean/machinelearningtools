@@ -28,8 +28,8 @@ convert_numeric <- function(userdata) {
 
 ######################################################################
 # function get_rowwise_stats()
-# IN:   data_survey (dataframe)
-# OUT:  output (dataframe) names lowercase & no spaces, removed variables
+# IN:   data_survey (tibble)
+# OUT:  output (tibble)
 #
 ######################################################################
 get_rowwise_stats <- function(
@@ -48,6 +48,20 @@ get_rowwise_stats <- function(
       }
     } %>%
     print(n = print_max)
+}
+
+######################################################################
+# function plot_density()
+# IN:   data (tibble)
+# OUT:  output (tibble)
+#
+######################################################################
+plot_density <- function(data, sort_fct = "mean") {
+
+  data %>%
+    get_rowwise_stats(sort = sort_fct) %>%
+    pluck(sort_fct) %>%
+    lattice::densityplot()
 }
 
 ######################################################################
