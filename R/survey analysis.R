@@ -65,13 +65,13 @@ plot_density <- function(data, sort_fct = "mean") {
 }
 
 ######################################################################
-# function plot_density()
+# function save_desc_stats()
 # IN:   data (tibble)
 # OUT:  output (tibble)
 #
 ######################################################################
 # retrieve & save descriptive statistics
-plot_density <- function(
+save_desc_stats <- function(
   data_labeled, descstats_labels, data_desc_stats_label) {
 
   data_labeled %>%
