@@ -26,7 +26,7 @@ group_high_low <- function(
     mutate(across(
       ends_with(".score"),
       .fns = list(group = ~ case_when(
-        .x >=  cutoff.high(.x) ~ "high",
+        .x >  cutoff.high(.x) ~ "high",
         .x <  cutoff.low(.x) ~ "low",
         TRUE ~ "NA"
       ) %>%
