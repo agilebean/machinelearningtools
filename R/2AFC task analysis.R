@@ -1,6 +1,19 @@
 
 group_high_low <- function(
-  data, indiff_labels, split_fct = median) {
+  data, indiff_labels, split_fct = "quantile", sd = TRUE) {
+
+  if (split_fct == "quantile") {
+    cutoff.high <- function(x) { quantile(x, probs = 0.75) }
+    cutoff.low <- function(x) { quantile(x, probs = 0.25) }
+  } else {
+    if (sd) {
+      cutoff.high <- function(x) { (exec(split_fct, x)) + sd(x) }
+      cutoff.low <- function(x) { (exec(split_fct, x)) - sd(x) }
+    } else {
+      cutoff.high <- function(x) { (exec(split_fct, x)) }
+      cutoff.low <- function(x) { (exec(split_fct, x)) }
+    }
+  }
 
   data %>%
     # add suffix ".score" to indiff variables
@@ -10,8 +23,12 @@ group_high_low <- function(
     # classify each indiff into high/low > mean(indiff)
     mutate(across(
       ends_with(".score"),
-      .fns = list(group = ~ ifelse(.x > split_fct(.x), "high", "low") %>%
-                    factor(levels = c("low", "high"))),
+      .fns = list(group = ~ case_when(
+        .x >=  cutoff.high(.x) ~ "high",
+        .x <=  cutoff.low(.x) ~ "low",
+        TRUE ~ "NA"
+      ) %>%
+        factor(levels = c("low", "high"))),
       .names = "{.col}.{.fn}"
     ),
     # keep all original variables Except the ones mutated
@@ -99,7 +116,6 @@ plot.2AFC <- function(
 
   # get max probability
   max.prob <- data.2afc$mean %>% max
-
 
   # create base plot
   plot.base <- data.2afc %>%
