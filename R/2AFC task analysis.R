@@ -1,10 +1,12 @@
 
 group_high_low <- function(
-  data, indiff_labels, split_fct = "quantile", sd = TRUE) {
+  data, indiff_labels,
+  split_fct = "quantile", probs = c(0.33, 0.66),
+  sd = TRUE) {
 
   if (split_fct == "quantile") {
-    cutoff.high <- function(x) { quantile(x, probs = 0.75) }
-    cutoff.low <- function(x) { quantile(x, probs = 0.25) }
+    cutoff.high <- function(x) { quantile(x, probs = probs[2]) }
+    cutoff.low <- function(x) { quantile(x, probs = probs[1]) }
   } else {
     if (sd) {
       cutoff.high <- function(x) { (exec(split_fct, x)) + sd(x) }
@@ -25,7 +27,7 @@ group_high_low <- function(
       ends_with(".score"),
       .fns = list(group = ~ case_when(
         .x >=  cutoff.high(.x) ~ "high",
-        .x <=  cutoff.low(.x) ~ "low",
+        .x <  cutoff.low(.x) ~ "low",
         TRUE ~ "NA"
       ) %>%
         factor(levels = c("low", "high"))),
