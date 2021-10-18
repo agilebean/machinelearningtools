@@ -85,14 +85,15 @@ test_normality <- function(data_object, formula) {
   response <- all.vars(formula)[1]
 
   data_object %>%
+    test_smirnov() %>%
     mutate(
       # Shapiro-Wilk test: preferably on residuals than DV
       # Source: https://psychometroscar.com/2018/07/11/normality-residuals-or-dependent-variable/
       shapiroed = map(aov, ~ .x %>%
                         residuals %>%
-                        shapiro.test %>%
+                        shapiro.test() %>%
                         broom::glance(.)),
-      shapiroed2 = map(data, ~ .x[[response]] %>%
+      shapiroed.dv = map(data, ~ .x[[response]] %>%
                          shapiro.test() %>%
                          broom::glance(.)),
 
