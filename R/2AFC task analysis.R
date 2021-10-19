@@ -134,7 +134,7 @@ plot.2AFC <- function(
       }
     } +
     {
-      if (no.colors > 2) {
+      if (no.colors > 8) {
         scale_color_manual(
           values = colorRampPalette(RColorBrewer::brewer.pal(8, palette))(no.colors)
         )
