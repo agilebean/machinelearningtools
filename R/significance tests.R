@@ -80,6 +80,19 @@ test_non_parametric <- function(data_object, formula_nonparam) {
     )
 }
 
+
+test_smirnov <- function(data_object, score_var = "wins", cum_fun = "pnorm") {
+
+  data_object %>%
+    mutate(
+      # Kolmogorov-Smirnov test
+      smirnoved = map(data, ~ .x[[!!score_var]] %>%
+                        ks.test(., y = cum_fun, mean = mean(.), sd = sd(.)) %>%
+                        broom::glance(.))
+    )
+}
+
+
 test_normality <- function(data_object, formula) {
 
   response <- all.vars(formula)[1]
@@ -104,16 +117,6 @@ test_normality <- function(data_object, formula) {
     )
 }
 
-test_smirnov <- function(data_object, score_var = "wins", cum_fun = "pnorm") {
-
-  data_object %>%
-    mutate(
-      # Kolmogorov-Smirnov test
-      smirnoved = map(data, ~ .x[[!!score_var]] %>%
-          ks.test(., y = cum_fun, mean = mean(.), sd = sd(.)) %>%
-            broom::glance(.))
-    )
-}
 
 test_homogeneity <- function(data_object, formula) {
 
@@ -122,7 +125,7 @@ test_homogeneity <- function(data_object, formula) {
 
   data_object %>%
     mutate(
-      # Levene test: homogeneious if p > 0.05, works only on factor
+      # Levene Test: homogeneious if p > 0.05, works only on factor
       levened = map(data, ~ DescTools::LeveneTest(formula, data = .x)),
 
       # Bartlett Test of Homogeneity of Variances BUT only one-way ANOVA!
@@ -224,11 +227,6 @@ print_stats <- function(data_set,
                  p, p.adj, p.adj.signif) %>%
           unite("groups", c(group1, group2), sep = "~")
 
-      } else if (stat_type == "tidied") {
-
-        unnest(., tidied) %>%
-          select(!!param.sym, term, !!grouping, F = statistic, p.value)
-
       } else if (stat_type == "durbined") {
 
         unnest(., durbined) %>%
@@ -240,12 +238,9 @@ print_stats <- function(data_set,
         unnest(., tidied) %>%
           select(!!param.sym, term, !!grouping, F = statistic, p.value)
 
-      } else if (stat_type == "brownforsythed") {
-
-        unnest(., tidied) %>%
-          select(!!param.sym, term, !!grouping, F = statistic, p.value)
-      } else {
-        unnest(., stat_type) %>%
+      }  else {
+        # covers bartletted, flignered, brownforsythed
+        unnest(., stat_type, names_repair = "minimal") %>%
           select(!!param.sym, !!grouping, statistic, p.value)
       }
     } %>%
