@@ -62,7 +62,9 @@ plot.2AFC <- function(
   color_label = NULL,
   palette = "Set1",
   lined = TRUE,
-  save_label = "", dpi = 450, width = 7, height = 3.5) {
+  save_label = "",
+  digits = 4, format = "html",
+  dpi = 450, width = 7, height = 3.5) {
 
   # give direct input of summarised 2AFC data
   if (is.null(comparisons_function)) {
@@ -211,6 +213,11 @@ plot.2AFC <- function(
 
     ggsave(file = filelabel,
            dpi = dpi, width = width, height = height)
+
+    data.2afc %>%
+      convert_kable(., digits = digits) %>%
+      cat(., file = paste0(save_label, ".", format))
+
   }
 
   return(list(
