@@ -63,7 +63,7 @@ plot.2AFC <- function(
   palette = "Set1",
   lined = TRUE,
   save_label = "",
-  digits = 4, format = "html",
+  digits = 3, format = "html",
   dpi = 450, width = 7, height = 3.5) {
 
   # give direct input of summarised 2AFC data
