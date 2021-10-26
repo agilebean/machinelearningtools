@@ -209,14 +209,15 @@ plot.2AFC <- function(
 
   if (save_label != "") {
 
-    filelabel <- paste0("figures/", save_label, ".png") %T>% print
+    label.plot <- paste0("figures/", save_label, ".png") %T>% print
+    label.table <- paste0("tables/", save_label, ".", format) %T>% print
 
-    ggsave(file = filelabel,
+    ggsave(file = label.plot,
            dpi = dpi, width = width, height = height)
 
     data.2afc %>%
       convert_kable(., digits = digits) %>%
-      cat(., file = paste0(save_label, ".", format))
+      cat(., file = label.table)
 
   }
 
