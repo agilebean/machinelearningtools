@@ -51,8 +51,8 @@ scale.agreement.strongly.4 <- c(
 scale.agreement.strongly.6 <- c(
   "Strongly disagree",
   "Disagree",
-  "Somewhat Disagree",
-  "Somewhat Agree",
+  "Somewhat disagree",
+  "Somewhat agree",
   "Agree",
   "Strongly agree"
 )
