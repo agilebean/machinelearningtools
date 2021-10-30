@@ -25,6 +25,24 @@ get_survey_data <- function(
 }
 
 ######################################################################
+# Function label_data_raw()
+######################################################################
+label_data_raw <- function(data_raw, descstats_dict, attention_dict) {
+
+  attention.cols <- 1:ncol(attention_dict)
+
+  data_raw %>%
+    # attention items
+    rename_with(
+      .cols = attention.cols,
+      .fn = ~ paste0("attention", attention.cols)
+    ) %>%
+    rename_with(.cols = descstats_dict$index, ~ descstats_dict$labels) %>%
+    # extract the content between brackets - rename_with doesn't work (duplicate)
+    set_names(gsub("\\[(.+)\\].+", "\\1", names(.)))
+}
+
+######################################################################
 # Function convert_numeric()
 # IN:   userdata (dataframe) containing factors
 # OUT:  output (dataframe) factors transformed into numerical
