@@ -48,6 +48,15 @@ scale.agreement.strongly.4 <- c(
   "Strongly agree"
 )
 
+scale.agreement.strongly.6 <- c(
+  "Strongly disagree",
+  "Disagree",
+  "Somewhat Disagree",
+  "Somewhat Agree",
+  "Agree",
+  "Strongly agree"
+)
+
 scale.agreement.strongly.5 <- c(
   "Strongly disagree",
   "Disagree",
@@ -112,19 +121,27 @@ scale.esteem.semdiff.5 <- c(
   "5 Very true of me"
 )
 
-# BIS/BAS
-scale.truth.4 <- c(
-  "Very false for me",
-  "Somewhat false for me",
-  "Somewhat true for me",
-  "Very true for me"
+# BIS/BAS Original
+scale.truth.4.carver <- c(
+  "1 (Very true for me)",
+  "2 (Somewhat true for me)",
+  "3 (Somewhat false for me)",
+  "4 (Very false for me)"
 )
 
+# BIS/BAS Muris2005
 scale.truth.4.muris <- c(
   "Not true",
   "Somewhat true",
   "TRUE", # "True" gets converted to "TRUE" in googlesheets
   "Very true"
+)
+
+scale.truth.4 <- c(
+  "Very false for me",
+  "Somewhat false for me",
+  "Somewhat true for me",
+  "Very true for me"
 )
 
 # self-efficacy (Sherer1982)
