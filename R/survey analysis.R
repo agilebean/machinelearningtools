@@ -12,6 +12,18 @@ authenticate_googledrive <- function() {
 }
 
 ######################################################################
+# Function get_survey_data()
+######################################################################
+get_survey_data <- function(key_survey, remove_index = c(1)) {
+
+  data.survey.main <- key_survey %>%
+    read_sheet(col_types = "c") %>%
+    select(-remove_index)
+
+  data.survey.main
+}
+
+######################################################################
 # Function convert_numeric()
 # IN:   userdata (dataframe) containing factors
 # OUT:  output (dataframe) factors transformed into numerical
