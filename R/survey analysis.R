@@ -51,7 +51,7 @@ check_attention_items <- function(data, attention_dict) {
 
   no.attention.items <- ncol(attention_dict)
   # add row index
-  data.indexed <- data %>% rownames_to_column(var = "row", .name_repair = "minimal")
+  data.indexed <- data %>% rownames_to_column(var = "row")
   # extract attention items with row index
   attention.items <- data.indexed %>%
     select(1: (1+no.attention.items) )  %>%
