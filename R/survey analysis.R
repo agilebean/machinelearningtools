@@ -17,7 +17,7 @@ authenticate_googledrive <- function() {
 get_survey_data <- function(
   survey_key, col_types = "c", remove_index = c(1)) {
 
-  data.survey.main <- key_survey %>%
+  data.survey.main <- survey_key %>%
     read_sheet(col_types = col_types) %>%
     select(-remove_index)
 
@@ -40,6 +40,33 @@ label_data_raw <- function(data_raw, descstats_dict, attention_dict) {
     rename_with(.cols = descstats_dict$index, ~ descstats_dict$labels) %>%
     # extract the content between brackets - rename_with doesn't work (duplicate)
     set_names(gsub("\\[(.+)\\].+", "\\1", names(.)))
+}
+
+######################################################################
+# function check_attention_items()
+# attention check
+# this function assumes that attention check item names start with "attention"
+######################################################################
+check_attention_items <- function(data, attention_dict) {
+
+  no.attention.items <- ncol(attention_dict)
+  # add row index
+  data.indexed <- data %>% rownames_to_column(var = "row", .name_repair = "minimal")
+  # extract attention items with row index
+  attention.items <- data.indexed %>%
+    select(1: (1+no.attention.items) )  %>%
+    set_names(c("row", paste0("attention", 1:no.attention.items)))
+
+  ## remove failed attention checks AND attention items
+  # remove.rows <- which(aa$attention1 != "Agree" | aa$attention2 != "2")
+  # data[-remove.rows, -c(1:2)]
+
+  # VERY TRICKY: extract the attention checks that passed
+  # https://stackoverflow.com/a/49381716/7769076
+  passed <- attention_dict %>% inner_join(attention.items)
+
+  data.indexed[data.indexed$row %in% passed$row,
+               !grepl(c("row|attention"), names(data.indexed))]
 }
 
 ######################################################################
@@ -109,39 +136,6 @@ save_desc_stats <- function(
     select(descstats_labels) %T>%
     saveRDS(data_desc_stats_label) %T>%
     print
-}
-
-######################################################################
-# function preprocess_survey()
-# IN:   data_survey (dataframe)
-# OUT:  output (dataframe) names lowercase & no spaces, removed variables
-#
-######################################################################
-
-
-######################################################################
-# function check_attention_items()
-# attention check
-# this function assumes that attention check item names start with "attention"
-######################################################################
-check_attention_items <- function(data, attention_dict) {
-
-  no.attention.items <- ncol(attention_dict)
-  # add row index
-  data.indexed <- data %>% rownames_to_column(var = "row")
-  # extract attention items with row index
-  attention.items <- data.indexed %>% select(1: (1+no.attention.items) )  %>%
-    set_names(c("row", paste0("attention", 1:no.attention.items)))
-
-  ## remove failed attention checks AND attention items
-  # remove.rows <- which(aa$attention1 != "Agree" | aa$attention2 != "2")
-  # data[-remove.rows, -c(1:2)]
-
-  # VERY TRICKY: extract the attention checks that passed
-  # https://stackoverflow.com/a/49381716/7769076
-  passed <- attention_dict %>% inner_join(attention.items)
-  data.indexed[data.indexed$row %in% passed$row,
-               !grepl(c("row|attention"), names(data.indexed))]
 }
 
 ######################################################################
