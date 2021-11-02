@@ -242,7 +242,7 @@ quartzFonts(gillsans = c("Gill Sans Light", "Gill Sans Light", "Gill Sans Italic
 #
 ######################################################################
 encode_scale_labels <- function(
-  scale_data_frame, scale_labels, reverse_index) {
+  scale_data_frame, scale_labels, reverse_index = NULL) {
 
   matrix <- as.matrix(scale_data_frame)
   scale.codes <- 1:length(scale_labels)
