@@ -223,7 +223,7 @@ print_stats <- function(data_set,
 
       } else if (stat_type == "dunned") {
 
-        unnest(., dunned2) %>%
+        unnest(., dunned) %>%
           select(!!param.sym, !!grouping, group1, group2, F = statistic,
                  p, p.adj, p.adj.signif) %>%
           unite("groups", c(group1, group2), sep = "~")
