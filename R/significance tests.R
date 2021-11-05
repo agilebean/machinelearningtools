@@ -41,7 +41,10 @@ summary_stats <- function(
 # assumes data_object is nested into a data column
 perform_aov <- function(data_object, formula_aov) {
 
-  response <- all.vars(formula_aov)[1]
+  response.label <- all.vars(formula_aov)[1]
+  predictor.label <- all.vars(formula_aov)[2]
+  predictor <- data_object$data %>% pluck(1) %>% .[[predictor.label]]
+
   data_object %>%
     mutate(
       aov = map(data, ~ aov(formula_aov, data = .x)),
@@ -49,11 +52,17 @@ perform_aov <- function(data_object, formula_aov) {
       glanced = map(lm, broom::glance), # aov doesn't yield "statistic"
       tidied = map(aov, broom::tidy),
       # CIs on DV extracted from formula
-      ci = map(data, ~ MeanCI(.x[[response]])),
-      se = map(data, ~ sd(.x[[response]]) / sqrt(nrow(.x))),
-      # posthoc scheffe shows which mean differences are significant
-      scheffe = map(aov, ~ DescTools::ScheffeTest(.x)) # only on factor
-    )
+      ci = map(data, ~ MeanCI(.x[[response.label]])),
+      se = map(data, ~ sd(.x[[response.label]]) / sqrt(nrow(.x)))
+    ) %>%
+    {
+      if (class(predictor) == "factor") {
+        # posthoc scheffe shows which mean differences are significant
+        scheffe = map(aov, ~ DescTools::ScheffeTest(.x)) # only on factor
+      } else {
+        .
+      }
+    }
 }
 
 test_non_parametric <- function(data_object, formula_nonparam) {
