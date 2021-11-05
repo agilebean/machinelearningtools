@@ -221,7 +221,7 @@ print_stats <- function(data_set,
         unnest(., kruskaled) %>%
           select(!!param.sym, !!grouping, K = statistic, p.kruskal = p.value)
 
-      } else if (stat_type == "dunned2") {
+      } else if (stat_type == "dunned") {
 
         unnest(., dunned2) %>%
           select(!!param.sym, !!grouping, group1, group2, F = statistic,
