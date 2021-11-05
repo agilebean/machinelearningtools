@@ -146,17 +146,20 @@ test_homogeneity <- function(data_object, formula) {
       flignered = map(data, ~ fligner.test(formula, data = .x) %>%
                         broom::glance(.)),
 
-      # Brown-Forsythe Test
-      brownforsythe = map(data, ~ bf.test(formula, data = .x)),
-      brownforsythed = map(
-        brownforsythe,
-        ~ tibble(statistic = .x$statistic, p.value = .x$p.value)
-      )
     ) %>%
     {
       if (class(predictor) == "factor") {
-        # Levene Test: homogeneious if p > 0.05, works only on factor
-        levened = map(data, ~ DescTools::LeveneTest(formula, data = .x))
+        mutate(
+          # Levene Test: homogeneious if p > 0.05, works only on factor
+          levened = map(data, ~ DescTools::LeveneTest(formula, data = .x)),
+
+          # Brown-Forsythe Test
+          brownforsythe = map(data, ~ bf.test(formula, data = .x)),
+          brownforsythed = map(
+            brownforsythe,
+            ~ tibble(statistic = .x$statistic, p.value = .x$p.value)
+          )
+        )
 
       } else {
         .
