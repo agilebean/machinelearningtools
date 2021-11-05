@@ -133,11 +133,11 @@ test_homogeneity <- function(data_object, formula) {
   require(onewaytests) # # Brown-Forsythe Test
   require(DescTools)
 
+  predictor.label <- all.vars(formula)[2]
+  predictor <- data_object$data %>% pluck(1) %>% .[[predictor.label]]
+
   data_object %>%
     mutate(
-      # Levene Test: homogeneious if p > 0.05, works only on factor
-      levened = map(data, ~ DescTools::LeveneTest(formula, data = .x)),
-
       # Bartlett Test of Homogeneity of Variances BUT only one-way ANOVA!
       bartletted = map(data, ~ bartlett.test(formula, data = .x) %>%
                          broom::glance(.)),
@@ -152,7 +152,19 @@ test_homogeneity <- function(data_object, formula) {
         brownforsythe,
         ~ tibble(statistic = .x$statistic, p.value = .x$p.value)
       )
-    )
+    ) %>%
+    {
+      if (class(predictor) == "factor") {
+        # Levene Test: homogeneious if p > 0.05, works only on factor
+        levened = map(data, ~ DescTools::LeveneTest(formula, data = .x))
+
+      } else {
+        .
+      }
+    }
+
+
+
 }
 
 test_independence <- function(data_object, model_label = "aov") {
