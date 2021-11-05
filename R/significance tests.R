@@ -75,8 +75,9 @@ test_non_parametric <- function(data_object, formula_nonparam) {
       # wilcox does not correct for multiple comparisons with pooled variance
       wilcoxed = map(data, ~ pairwise.wilcox.test(x = response, g = group)),
       # dunn better than wilcox
-      dunned = map(data, ~ DescTools::DunnTest(formula_nonparam, data = .x)),
-      dunned2 = map(data, ~ rstatix::dunn_test(formula_nonparam, data = .x))
+      # remove DescTools::DunnTest bec no df and precision limited to p < 2e-16
+      # dunned = map(data, ~ DescTools::DunnTest(formula_nonparam, data = .x)),
+      dunned = map(data, ~ rstatix::dunn_test(formula_nonparam, data = .x))
     )
 }
 
