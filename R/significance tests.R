@@ -87,7 +87,7 @@ test_smirnov <- function(data_object, score_var = "wins", cum_fun = "pnorm") {
   data_object %>%
     mutate(
       # Kolmogorov-Smirnov test
-      smirnoved = map(data, ~ .x[[!!score_var]] %>%
+      smirnoved = map(data, ~ .x[[score_var]] %>%
                         ks.test(., y = cum_fun, mean = mean(.), sd = sd(.)) %>%
                         broom::glance(.))
     )
@@ -99,7 +99,7 @@ test_normality <- function(data_object, formula) {
   response <- all.vars(formula)[1]
 
   data_object %>%
-    test_smirnov() %>%
+    test_smirnov(score_var = response) %>%
     mutate(
       # Shapiro-Wilk test: preferably on residuals than DV
       # Source: https://psychometroscar.com/2018/07/11/normality-residuals-or-dependent-variable/
@@ -309,7 +309,7 @@ convert_latex <- function(data, digits = 4, ...) {
 }
 
 analyze_aov <- function(
-  data_object, nesting_labels, formula_aov,
+  data_object, nesting_labels, formula_aov, score_var = "score",
   test_independence = TRUE,
   test_homogeneity = TRUE,
   test_normality = TRUE,
