@@ -3,7 +3,7 @@ summarise_wins <- function(result_data, max_wins, grouping) {
 
   result_data %>%
     group_by(across(all_of(grouping))) %>%
-    summarise(
+    dplyr::summarise(
       mean = mean(wins / max_wins),
       median = median(wins / max_wins),
       sd = sd(wins / max_wins),

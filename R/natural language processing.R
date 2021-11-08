@@ -8,7 +8,7 @@ unnest_freetext <- function(data, predictor, limit = NULL) {
     unnest_tokens(word, !!predictor) %>%
     filter(!word %in% stop_words$word) %>%
     group_by(word) %>%
-    summarise(count = n()) %>%
+    dplyr::summarise(count = n()) %>%
     arrange(desc(count))
 
   # print only the first <limit> rows
@@ -38,7 +38,7 @@ sentiment_freetext <- function(
     unnest_tokens(word, !!text_column) %>%
     filter(!word %in% stop_words$word) %>%
     group_by(word) %>%
-    summarise(count = n()) %>%
+    dplyr::summarise(count = n()) %>%
     arrange(desc(count))
 
   # print only the first <limit> rows
@@ -52,7 +52,7 @@ sentiment_freetext <- function(
   # convert sentiment ranking (tibble) into predictors
   result <- sentiment.ranking %>%
     group_by(sentiment) %>%
-    summarise(weight = sum(count, na.rm = TRUE)) %>%
+    dplyr::summarise(weight = sum(count, na.rm = TRUE)) %>%
     {
       if (normalize) {
         # tricky: division by 0 would lead to NaN

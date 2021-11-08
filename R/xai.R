@@ -467,7 +467,7 @@ get_pimp_range_List_models_list <- function(
                 # remove the baseline model (seems without any predictor)
                 filter(variable != "_baseline_") %>%
                 group_by(variable) %>%
-                summarise(mean_dropout_loss = mean(dropout_loss)) %>%
+                dplyr::summarise(mean_dropout_loss = mean(dropout_loss)) %>%
                 .$mean_dropout_loss %>%
                 value_function
             })
