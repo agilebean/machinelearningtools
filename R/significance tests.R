@@ -150,6 +150,8 @@ test_homogeneity <- function(data_object, formula) {
     {
       if (class(predictor) == "factor") {
         mutate(
+          # very tricky: for inline conditions, need explicit LHS!
+          .,
           # Levene Test: homogeneious if p > 0.05, works only on factor
           levened = map(data, ~ DescTools::LeveneTest(formula, data = .x)),
 
