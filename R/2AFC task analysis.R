@@ -2,7 +2,7 @@
 group_high_low <- function(
   data, indiff_labels,
   split_fct = NULL, quantiles = c(0.33, 0.66),
-  sd = TRUE) {
+  error_fct = NULL) {
 
   if (is.null(split_fct)) {
     cutoff.high <- function(x) {
@@ -12,12 +12,14 @@ group_high_low <- function(
       quantile(x, probs = quantiles[1],  na.rm = TRUE)
     }
   } else { # split_fct == mean or median
-    if (sd) {
-      cutoff.high <- function(x) { (exec(split_fct, x)) + sd(x) }
-      cutoff.low <- function(x) { (exec(split_fct, x)) - sd(x) }
-    } else {
+    if (is.null(error_fct)) {
       cutoff.high <- function(x) { (exec(split_fct, x)) }
-      cutoff.low <- function(x) { (exec(split_fct, x)) }
+      cutoff.low <- cutoff.high
+    } else {
+      cutoff.high <- function(x) {
+        (exec(split_fct, x)) +  (exec(error_fct, x))
+      }
+      cutoff.low <- (exec(split_fct, x))
     }
   }
 
