@@ -45,7 +45,7 @@ group_high_low <- function(
     # name the new vars as the original indiff vars
     rename_with(
       .cols = ends_with(".score!.group"),
-      ~ gsub(".score.group", "", .x)
+      ~ gsub(".score!.group", "", .x)
     )
 }
 
