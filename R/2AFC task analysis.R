@@ -5,8 +5,12 @@ group_high_low <- function(
   sd = TRUE) {
 
   if (is.null(split_fct)) {
-    cutoff.high <- function(x) { quantile(x, probs = quantiles[2]) }
-    cutoff.low <- function(x) { quantile(x, probs = quantiles[1]) }
+    cutoff.high <- function(x) {
+      quantile(x, probs = quantiles[2], na.rm = TRUE)
+    }
+    cutoff.low <- function(x) {
+      quantile(x, probs = quantiles[1],  na.rm = TRUE)
+    }
   } else { # split_fct == mean or median
     if (sd) {
       cutoff.high <- function(x) { (exec(split_fct, x)) + sd(x) }
@@ -20,11 +24,11 @@ group_high_low <- function(
   data %>%
     # add suffix ".score" to indiff variables
     rename_with(.cols = indiff_labels,
-                .fn = ~ paste0(.x, ".score")
+                .fn = ~ paste0(.x, ".score!")
     ) %>%
     # classify each indiff into high/low > mean(indiff)
     mutate(across(
-      ends_with(".score"),
+      ends_with(".score!"),
       .fns = list(group = ~ case_when(
         .x >  cutoff.high(.x) ~ "high",
         .x <  cutoff.low(.x) ~ "low",
@@ -40,7 +44,7 @@ group_high_low <- function(
     ) %>%
     # name the new vars as the original indiff vars
     rename_with(
-      .cols = ends_with(".score.group"),
+      .cols = ends_with(".score!.group"),
       ~ gsub(".score.group", "", .x)
     )
 }
