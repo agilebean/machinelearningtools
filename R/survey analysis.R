@@ -144,11 +144,14 @@ save_desc_stats <- function(
 # Function save_kable_table()
 # saves dataframe as latex or html
 ######################################################################
-save_kable_table <- function(dataframe, digits, format, filename) {
+save_kable_table <- function(dataframe, file_name, digits = 2) {
+
+  format <- gsub(".+\\.(.+)", "\\1", file_name)
+
   dataframe %>%
     knitr::kable(digits = digits,
                  format = ifelse(format == "tex", "latex", "html")) %>%
-    cat(file = filename)
+    cat(file = file_name)
 }
 
 ######################################################################
