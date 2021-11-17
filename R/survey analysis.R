@@ -170,15 +170,13 @@ save_table <- function(dataframe, file_name, digits = 2) {
     ),
     "tex" = save_kable_table(
       dataframe,
-      digits = digits,
-      format = format,
-      filename = file_name
+      file_name = file_name,
+      digits = digits
     ),
     "html" = save_kable_table(
       dataframe,
-      digits = digits,
-      format = format,
-      filename = file_name
+      file_name = file_name,
+      digits = digits
     )
   )
 }
