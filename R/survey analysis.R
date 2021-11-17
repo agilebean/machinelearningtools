@@ -45,7 +45,8 @@ label_data_raw <- function(data_raw, descstats_dict, attention_dict) {
 ######################################################################
 # function check_attention_items()
 # attention check
-# this function assumes that attention check item names start with "attention"
+# assumes: attention check item are first items in data
+# assumes: attention check item names start with "attention"
 ######################################################################
 check_attention_items <- function(data, attention_dict) {
 
@@ -54,6 +55,7 @@ check_attention_items <- function(data, attention_dict) {
   data.indexed <- data %>% rownames_to_column(var = "row")
   # extract attention items with row index
   attention.items <- data.indexed %>%
+    # assumes: attention check item are first items in data
     select(1: (1+no.attention.items) )  %>%
     set_names(c("row", paste0("attention", 1:no.attention.items)))
 
@@ -136,6 +138,73 @@ save_desc_stats <- function(
     select(descstats_labels) %T>%
     saveRDS(data_desc_stats_label) %T>%
     print
+}
+
+######################################################################
+# Function save_kable_table()
+######################################################################
+save_kable_table <- function(dataframe, digits, format, filename) {
+  dataframe %>%
+    knitr::kable(digits = digits,
+                 format = ifelse(format == "tex", "latex", "html")) %>%
+    cat(file = filename)
+}
+
+######################################################################
+# Function get_scale_stats()
+# IN:   item_encoded_list (list from encode_survey_by_item_dict())
+# OUT:  -- (tables saved as latex, html, or csv)
+#
+######################################################################
+get_scale_stats <- function(
+  item_encoded_list,
+  save_tables_from = 0,
+  digits = 2,
+  format = "csv"
+) {
+
+  # get Cronbach alphas & item reliabilities
+  scale.result <- item_encoded_list %>%
+
+    map(~ sjPlot::tab_itemscale(.x, show.kurtosis = TRUE) %>%
+          .$df.list %>%
+          .[[1]] %>% # tricky!
+          rename(`alpha if deleted` = `&alpha; if deleted`)
+    )
+
+  filename <- function(table_nr, scale_label, file_extension) {
+    paste0(
+      "tables/Table ", table_nr,
+      " Item Analysis of Scale ", scale_label,
+      ".", file_extension)
+  }
+
+  # save tables
+  if (save_tables_from > 0) {
+    pmap(list(
+      scale.result,
+      # item analysis table per scale
+      (save_tables_from - 1) + (1:length(scale.result)),
+      # table number
+      names(scale.result)
+    ), # name of scale
+    ~ switch(
+      format,
+      "csv" = write_csv(x = ..1, file = filename(..2, ..3, format)),
+      "tex" = save_kable_table(
+        ..1,
+        digits = digits,
+        format = format,
+        filename = filename(..2, ..3, "tex")
+      ),
+      "html" = save_kable_table(
+        ..1,
+        digits = digits,
+        format = format,
+        filename = filename(..2, ..3, "html")
+      ),
+    ))
+  }
 }
 
 ######################################################################
