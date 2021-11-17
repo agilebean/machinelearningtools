@@ -142,12 +142,42 @@ save_desc_stats <- function(
 
 ######################################################################
 # Function save_kable_table()
+# saves dataframe as latex or html
 ######################################################################
 save_kable_table <- function(dataframe, digits, format, filename) {
   dataframe %>%
     knitr::kable(digits = digits,
                  format = ifelse(format == "tex", "latex", "html")) %>%
     cat(file = filename)
+}
+
+######################################################################
+# Function save_table()
+# saves dataframe as csv, latex or html
+######################################################################
+save_table <- function(dataframe, file_name, digits = 2) {
+
+  format <- gsub(".+\\.(.+)", "\\1", file_name)
+
+  switch(
+    format,
+    "csv" = write_csv(
+      dataframe,
+      file = file_name
+    ),
+    "tex" = save_kable_table(
+      dataframe,
+      digits = digits,
+      format = format,
+      filename = file_name
+    ),
+    "html" = save_kable_table(
+      dataframe,
+      digits = digits,
+      format = format,
+      filename = file_name
+    )
+  )
 }
 
 ######################################################################
@@ -188,22 +218,8 @@ get_scale_stats <- function(
       # table number
       names(scale.result)
     ), # name of scale
-    ~ switch(
-      format,
-      "csv" = write_csv(x = ..1, file = filename(..2, ..3, format)),
-      "tex" = save_kable_table(
-        ..1,
-        digits = digits,
-        format = format,
-        filename = filename(..2, ..3, "tex")
-      ),
-      "html" = save_kable_table(
-        ..1,
-        digits = digits,
-        format = format,
-        filename = filename(..2, ..3, "html")
-      ),
-    ))
+    ~ save_table(..1, filename(..2, ..3, format), digits)
+    )
   }
 }
 
