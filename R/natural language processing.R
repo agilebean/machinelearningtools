@@ -57,7 +57,7 @@ sentiment_freetext <- function(
       if (normalize) {
         # tricky: division by 0 would lead to NaN
         # mutate(weight = weight/sum(weight)) %>%
-        mutate(., weight = ifelse(weight == 0, 0, weight/sum(weight)))
+        dplyr::mutate(., weight = ifelse(weight == 0, 0, weight/sum(weight)))
       } else {
         .
       }

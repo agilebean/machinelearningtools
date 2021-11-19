@@ -543,7 +543,7 @@ encode_by_item_dict <- function(data, lv_item_dict, add_id = TRUE) {
         # add participant id
         map(., ~ .x %>%
               rownames_to_column(var = "id") %>%
-              mutate(across(id, as.numeric))
+              dplyr::mutate(across(id, as.numeric))
         )
       } else {
         .
@@ -675,7 +675,7 @@ mediate_each <- function(vars, data, no_simulations=10, IDE = FALSE) {
     # rename columns
     rename(effect_size_mx = Estimate, p_value_mx = "Pr...t..") %>%
     # add predictor name
-    mutate(predictor_mx=predictor, mediator_mx=mediator)
+    dplyr::mutate(predictor_mx=predictor, mediator_mx=mediator)
 
   model.Y <- lm(get(outcome) ~ get(predictor) + get(mediator), data)
   # model.Y %>% summary
@@ -685,7 +685,9 @@ mediate_each <- function(vars, data, no_simulations=10, IDE = FALSE) {
     # rename columns
     rename(effect_size_ym = Estimate, p_value_ym = "Pr...t..") %>%
     # add predictor name
-    mutate(outcome=outcome, mediator=mediator, predictor=predictor)
+    dplyr::mutate(outcome = outcome,
+                  mediator = mediator,
+                  predictor = predictor)
 
   if (IDE)
   {
@@ -702,7 +704,9 @@ mediate_each <- function(vars, data, no_simulations=10, IDE = FALSE) {
       .[c("d0", "d0.p", "z0", "z0.p", "n0", "n0.p")] %>%
       lapply(., function(x) round(x, digits = 2)) %>%
       as.data.frame() %>%
-      mutate(predictor=predictor, mediator=mediator, outcome=outcome)
+      dplyr::mutate(predictor = predictor,
+                    mediator = mediator,
+                    outcome = outcome)
 
     result <- best.mediators.ACME
 
@@ -738,7 +742,7 @@ eval_mediations_detailed <- function(mediation_vars, data, p_cutoff) {
 
   best.models.IDE <- best.models %>%
     # estimate indirect effect b*a
-    mutate(IDE = effect_size_ym * effect_size_mx,
+    dplyr::mutate(IDE = effect_size_ym * effect_size_mx,
            p_ave = (p_value_ym + p_value_mx)/2) %>%
     # dplyr::select(ACME, p_ave, outcome, mediator, predictor) %>%
     dplyr::select(IDE, predictor, mediator, outcome, effect_size_mx, effect_size_ym) %>%

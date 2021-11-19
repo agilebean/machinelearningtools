@@ -19,7 +19,7 @@ summary_stats <- function(
 
   data_set %>%
     nest(data = !any_of(grouping_labels)) %>%
-    mutate(
+    dplyr::mutate(
       ci = map(data, ~ DescTools::MeanCI(.x[[dv]])),
       var = map(data, ~ var(.x[[dv]])),
       sd = map(data, ~ sd(.x[[dv]])),
@@ -46,7 +46,7 @@ perform_aov <- function(data_object, formula_aov) {
   predictor <- data_object$data %>% pluck(1) %>% .[[predictor.label]]
 
   data_object %>%
-    mutate(
+    dplyr::mutate(
       aov = map(data, ~ aov(formula_aov, data = .x)),
       lm = map(data, ~ lm(formula_aov, data = .x)),
       glanced = map(lm, broom::glance), # aov doesn't yield "statistic"
@@ -74,7 +74,7 @@ test_non_parametric <- function(data_object, formula_nonparam) {
   group <- formula_nonparam %>% all.vars() %>% .[2]
 
   data_object %>%
-    mutate(
+    dplyr::mutate(
       # Kruskal-Wallis test: non-parametric alternative to one-way ANOVA
       # uses sample medians instead of means
       kruskaled = map(data,
@@ -94,7 +94,7 @@ test_non_parametric <- function(data_object, formula_nonparam) {
 test_smirnov <- function(data_object, score_var = "wins", cum_fun = "pnorm") {
 
   data_object %>%
-    mutate(
+    dplyr::mutate(
       # Kolmogorov-Smirnov test
       smirnoved = map(data, ~ .x[[score_var]] %>%
                         ks.test(., y = cum_fun, mean = mean(.), sd = sd(.)) %>%
@@ -109,7 +109,7 @@ test_normality <- function(data_object, formula) {
 
   data_object %>%
     test_smirnov(score_var = response) %>%
-    mutate(
+    dplyr::mutate(
       # Shapiro-Wilk test: preferably on residuals than DV
       # Source: https://psychometroscar.com/2018/07/11/normality-residuals-or-dependent-variable/
       shapiroed = map(aov, ~ .x %>%
@@ -137,7 +137,7 @@ test_homogeneity <- function(data_object, formula) {
   predictor <- data_object$data %>% pluck(1) %>% .[[predictor.label]]
 
   data_object %>%
-    mutate(
+    dplyr::mutate(
       # Bartlett Test of Homogeneity of Variances BUT only one-way ANOVA!
       bartletted = map(data, ~ bartlett.test(formula, data = .x) %>%
                          broom::glance(.)),
@@ -149,7 +149,7 @@ test_homogeneity <- function(data_object, formula) {
     ) %>%
     {
       if (class(predictor) == "factor") {
-        mutate(
+        dplyr::mutate(
           # very tricky: for inline conditions, need explicit LHS!
           .,
           # Levene Test: homogeneious if p > 0.05, works only on factor
@@ -177,7 +177,7 @@ test_independence <- function(data_object, model_label = "aov") {
   require(DescTools)
   model <- rlang::sym(model_label)
   data_object %>%
-    mutate(
+    dplyr::mutate(
       # independent samples test
       durbined = map(!!model, ~ DescTools::DurbinWatsonTest(.x) %>%
                      broom::glance(.))
@@ -190,7 +190,7 @@ create_plots_lm  <- function(data_object, model_label = "aov") {
   require(gglm)
   model <- rlang::sym(model_label)
   data_object %>%
-    mutate(
+    dplyr::mutate(
       plot.residuals = map(!!model, ~ ggplot(data = .x) + stat_fitted_resid() ),
       plot.qq = imap(!!model, ~ ggplot(data = .x) +
                       stat_normal_qq(alpha = 0.2) +

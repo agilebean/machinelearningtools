@@ -75,9 +75,9 @@ print_correlation_table_from_model <- function(
     # move data from original column vectors into row data
     nest(data = -name) %>%
     # create vectors from row data
-    mutate(data = map(data, ~t(.x) %>% as.numeric)) %>%
+    dplyr::mutate(data = map(data, ~t(.x) %>% as.numeric)) %>%
     # calculate summary stats
-    mutate(
+    dplyr::mutate(
       mean = map(data, ~mean(.x)),
       sd = map(data, ~sd(.x))
     ) %>%

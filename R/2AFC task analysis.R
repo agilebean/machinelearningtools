@@ -29,7 +29,7 @@ group_high_low <- function(
                 .fn = ~ paste0(.x, ".score!")
     ) %>%
     # classify each indiff into high/low > mean(indiff)
-    mutate(across(
+    dplyr::mutate(across(
       ends_with(".score!"),
       .fns = list(group = ~ case_when(
         .x >  cutoff.high(.x) ~ "high",
@@ -114,14 +114,14 @@ plot.2AFC <- function(
   if (lined == TRUE) {
     if (!is.numeric(data.2afc[[x_variable]])) {
       # conversion from factor only works if x_variable is char
-      data.2afc %<>% mutate(
+      data.2afc %<>% dplyr::mutate(
         across(x_variable,
                ~as.numeric(as.character(.x)))
       )
     }
 
   } else {
-    data.2afc %<>% mutate(across(x_variable, as.factor))
+    data.2afc %<>% dplyr::mutate(across(x_variable, as.factor))
   }
 
   # get max probability

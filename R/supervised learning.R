@@ -101,7 +101,7 @@ get_model_metrics <- function(
     # dplyr::select(ends_with("RMSE"), ends_with("Rsquared"))
     dplyr::select(ends_with(metric1), ends_with(metric2)) %>%
     # calculate R from R-squared variables
-    mutate(
+    dplyr::mutate(
       across(
         .cols = ends_with(metric2), # R-squared
         .fns = sqrt,
@@ -163,7 +163,7 @@ get_model_metrics <- function(
         if (!is.null(metrics.testing)) {
           # tricky: within conditional {} block, must reference to LHS (.)
           merge(., metrics.testing, by = "model") %>%
-            mutate(RMSE.delta = RMSE.testing - RMSE.mean) %>%
+            dplyr::mutate(RMSE.delta = RMSE.testing - RMSE.mean) %>%
             arrange(RMSE.testing)
         } else {
           .
@@ -834,7 +834,7 @@ visualize_importance <- function (
     arrange(desc(importance)) %>%
     {
       if (relative) {
-        mutate(., `%RI` = importance/sum(importance)*100) %>%
+        dplyr::mutate(., `%RI` = importance/sum(importance)*100) %>%
           select(variable, `%RI`)
       } else {
         .
