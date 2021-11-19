@@ -493,7 +493,7 @@ encode_scale_labels <- function(
   return(encoded_df)
 }
 
-encode_by_item_dict <- function(data, lv_item_dict) {
+encode_by_item_dict <- function(data, lv_item_dict, add_id = TRUE) {
 
   lv_item_dict %>%
     map( ~ .x %>%
@@ -506,7 +506,18 @@ encode_by_item_dict <- function(data, lv_item_dict) {
              reverse_index = .x %>% pluck("reverse.index")
            )
     ) %>%
-    set_names(lv_item_dict %>% map_chr(~ .x %>% pluck("scale.label")))
+    set_names(lv_item_dict %>% map_chr(~ .x %>% pluck("scale.label"))) %>%
+    {
+      if (add_id) {
+        # add participant id
+        map(~ .x %>%
+              rownames_to_column(var = "id") %>%
+              mutate(across(id, as.numeric))
+        )
+      } else {
+        .
+      }
+    }
 }
 
 encode_survey_by_item_dict <- function(survey_data, lv_item_dict) {
