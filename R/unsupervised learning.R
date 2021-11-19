@@ -37,7 +37,7 @@ iterate_factor_analysis <- function (items, max_factors = 5) {
       }) %>%
       set_names(c("nfactors", "fn",  "RMSR", "fit.off",  "cor", "chi",
                   "model", "loadings", "scores")) %>%
-      mutate_if(is.numeric, round, 2)
+      dplyr::mutate_if(is.numeric, round, 2)
 
   })
 

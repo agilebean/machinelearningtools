@@ -546,7 +546,8 @@ list_variable_importance <- function(model_object) {
   model_object$importance %>%
     as.data.frame %>%
     tibble::rownames_to_column() %>%
-    mutate(Importance = round(IncNodePurity * 100/max(IncNodePurity), digits =2)) %>%
+    dplyr::mutate(Importance = round(IncNodePurity * 100/max(IncNodePurity),
+                                     digits =2)) %>%
     arrange(-IncNodePurity)
 
 }
@@ -597,7 +598,8 @@ visualize_variable_importance_rf <- function(rf_object) {
   rf_object$importance %>%
     as.data.frame %>%
     tibble::rownames_to_column() %>%
-    mutate(Importance = round(IncNodePurity * 100/max(IncNodePurity), digits =2)) %>%
+    dplyr::mutate(Importance =
+                  round(IncNodePurity * 100/max(IncNodePurity), digits =2)) %>%
     arrange(-IncNodePurity) %>%
     ggplot(data = ., aes(x = reorder(rowname, Importance), y = Importance)) +
     theme_minimal() +
