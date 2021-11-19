@@ -97,7 +97,7 @@ get_rowwise_stats <- function(
 
   data %>%
     rowwise(!!rlang::sym(id_label)) %>%
-    mutate(
+    dplyr::mutate(
       sd = sd(c_across(everything())),
       mean = mean(c_across(everything()))) %>%
     {
