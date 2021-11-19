@@ -230,7 +230,8 @@ get_itemscale_stats <- function(
           sjPlot::tab_itemscale(show.kurtosis = TRUE) %>%
           .$df.list %>%
           .[[1]] %>% # tricky!
-          rename(`alpha if deleted` = `&alpha; if deleted`)
+          rename(`alpha if deleted` = `&alpha; if deleted`) %>%
+          select(-Missings)
     )
 
   filename <- function(table_nr, scale_label, file_extension) {
