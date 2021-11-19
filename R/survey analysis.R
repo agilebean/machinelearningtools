@@ -319,38 +319,6 @@ quartzFonts(gillsans = c("Gill Sans Light", "Gill Sans Light", "Gill Sans Italic
 ################################################################################
 
 
-######################################################################
-# Function encode_scale_labels()
-# replace scale responses containing label names with their scale codes
-#
-# IN:   scale_data_frame (dataframe), scale_labels(vector(char))
-# OUT:  encoded_df (dataframe)
-#
-######################################################################
-encode_scale_labels <- function(
-  scale_data_frame, scale_labels, reverse_index = NULL) {
-
-  matrix <- as.matrix(scale_data_frame)
-  scale.codes <- 1:length(scale_labels)
-  matrix[matrix == ""] <- NA
-
-  for (index in scale.codes) {
-    matrix[matrix == scale_labels[index]] <- scale.codes[index]
-  }
-
-  encoded_df <- matrix %>%
-    as.data.frame() %>%
-    map_df(as.numeric)
-
-  # reverse-coding
-  if (!is.null(reverse_index)) {
-    encoded_df[reverse_index] %<>% map(~ max(scale.codes) + 1 - .x)
-  }
-
-  return(encoded_df)
-}
-
-
 # create mean scores of a Latent Variable
 get_mean_score <- function(data) {
   return(rowMeans(data.matrix(data), na.rm = TRUE))
@@ -484,7 +452,72 @@ remove_descriptive_columns <- function(descriptive_columns_matrix, survey_raw)
   return(output)
 }
 
+name_by_item_dict <- function(data, lv_item_dict) {
+
+  names(data) <- lv_item_dict %>%
+    map(pluck("item.labels")) %>%
+    unlist %>%
+    as.vector()
+
+  return(data)
+}
+
 ######################################################################
+# Function encode_scale_labels()
+# replace scale responses containing label names with their scale codes
+#
+# IN:   scale_data_frame (dataframe), scale_labels(vector(char))
+# OUT:  encoded_df (dataframe)
+#
+######################################################################
+encode_scale_labels <- function(
+  scale_data_frame, scale_labels, reverse_index = NULL) {
+
+  matrix <- as.matrix(scale_data_frame)
+  scale.codes <- 1:length(scale_labels)
+  matrix[matrix == ""] <- NA
+
+  for (index in scale.codes) {
+    matrix[matrix == scale_labels[index]] <- scale.codes[index]
+  }
+
+  encoded_df <- matrix %>%
+    as.data.frame() %>%
+    map_df(as.numeric)
+
+  # reverse-coding
+  if (!is.null(reverse_index)) {
+    encoded_df[reverse_index] %<>% map(~ max(scale.codes) + 1 - .x)
+  }
+
+  return(encoded_df)
+}
+
+encode_by_item_dict <- function(data, lv_item_dict) {
+
+  lv_item_dict %>%
+    map( ~ .x %>%
+           pluck("item.labels") %>%
+           # put all the items into a list of scales
+           data[.] %>%
+           # tricky: use .x containing encoding defined in item.dict.e1
+           encode_scale_labels(
+             scale_labels = .x %>% pluck("encoding"),
+             reverse_index = .x %>% pluck("reverse.index")
+           )
+    ) %>%
+    set_names(lv_item_dict %>% map_chr(~ .x %>% pluck("scale.label")))
+}
+
+encode_survey_by_item_dict <- function(survey_data, lv_item_dict) {
+
+  survey_data %>%
+    name_by_item_dict(lv_item_dict) %>%
+    encode_by_item_dict(lv_item_dict)
+}
+
+######################################################################
+# DEPRECATED
 # Function encode_survey_and_scales()
 # IN:   survey_data (dataframe)
 #       LV_labels (list)
@@ -526,6 +559,7 @@ encode_survey_and_scales <- function(survey_data, LV_labels, LV_scale_list) {
 }
 
 ######################################################################
+# DEPRECATED
 # Function remove_failed_attention_checks()
 # IN:   attention_items_matrix (matrix)
 #       survey_numeric (dataframe)
