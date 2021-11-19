@@ -186,6 +186,7 @@ get_scale_stats <- function(
 
   scale.stats <- item_encoded_list %>%
     map(~ .x %>%
+          # tricky: remove id column only if exists
           select(-matches("^id$")) %>%
           psych::alpha(.
                        # , check.keys = TRUE
@@ -221,9 +222,12 @@ get_itemscale_stats <- function(
 ) {
 
   # get Cronbach alphas & item reliabilities
-  scale.result <- item_encoded_list %>%
+  list.itemscale <- item_encoded_list %>%
 
-    map(~ sjPlot::tab_itemscale(.x, show.kurtosis = TRUE) %>%
+    map(~ .x %>%
+          # tricky: remove id column only if exists
+          select(-matches("^id$")) %>%
+          sjPlot::tab_itemscale(show.kurtosis = TRUE) %>%
           .$df.list %>%
           .[[1]] %>% # tricky!
           rename(`alpha if deleted` = `&alpha; if deleted`)
@@ -239,7 +243,7 @@ get_itemscale_stats <- function(
   # save tables
   if (save_tables_from > 0) {
     pmap(list(
-      scale.result, # ..1 item analysis table per scale
+      list.itemscale, # ..1 item analysis table per scale
       (save_tables_from - 1) + (1:length(scale.result)), # ..2 table number
       names(scale.result) # ..3 scale name
     ),
@@ -247,7 +251,7 @@ get_itemscale_stats <- function(
     )
   }
 
-  scale.result
+  list.itemscale
 }
 
 ######################################################################
