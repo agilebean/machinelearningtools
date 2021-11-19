@@ -208,12 +208,12 @@ get_scale_stats <- function(
 }
 
 ######################################################################
-# Function save_itemscale_stats()
+# Function get_itemscale_stats()
 # IN:   item_encoded_list (list from encode_survey_by_item_dict())
 # OUT:  -- (tables saved as latex, html, or csv)
 #
 ######################################################################
-save_itemscale_stats <- function(
+get_itemscale_stats <- function(
   item_encoded_list,
   save_tables_from = 0,
   digits = 2,
@@ -246,6 +246,8 @@ save_itemscale_stats <- function(
     ~ save_table(..1, filename(..2, ..3, format), digits)
     )
   }
+
+  scale.result
 }
 
 ######################################################################
