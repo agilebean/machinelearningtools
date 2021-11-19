@@ -181,6 +181,32 @@ save_table <- function(dataframe, file_name, digits = 2) {
   )
 }
 
+get_scale_stats <- function(
+  item_encoded_list, digits = 2, file_name = "") {
+
+  scale.stats <- item_encoded_list %>%
+    map(~ .x %>%
+          select(-matches("^id$")) %>%
+          psych::alpha(.
+                       # , check.keys = TRUE
+          )
+    ) %>%
+    # tricky: in named list, .x is list element, .y is list element name
+    imap_dfr(
+      ~ .x$total %>%
+        select(`Cronbach alpha` = raw_alpha, mean, sd) %>%
+        set_rownames(.y) %>%
+        round(digits = digits)
+    )
+
+  if (file_name != "") {
+    scale.stats %>% save_table(file_name = file_name, digits = digits)
+  }
+
+  scale.stats
+
+}
+
 ######################################################################
 # Function save_itemscale_stats()
 # IN:   item_encoded_list (list from encode_survey_by_item_dict())
