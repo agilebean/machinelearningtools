@@ -510,7 +510,7 @@ encode_by_item_dict <- function(data, lv_item_dict, add_id = TRUE) {
     {
       if (add_id) {
         # add participant id
-        map(~ .x %>%
+        map(., ~ .x %>%
               rownames_to_column(var = "id") %>%
               mutate(across(id, as.numeric))
         )
