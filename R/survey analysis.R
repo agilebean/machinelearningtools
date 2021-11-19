@@ -182,12 +182,12 @@ save_table <- function(dataframe, file_name, digits = 2) {
 }
 
 ######################################################################
-# Function get_scale_stats()
+# Function save_itemscale_stats()
 # IN:   item_encoded_list (list from encode_survey_by_item_dict())
 # OUT:  -- (tables saved as latex, html, or csv)
 #
 ######################################################################
-get_scale_stats <- function(
+save_itemscale_stats <- function(
   item_encoded_list,
   save_tables_from = 0,
   digits = 2,
@@ -213,12 +213,10 @@ get_scale_stats <- function(
   # save tables
   if (save_tables_from > 0) {
     pmap(list(
-      scale.result,
-      # item analysis table per scale
-      (save_tables_from - 1) + (1:length(scale.result)),
-      # table number
-      names(scale.result)
-    ), # name of scale
+      scale.result, # ..1 item analysis table per scale
+      (save_tables_from - 1) + (1:length(scale.result)), # ..2 table number
+      names(scale.result) # ..3 scale name
+    ),
     ~ save_table(..1, filename(..2, ..3, format), digits)
     )
   }
@@ -526,6 +524,8 @@ encode_survey_by_item_dict <- function(survey_data, lv_item_dict) {
     name_by_item_dict(lv_item_dict) %>%
     encode_by_item_dict(lv_item_dict)
 }
+
+
 
 ######################################################################
 # DEPRECATED
