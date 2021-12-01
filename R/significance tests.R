@@ -392,4 +392,68 @@ analyze_non_parametric <- function(
     }
 }
 
+paired_ttest <- function(
+  data_post, data_pre,
+  meta.type = "SMCC",
+  vars = "vb",
+  simple = TRUE) {
 
+  n <- data_post %>% nrow()
+
+  tt <- map2(data_post, data_pre,
+             ~ t.test(.x, .y, paired = TRUE) %>%
+               .[c("estimate", "p.value", "stderr")] %>%
+               as_tibble %>%
+               dplyr::rename(.,
+                             m.diff = estimate,
+                             se.diff = stderr,
+                             p.diff = p.value
+               ) %>%
+               mutate(
+                 d.diff = m.diff / (sqrt(n) * se.diff),
+                 sd.pre = sd(.y),
+                 sd.post = sd(.x),
+                 r = cor(.x, .y),
+                 # Ross & DeShon (2002): correlated sds
+                 d.rm = (m.diff * sqrt(2*(1-r)) )/
+                   (sd.pre^2 + sd.post^2 - 2*r*sd.pre*sd.post),
+                 # Ross & DeShon (2002): prior sd
+                 # d.sd.pre = (estimate * sqrt(2*(1-r)) )/ sd.pre,
+                 d.sd.pre = m.diff/ sd.pre,
+                 # change score standardization Wolfgang
+                 d.mf = metafor::escalc(
+                   measure = meta.type,
+                   x1i = !!.x, x2i = !!.y,
+                   m1i = mean(!!.x), m2i = mean(!!.y),
+                   sd1i = sd(!!.x), sd2i = sd(!!.y),
+                   ni = nrow(!!data_post),
+                   ri = cor(!!.x, !!.y)
+                 ) %>%
+                   summary() %>%
+                   select(yi, pval)
+                 ,
+                 m1 = mean(!!.y), m2 = mean(!!.x)
+               )
+  ) %>%
+    imap_dfr( ~.x, .id = "item") %>%
+    select(., item, m1, m2, m.diff, se.diff,
+           sd.pre, sd.post, r,
+           d.diff, p.diff, d.rm, d.sd.pre, d.mf)
+
+  if (vars == "vb") {
+    tt <- tt %>%
+      filter(item %in% vb.perceptions)
+  }
+
+  if (simple) {
+    tt <- tt %>%
+      select(item, m1, m2, m.diff, se.diff,
+             d.diff, p.diff, d.mf)
+  }
+
+  tt %>%
+    select(., -d.mf) %>%
+    bind_cols(tt[["d.mf"]]) %>%
+    dplyr::rename(d.smcc = yi, p.smcc = pval)
+
+}
