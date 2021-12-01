@@ -531,7 +531,7 @@ encode_by_item_dict <- function(data, lv_item_dict, add_id = TRUE) {
            pluck("item.labels") %>%
            # put all the items into a list of scales
            data[.] %>%
-           # tricky: use .x containing encoding defined in item.dict.e1
+           # tricky: use .x containing encoding defined in item.dict
            encode_scale_labels(
              scale_labels = .x %>% pluck("encoding"),
              reverse_index = .x %>% pluck("reverse.index")

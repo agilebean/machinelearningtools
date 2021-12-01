@@ -131,12 +131,15 @@ scale.control.5 <- c(
   "5 Very much like me"
 )
 
-scale.describe.semdiff.5 <- c(
-  "1 Does not describe me at all",
-  "2",
-  "3",
-  "4",
-  "5 Describes me very well"
+scale.empathy.virtualangle.5 <- list(
+  encoding = c(
+    "1 Does not describe me at all",
+    "2",
+    "3",
+    "4",
+    "5 Describes me very well"
+  ),
+  reverse.index = c(2, 4, 5)
 )
 
 
