@@ -97,11 +97,14 @@ scale.truth.4.carver <- c(
 )
 
 # BIS/BAS Muris2005
-scale.truth.4.muris <- c(
-  "Not true",
-  "Somewhat true",
-  "TRUE", # "True" gets converted to "TRUE" in googlesheets
-  "Very true"
+scale.bisbas.muris.virtualangle <- list(
+  encoding = c(
+    "Not true",
+    "Somewhat true",
+    "TRUE", # "True" gets converted to "TRUE" in googlesheets
+    "Very true"
+  ),
+  reverse.index = NULL
 )
 
 scale.truth.4 <- c(
