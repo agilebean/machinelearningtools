@@ -79,33 +79,7 @@ scale.frequency.almost.6 <- c(
   "Almost always"
 )
 
-# SISE
-scale.esteem.semdiff.5 <- c(
-  "1 Not very true of me",
-  "2",
-  "3",
-  "4",
-  "5 Very true of me"
-)
 
-# BIS/BAS Original
-scale.truth.4.carver <- c(
-  "1 (Very true for me)",
-  "2 (Somewhat true for me)",
-  "3 (Somewhat false for me)",
-  "4 (Very false for me)"
-)
-
-# BIS/BAS Muris2005
-scale.bisbas.muris.virtualangle <- list(
-  encoding = c(
-    "Not true",
-    "Somewhat true",
-    "TRUE", # "True" gets converted to "TRUE" in googlesheets
-    "Very true"
-  ),
-  reverse.index = NULL
-)
 
 scale.truth.4 <- c(
   "Very false for me",
@@ -132,17 +106,6 @@ scale.control.5 <- c(
   "3",
   "4",
   "5 Very much like me"
-)
-
-scale.empathy.virtualangle.5 <- list(
-  encoding = c(
-    "1 Does not describe me at all",
-    "2",
-    "3",
-    "4",
-    "5 Describes me very well"
-  ),
-  reverse.index = c(2, 4, 5)
 )
 
 
