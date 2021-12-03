@@ -42,22 +42,19 @@ get_xai_explanations <- function(
   get_DALEX_attribution_text = TRUE,
   get_DALEX_attribution_uncertainty_plot = TRUE,
   get_DALEX_shapley_plot = TRUE,
-  get_LIME_explainer = FALSE,
   get_LIME_explanations = FALSE,
   get_LIME_explanations_plot = FALSE,
   get_LIME_features_plot = FALSE
 ) {
-
+  # tidyverse packages
   require(ggplot2) # ggsave
   require(dplyr)
   require(furrr)
-
-  if (get_DALEX_explainer) {
-    require(DALEX)
-    require(iBreakDown)
-    require(ingredients)
-  }
-  if (get_LIME_explainer) require(lime)
+  # XAI packages
+  require(DALEX)
+  require(iBreakDown)
+  require(ingredients)
+  require(lime)
 
   options(parallelly.fork.enable = TRUE)
   plan(multicore, workers = 8)
@@ -269,7 +266,10 @@ get_xai_explanations <- function(
       }
 
 
-      LIME.explainer <- if (get_LIME_explainer) {
+      LIME.explainer <- if (
+        get_LIME_explanations |
+        get_LIME_explanations_plot |
+        get_LIME_features_plot ) {
 
         print("*** LIME.explainer")
         lime::lime(
