@@ -32,6 +32,17 @@ scale.agreement.strongly.5 <- c(
   "Strongly agree"
 )
 
+# self-efficacy (Sherer1982)
+scale.agreement.strongly.7 <- c(
+  "Strongly disagree",
+  "Disagree",
+  "Somewhat disagree",
+  "Neither agree nor disagree",
+  "Somewhat agree",
+  "Agree",
+  "Strongly agree"
+)
+
 # SDT, virtualcompanion daily
 scale.agreement.little.5 <- c(
   "Not at all",
@@ -79,24 +90,11 @@ scale.frequency.almost.6 <- c(
   "Almost always"
 )
 
-
-
 scale.truth.4 <- c(
   "Very false for me",
   "Somewhat false for me",
   "Somewhat true for me",
   "Very true for me"
-)
-
-# self-efficacy (Sherer1982)
-scale.agreement.7 <- c(
-  "Strongly disagree",
-  "Disagree",
-  "Somewhat disagree",
-  "Neither agree nor disagree",
-  "Somewhat agree",
-  "Agree",
-  "Strongly agree"
 )
 
 # self-control
