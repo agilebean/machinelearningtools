@@ -19,7 +19,9 @@ group_high_low <- function(
       cutoff.high <- function(x) {
         (exec(split_fct, x)) +  (exec(error_fct, x))
       }
-      cutoff.low <- (exec(split_fct, x))
+      cutoff.low <- function(x) {
+        (exec(split_fct, x)) - (exec(error_fct, x))
+      }
     }
   }
 
