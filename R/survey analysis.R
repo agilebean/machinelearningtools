@@ -299,8 +299,10 @@ determine_factor_extraction_no <- function(items_df) {
 #       corr_type(string), cut_off(dbl): below factors loadings suppressed
 # OUT:  output (dataframe)
 ######################################################################
-do_factor_analysis <- function(items_input, n_factors = 3, factor_method = "fa",
-                               corr_type = "cor", cut_off = NULL) {
+do_factor_analysis <- function(
+  items_input,
+  n_factors = 3, factor_method = "fa", corr_type = "cor",
+  sort = TRUE, cut_off = NULL, digits = 3, save = "") {
   require(dplyr)
   items <- na.omit(items_input)
   items <- data.matrix(items)
@@ -313,20 +315,54 @@ do_factor_analysis <- function(items_input, n_factors = 3, factor_method = "fa",
   }
   else # psych:fa for Factor Analysis
   {
-    output <- fa(items, rotate="oblimin", use="pairwise",
-                 fm=factor_method, nfactors=n_factors, cor=corr_type)
+    output <- fa(
+      items,
+      rotate = "oblimin",
+      use = "pairwise",
+      fm = factor_method,
+      nfactors = n_factors,
+      cor = corr_type
+    )
   }
-  # print (blank) for values within cutoff range
 
-  cutoff <- ifelse(cut_off, cut_off, 0)
-  output$loadings %<>% # updates input after feeding into pipe
-    replace(., .>-cutoff & .<cutoff, NA) %>%
-    round(., digits = 2) %>%
-    print(., na.print="")
+  if (sort) output %<>% fa.sort()
 
-  return(output)
+  # https://www.anthonyschmidt.co/post/2020-09-27-efa-tables-in-r/
+  add_info <- cbind(output$communality,
+                    output$uniquenesses,
+                    output$complexity) %>%
+    # make it a data frame
+    as.data.frame() %>%
+    # column names
+    dplyr::rename("communality" = V1,
+                  "uniqueness" = V2,
+                  "complexity" = V3) %>%
+    #get the item names from the vector
+    rownames_to_column("item")
+
+  factor.loadings <- output$loadings %>%
+    unclass() %>%
+    as.data.frame() %>%
+    rownames_to_column("item") %>%
+    replace(.>-cutoff & .<cutoff, NA)
+
+  output <- factor.loadings %>%
+    left_join(add_info) %>%
+    dplyr::mutate(across(where(is.numeric), round, digits))
+
+  output <- factor.loadings %>%
+    left_join(add_info) %>%
+    dplyr::mutate(across(where(is.numeric), round, digits)) %>%
+    dplyr::mutate(across(everything(), as.character)) %>%
+    # print (blank) for values within cutoff range
+    replace(is.na(.), "")
+
+  if (save != "") {
+    output %>% save_table(save)
+  }
+
+  output
 }
-
 
 ######################################################################
 # Function get_alpha()
