@@ -44,7 +44,6 @@ perform_max_SMOTE <- function(
   return(training.set)
 }
 
-
 ################################################################################
 # print_correlation_table_from_model
 # input: caret::train object

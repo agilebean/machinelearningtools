@@ -181,6 +181,27 @@ save_table <- function(dataframe, file_name, digits = 2) {
   )
 }
 
+################################################################################
+# save_sjPlot_corr_csv
+# input: sjPlot::tab_corr object
+################################################################################
+save_sjPlot_corr_csv <- function(
+  sjplot_tab_corr, file_label = "") {
+
+  table.corr <- sjplot_tab_corr$page.content %>%
+    rvest::read_html() %>%
+    rvest::html_table() %>%
+    pluck(1) %>%
+    # remove last row
+    head(., -1) %>% print
+
+  if (file_label != "") {
+    table.corr %>%
+      save_table(paste0(file_label, ".csv"))
+  }
+}
+
+
 get_scale_stats <- function(
   item_encoded_list, digits = 2, file_name = "") {
 
