@@ -219,66 +219,72 @@ print_stats <- function(data_set,
 
   require(dplyr)
 
-  param.sym = rlang::sym(param_var)
-
   result.table <- data_set %>%
-    {
-      if (stat_type == "levened") {
+    purrr::when(
+      stat_type == "levened" ~ {
+
         unnest(., levened) %>%
-          select(!!param.sym, !!grouping, F.levene = `F value`, p.levene = `Pr(>F)`) %>%
+          select(param_var, grouping, F.levene = `F value`, p.levene = `Pr(>F)`) %>%
           filter(!is.na(F.levene))
 
-      } else if (stat_type == "glanced") {
+      },
+      stat_type == "glanced" ~ {
 
         unnest(., c(glanced, se)) %>%
           unnest_wider(ci) %>%
-          select(!!param.sym, !!grouping,
+          select(param_var, grouping,
                  mean, se, lwr.ci, upr.ci, # MeanCI
                  F.anova = statistic, p.anova = p.value # glanced
           )
 
-      } else if (stat_type == "shapiroed") {
+      },
+      stat_type == "shapiroed" ~ {
 
         unnest(., shapiroed) %>%
-          select(!!param.sym, !!grouping, W = statistic, p.shapiro = p.value)
+          select(param_var, grouping, W = statistic, p.shapiro = p.value)
 
-      } else if (stat_type == "kruskaled") {
+      },
+      stat_type == "kruskaled" ~ {
 
         unnest(., kruskaled) %>%
-          select(!!param.sym, !!grouping, K = statistic, p.kruskal = p.value)
+          select(param_var, grouping, K = statistic, p.kruskal = p.value)
 
-      } else if (stat_type == "dunned") {
+      },
+      stat_type == "dunned" ~ {
 
         unnest(., dunned) %>%
-          select(!!param.sym, !!grouping, group1, group2, F = statistic,
+          select(param_var, grouping, group1, group2, F = statistic,
                  p, p.adj, p.adj.signif) %>%
           unite("groups", c(group1, group2), sep = "~")
 
-      } else if (stat_type == "durbined") {
+      },
+      stat_type == "durbined" ~ {
 
         unnest(., durbined) %>%
-          select(!!param.sym, !!grouping, autocorrelation,
+          select(param_var, grouping, autocorrelation,
                  dw = statistic, p.durbin = p.value)
 
-      } else if (stat_type == "tidied") {
+      },
+      stat_type == "tidied" ~ {
 
         unnest(., tidied) %>%
-          select(!!param.sym, term, !!grouping, F = statistic, p.value)
+          select(param_var, term, grouping, F = statistic, p.value)
 
-      }  else {
+      },
+      TRUE ~ {
         # covers bartletted, flignered, brownforsythed
         unnest(., stat_type, names_repair = "minimal") %>%
-          select(!!param.sym, !!grouping, statistic, p.value)
+          select(param_var, grouping, statistic, p.value)
       }
-    } %>%
+    ) %>%
     {
       if (!is.null(grouping)) {
-        arrange(., !!param.sym, !!rlang::sym(grouping))
+
+        dplyr::arrange(., param_var, grouping)
       } else {
         .
       }
     }
-
 
   if (kable) {
 
