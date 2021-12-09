@@ -319,7 +319,7 @@ do_factor_analysis <- function(items_input, n_factors = 3, factor_method = "fa",
   # print (blank) for values within cutoff range
 
   cutoff <- ifelse(cut_off, cut_off, 0)
-  output$weights %<>% # updates input after feeding into pipe
+  output$loadings %<>% # updates input after feeding into pipe
     replace(., .>-cutoff & .<cutoff, NA) %>%
     round(., digits = 2) %>%
     print(., na.print="")
