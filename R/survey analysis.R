@@ -353,8 +353,8 @@ do_factor_analysis <- function(
   output <- factor.loadings %>%
     left_join(add_info) %>%
     dplyr::mutate(across(where(is.numeric), round, digits)) %>%
-    dplyr::mutate(across(everything(), as.character)) %>%
     # print (blank) for values within cutoff range
+    dplyr::mutate(across(everything(), as.character)) %>%
     replace(is.na(.), "")
 
   if (save != "") {
