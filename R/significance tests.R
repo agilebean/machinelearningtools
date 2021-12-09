@@ -80,7 +80,7 @@ test_non_parametric <- function(data_object, formula_nonparam) {
       kruskaled = map(data,
         ~ kruskal.test(formula_nonparam, data = .x) %>%
           broom::glance(.) %>%
-          rename(df = parameter)),
+          dplyr::rename(df = parameter)),
       # wilcox does not correct for multiple comparisons with pooled variance
       wilcoxed = map(data, ~ pairwise.wilcox.test(x = response, g = group)),
       # dunn better than wilcox

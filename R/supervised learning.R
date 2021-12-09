@@ -252,7 +252,7 @@ get_metric_resamples <- function(resamples_data, metric) {
     select(Resample, contains(metric)) %>%
     # tricky: tilde (~) NOT dash (-)
     setNames(gsub(paste0("~", metric), "", names(.))) %>%
-    rename(id = Resample)
+    dplyr::rename(id = Resample)
 }
 
 ################################################################################
@@ -786,7 +786,7 @@ get_testingset_performance <- function(
         }) %>%
       t %>%
       as_tibble(rownames = "model") %>%
-      rename(RMSE.testing = V1, R2.testing = V2,
+      dplyr::rename(RMSE.testing = V1, R2.testing = V2,
              R2.testing2 = V3,  R2.postResample= V4) %>%
       arrange(RMSE.testing) %>%
       as.data.frame
@@ -830,7 +830,7 @@ visualize_importance <- function (
   }
 
   importance.table <- importance_object %>%
-    rename(variable = rowname, importance = Overall) %>%
+    dplyr::rename(variable = rowname, importance = Overall) %>%
     arrange(desc(importance)) %>%
     {
       if (relative) {

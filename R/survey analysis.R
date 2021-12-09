@@ -230,7 +230,7 @@ get_itemscale_stats <- function(
           sjPlot::tab_itemscale(show.kurtosis = TRUE) %>%
           .$df.list %>%
           .[[1]] %>% # tricky!
-          rename(`alpha if deleted` = `&alpha; if deleted`) %>%
+          dplyr::rename(`alpha if deleted` = `&alpha; if deleted`) %>%
           select(-Missings)
     )
 
@@ -673,7 +673,7 @@ mediate_each <- function(vars, data, no_simulations=10, IDE = FALSE) {
     .$coefficients %>% .[2,c(1,4)] %>%
     as.list %>% as.data.frame %>%
     # rename columns
-    rename(effect_size_mx = Estimate, p_value_mx = "Pr...t..") %>%
+    dplyr::rename(effect_size_mx = Estimate, p_value_mx = "Pr...t..") %>%
     # add predictor name
     dplyr::mutate(predictor_mx=predictor, mediator_mx=mediator)
 
@@ -683,7 +683,7 @@ mediate_each <- function(vars, data, no_simulations=10, IDE = FALSE) {
     .$coefficients %>% .[2,c(1,4)] %>%
     as.list %>% data.frame %>%
     # rename columns
-    rename(effect_size_ym = Estimate, p_value_ym = "Pr...t..") %>%
+    dplyr::rename(effect_size_ym = Estimate, p_value_ym = "Pr...t..") %>%
     # add predictor name
     dplyr::mutate(outcome = outcome,
                   mediator = mediator,
