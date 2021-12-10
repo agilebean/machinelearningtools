@@ -219,7 +219,8 @@ get_scale_stats <- function(
         select(`Cronbach alpha` = raw_alpha, mean, sd) %>%
         set_rownames(.y) %>%
         round(digits = digits)
-    )
+    ) %>%
+    rownames_to_column("scale")
 
   if (file_name != "") {
     scale.stats %>% save_table(file_name = file_name, digits = digits)
