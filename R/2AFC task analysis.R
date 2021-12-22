@@ -69,6 +69,7 @@ plot.2AFC <- function(
   x_variable,
   color_label = NULL,
   palette = "Set1",
+  color_scheme_fct = NULL,
   lined = TRUE,
   save_label = "",
   digits = 3, format = "html",
@@ -148,6 +149,8 @@ plot.2AFC <- function(
         scale_color_manual(
           values = colorRampPalette(RColorBrewer::brewer.pal(8, palette))(no.colors)
         )
+      } else if (!is.null(color_scheme_fct)) {
+        color_scheme_fct()
       } else {
         scale_color_brewer(palette = palette)
       }
