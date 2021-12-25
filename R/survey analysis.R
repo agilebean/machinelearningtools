@@ -160,21 +160,24 @@ save_kable_table <- function(dataframe, file_name, digits = 2) {
 ######################################################################
 save_table <- function(dataframe, file_name, digits = 2) {
 
+  data <- dataframe %>%
+    mutate(across(where(is.numeric), round, digits))
+
   format <- gsub(".+\\.(.+)", "\\1", file_name)
 
   switch(
     format,
     "csv" = write_csv(
-      dataframe,
+      data,
       file = file_name
     ),
     "tex" = save_kable_table(
-      dataframe,
+      data,
       file_name = file_name,
       digits = digits
     ),
     "html" = save_kable_table(
-      dataframe,
+      data,
       file_name = file_name,
       digits = digits
     )
