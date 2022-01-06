@@ -253,8 +253,10 @@ print_stats <- function(data_set,
       stat_type == "dunned" ~ {
 
         unnest(., dunned) %>%
-          select(param_var, grouping, group1, group2, F = statistic,
-                 p, p.adj, p.adj.signif) %>%
+          mutate(`eta-squared` = statistic^2 / (n1 + n2)) %>%
+          select(param_var, grouping, group1, group2, z = statistic,
+                 p, p.adj, p.adj.signif,
+                 `eta-squared`) %>%
           unite("groups", c(group1, group2), sep = "~")
 
       },
