@@ -214,7 +214,7 @@ print_stats <- function(data_set,
                         format = "html",
                         kable = FALSE,
                         latex = FALSE,
-                        digits = 4,
+                        digits = 2,
                         ...) {
 
   require(dplyr)
