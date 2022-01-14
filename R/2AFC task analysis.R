@@ -224,6 +224,7 @@ plot.2AFC <- function(
     label.table <- paste0("tables/", save_label, ".", format) %T>% print
 
     ggsave(file = label.plot,
+           bg = "white",
            dpi = dpi, width = width, height = height)
 
     data.2afc %>%
