@@ -58,7 +58,10 @@ perform_aov <- function(data_object, formula_aov) {
     {
       if (class(predictor) == "factor") {
         # posthoc scheffe shows which mean differences are significant
-        scheffe = map(aov, ~ DescTools::ScheffeTest(.x)) # only on factor
+        dplyr::mutate(
+          ., # TRICKY: LHS essential for inline pipe
+          scheffe = map(aov, ~ DescTools::ScheffeTest(.x)) # only on factor
+        )
       } else {
         .
       }
