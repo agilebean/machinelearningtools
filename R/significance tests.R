@@ -231,7 +231,7 @@ print_stats <- function(data_set,
           filter(!is.na(F.levene))
 
       },
-      stat_type == "glanced" ~ {
+      stat_type == "glanced" | stat_type == "aov" ~ {
 
         unnest(., c(glanced, se)) %>%
           unnest_wider(ci) %>%
@@ -271,7 +271,7 @@ print_stats <- function(data_set,
                  dw = statistic, p.durbin = p.value)
 
       },
-      stat_type == "aov" ~ {
+      stat_type == "tidied" ~ { # same as glanced
 
         unnest(., tidied) %>%
           select(param_var, term, grouping, F = statistic, p.value)
