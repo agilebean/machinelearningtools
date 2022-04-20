@@ -52,7 +52,7 @@ perform_aov <- function(data_object, formula_aov) {
       glanced = map(lm, broom::glance), # aov doesn't yield "statistic"
       tidied = map(aov, broom::tidy),
       # CIs on DV extracted from formula
-      ci = map(data, ~ MeanCI(.x[[response.label]])),
+      ci = map(data, ~ DescTools::MeanCI(.x[[response.label]])),
       se = map(data, ~ sd(.x[[response.label]]) / sqrt(nrow(.x)))
     ) %>%
     {
@@ -271,7 +271,7 @@ print_stats <- function(data_set,
                  dw = statistic, p.durbin = p.value)
 
       },
-      stat_type == "tidied" ~ {
+      stat_type == "aov" ~ {
 
         unnest(., tidied) %>%
           select(param_var, term, grouping, F = statistic, p.value)
