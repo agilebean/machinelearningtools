@@ -212,7 +212,6 @@ create_plots_lm  <- function(data_object, model_label = "aov") {
 print_stats <- function(data_set,
                         stat_type,
                         grouping = NULL,
-                        param_var = "parameter",
                         save_label = "",
                         format = "html",
                         kable = FALSE,
@@ -227,7 +226,7 @@ print_stats <- function(data_set,
       stat_type == "levened" ~ {
 
         unnest(., levened) %>%
-          select(param_var, grouping, F.levene = `F value`, p.levene = `Pr(>F)`) %>%
+          select(grouping, F.levene = `F value`, p.levene = `Pr(>F)`) %>%
           filter(!is.na(F.levene))
 
       },
@@ -235,7 +234,7 @@ print_stats <- function(data_set,
 
         unnest(., c(glanced, se)) %>%
           unnest_wider(ci) %>%
-          select(param_var, grouping,
+          select(grouping,
                  mean, se, lwr.ci, upr.ci, # MeanCI
                  F.anova = statistic, p.anova = p.value # glanced
           )
@@ -244,20 +243,20 @@ print_stats <- function(data_set,
       stat_type == "shapiroed" ~ {
 
         unnest(., shapiroed) %>%
-          select(param_var, grouping, W = statistic, p.shapiro = p.value)
+          select(grouping, W = statistic, p.shapiro = p.value)
 
       },
       stat_type == "kruskaled" ~ {
 
         unnest(., kruskaled) %>%
-          select(param_var, grouping, K = statistic, p.kruskal = p.value)
+          select(grouping, K = statistic, p.kruskal = p.value)
 
       },
       stat_type == "dunned" ~ {
 
         unnest(., dunned) %>%
           mutate(`eta-squared` = statistic^2 / (n1 + n2)) %>%
-          select(param_var, grouping, group1, group2,
+          select(grouping, group1, group2,
                  z = statistic, `eta-squared`,
                  p, p.adj, p.adj.signif
                  ) %>%
@@ -267,26 +266,26 @@ print_stats <- function(data_set,
       stat_type == "durbined" ~ {
 
         unnest(., durbined) %>%
-          select(param_var, grouping, autocorrelation,
+          select(grouping, autocorrelation,
                  dw = statistic, p.durbin = p.value)
 
       },
       stat_type == "tidied" ~ { # same as glanced
 
         unnest(., tidied) %>%
-          select(param_var, term, grouping, F = statistic, p.value)
+          select(term, grouping, F = statistic, p.value)
 
       },
       TRUE ~ {
         # covers bartletted, flignered, brownforsythed
         unnest(., stat_type, names_repair = "minimal") %>%
-          select(param_var, grouping, statistic, p.value)
+          select(grouping, statistic, p.value)
       }
     ) %>%
     {
       if (!is.null(grouping)) {
 
-        dplyr::arrange(., param_var, grouping)
+        dplyr::arrange(., grouping)
       } else {
         .
       }
