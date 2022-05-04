@@ -285,7 +285,7 @@ print_stats <- function(data_set,
     {
       if (!is.null(grouping)) {
 
-        dplyr::arrange(., grouping)
+        dplyr::arrange(., across(grouping))
       } else {
         .
       }
