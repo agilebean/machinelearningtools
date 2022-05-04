@@ -203,7 +203,7 @@ create_plots_lm  <- function(data_object, model_label = "aov") {
                       )
                     ),
       plot.leverage = map(!!model, ~ ggplot(data = .x) + stat_resid_leverage() ),
-      plot.hist  = map(!!model, ~ ggplot(data = .x) + stat_resid_hist() ),
+      hist.residual  = map(!!model, ~ ggplot(data = .x) + stat_resid_hist() ),
       plot.scale = map(!!model, ~ ggplot(data = .x) + stat_scale_location() ),
     )
 }
