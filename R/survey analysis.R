@@ -6,9 +6,16 @@
 ######################################################################
 # Function authenticate_googledrive()
 ######################################################################
-authenticate_googledrive <- function() {
-  googledrive::drive_auth(email = "cso@yonsei.ac.kr")
-  gs4_auth(token = googledrive::drive_token())
+authenticate_googledrive <- function(
+    email = "cso@yonsei.ac.kr", token = NULL) {
+  require(googledrive)
+  require(googlesheets4)
+  googledrive::drive_auth(email)
+  if (!is.null(token)) {
+    gs4_auth(token = googledrive::drive_token())
+  } else {
+    googlesheets4::gs4_deauth()
+  }
 }
 
 ######################################################################
