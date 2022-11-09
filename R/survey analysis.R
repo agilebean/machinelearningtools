@@ -22,7 +22,7 @@ authenticate_googledrive <- function(
 # Function get_survey_data()
 ######################################################################
 get_survey_data <- function(
-  survey_key, col_types = "c", remove_col = 0, remove_row = 0) {
+  survey_key, col_types = NULL, remove_col = 0, remove_row = 0) {
 
   data.survey.main <- survey_key %>%
     read_sheet(col_types = col_types, skip = remove_row) %>%
