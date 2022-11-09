@@ -7,7 +7,7 @@
 # Function authenticate_googledrive()
 ######################################################################
 authenticate_googledrive <- function(
-    email = "cso@yonsei.ac.kr", token = NULL) {
+    email = "chaehan.so@gmail.com", token = NULL) {
   require(googledrive)
   require(googlesheets4)
   googledrive::drive_auth(email)
