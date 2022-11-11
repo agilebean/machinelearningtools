@@ -34,8 +34,8 @@ group_high_low <- function(
     dplyr::mutate(across(
       ends_with(".score!"),
       .fns = list(group = ~ case_when(
-        .x >=  cutoff.high(.x) ~ "high",
-        .x <=  cutoff.low(.x) ~ "low",
+        .x >  cutoff.high(.x) ~ "high",
+        .x <  cutoff.low(.x) ~ "low",
         TRUE ~ "NA"
       ) %>%
         factor(levels = c("low", "high"))),
