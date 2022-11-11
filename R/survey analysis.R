@@ -20,6 +20,12 @@ authenticate_googledrive <- function(
 
 ######################################################################
 # Function get_survey_data()
+#
+# tidies all column names equivalent to:
+# rename_with(~ tolower(.) %>% # removes capital letters
+#   gsub("\\(|\\)", "",.) %>% # removes "(" and ")"
+#   gsub(" ", "_", .)) # removes spaces by "_"
+#
 ######################################################################
 get_survey_data <- function(
   survey_key, col_types = NULL, remove_col = 0, remove_row = 0) {
