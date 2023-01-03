@@ -173,7 +173,7 @@ plot.2AFC <- function(
     as.vector()
 
   # calculate error bar width ~ 1/11 of one interval
-  width.errorbar <- max(x.labels)/22
+  width.errorbar <- max(x.labels)/11
 
   # create main plot
   if (lined == TRUE) {
