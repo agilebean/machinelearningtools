@@ -53,8 +53,8 @@ perform_aov <- function(data_object, formula_aov) {
       tidied = map(aov, broom::tidy),
       # means per DV group
       means = map(data, ~.x %>% 
-                    group_by(!!predictor.label) %>% 
-                    summarise(mean = mean(!!response.label))),
+                    group_by(!!sym(predictor.label)) %>% 
+                    summarise(mean = mean(!!sym(response.label)))),
       se = map(data, ~ sd(.x[[response.label]]) / sqrt(nrow(.x)))
     ) %>%
     {
