@@ -225,20 +225,27 @@ print_stats <- function(data_set,
 
   result.table <- data_set %>%
     purrr::when(
+      stat_type == "glanced" ~ {
+        
+        unnest(., c(glanced, se)) %>%
+          select(grouping,
+                 r.squared, adj.r.squared,
+                 se, df,
+                 F = statistic, p.value # glanced
+          )
+        
+      },
+      stat_type == "tidied" ~ { # same as glanced
+        
+        unnest(., tidied) %>%
+          select(term, grouping, F = statistic, p.value)
+        
+      },
       stat_type == "levened" ~ {
 
         unnest(., levened) %>%
           select(grouping, F.levene = `F value`, p.levene = `Pr(>F)`) %>%
           filter(!is.na(F.levene))
-
-      },
-      stat_type == "glanced" | stat_type == "aov" ~ {
-
-        unnest(., c(glanced, se)) %>%
-          select(grouping,
-                 se,
-                 F.anova = statistic, p.anova = p.value # glanced
-          )
 
       },
       stat_type == "shapiroed" ~ {
@@ -269,12 +276,6 @@ print_stats <- function(data_set,
         unnest(., durbined) %>%
           select(grouping, autocorrelation,
                  dw = statistic, p.durbin = p.value)
-
-      },
-      stat_type == "tidied" ~ { # same as glanced
-
-        unnest(., tidied) %>%
-          select(term, grouping, F = statistic, p.value)
 
       },
       TRUE ~ {
