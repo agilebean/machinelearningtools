@@ -235,9 +235,8 @@ print_stats <- function(data_set,
       stat_type == "glanced" | stat_type == "aov" ~ {
 
         unnest(., c(glanced, se)) %>%
-          unnest_wider(ci) %>%
           select(grouping,
-                 mean, se, lwr.ci, upr.ci, # MeanCI
+                 se,
                  F.anova = statistic, p.anova = p.value # glanced
           )
 
