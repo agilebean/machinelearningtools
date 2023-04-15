@@ -51,8 +51,10 @@ perform_aov <- function(data_object, formula_aov) {
       lm = map(data, ~ lm(formula_aov, data = .x)),
       glanced = map(lm, broom::glance), # aov doesn't yield "statistic"
       tidied = map(aov, broom::tidy),
-      # CIs on DV extracted from formula
-      ci = map(data, ~ DescTools::MeanCI(.x[[response.label]])),
+      # means per DV group
+      means = map(data, ~.x %>% 
+                    group_by(!!predictor.label) %>% 
+                    summarise(mean = mean(!!response.label))),
       se = map(data, ~ sd(.x[[response.label]]) / sqrt(nrow(.x)))
     ) %>%
     {
