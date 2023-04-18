@@ -1,3 +1,19 @@
+
+# plot residuals over predictions (y_hat) or predictor (x)
+plot_residuals <- function(data, x_variable) {
+  ggplot(data, aes(y = residuals, x = !!rlang::sym(x_variable))) +
+    geom_point() +
+    geom_hline(yintercept = 0, linewidth = 0.5) +
+    theme_minimal()
+}
+
+# plot Q-Q normal plot
+plot_qq <- function(model_lm) {
+  ggplot(model_lm) + 
+    gglm::stat_normal_qq(alpha = 0.3) +
+    theme_minimal()
+}
+
 # create grouped data for group comparisons
 summarise_wins <- function(result_data, max_wins, grouping) {
 
