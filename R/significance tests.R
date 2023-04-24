@@ -14,6 +14,15 @@ plot_qq <- function(model_lm) {
     theme_minimal()
 }
 
+# plot histogram from vector
+plot_histogram <- function(vector, xlabel = "residuals", bins = 8, ymax = 12.5) {
+  ggplot() + 
+    geom_histogram(aes(x = vector), bins = bins, fill = "lightblue") +
+    labs(x = xlabel) +
+    lims(y = c(0, ymax)) +
+    theme_minimal()
+}
+
 # create grouped data for group comparisons
 summarise_wins <- function(result_data, max_wins, grouping) {
 
