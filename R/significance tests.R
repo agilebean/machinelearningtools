@@ -27,7 +27,7 @@ plot_histogram <- function(vector, xlabel = "residuals", bins = 8, ymax = 12.5) 
 save_flextable_docx <- function(data, digits = 3, filename) {
   data %>% 
     flextable::flextable() %>%
-    flextable::colformat_double(digits = 3) %>%
+    flextable::colformat_double(digits = digits) %>%
     flextable::save_as_docx(path = filename)
 }
 
